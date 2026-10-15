@@ -9,6 +9,11 @@ sources, custom LLM translation, saved player preferences, browser fullscreen,
 and player font-file imports. The original project is
 [ibratabian17/YouLyPlus](https://github.com/ibratabian17/YouLyPlus).
 
+This fork is licensed under the **GNU Affero General Public License, version 3
+only (AGPL-3.0-only)**. See [LICENSE](LICENSE) for the full terms and
+[third-party notices](THIRD_PARTY_NOTICES.md) for the original YouLy+ MIT
+copyright and permission notice and other dependency licenses.
+
 To build this fork for Chrome / Edge, install Node.js and npm, then run:
 
 ```sh
@@ -25,7 +30,7 @@ for settings and manual checks, and [third-party notices](THIRD_PARTY_NOTICES.md
 for AMLL and OpenCC licenses. The sections below describe the original project;
 its store listings and release links refer to the upstream version.
 
-[![License](https://img.shields.io/github/license/ibratabian17/YouLyPlus?style=for-the-badge)](https://github.com/ibratabian17/YouLyPlus/blob/main/LICENSE)
+[![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg?style=for-the-badge)](LICENSE)
 [![Latest Version](https://img.shields.io/github/v/release/ibratabian17/YouLyPlus?style=for-the-badge)](https://github.com/ibratabian17/YouLyPlus/releases)
 [![GitHub Stars](https://img.shields.io/github/stars/ibratabian17/YouLyPlus?style=for-the-badge&color=yellow)](https://github.com/ibratabian17/YouLyPlus/stargazers)
 [![GitHub Forks](https://img.shields.io/github/forks/ibratabian17/YouLyPlus?style=for-the-badge&color=blue)](https://github.com/ibratabian17/YouLyPlus/network/members)
