@@ -1222,5 +1222,62 @@
         "content": "$2"
       }
     }
-  }
+  },
+  "labelSourcePlatform": {
+    "message": "Music platform"
+  },
+  "helperAppleProviderOrder": {
+    "message": "Try sources in this order. Drag to reorder or remove a source. Apple Music always stays last as the fallback."
+  },
+  "optionCustomLLM": {
+    "message": "Third-party LLM (Chat Completions)"
+  },
+  "categoryCustomLLM": {
+    "message": "Third-party LLM"
+  },
+  "labelCustomLLMUrl": {
+    "message": "API address"
+  },
+  "descCustomLLMUrl": {
+    "message": "Use a Chat Completions compatible base URL or full endpoint."
+  },
+  "descCustomLLMKey": {
+    "message": "Stored locally and sent only to your configured API address. Leave blank if no key is needed."
+  },
+  "labelCustomLLMModel": {
+    "message": "Model name"
+  },
+  "descCustomLLMModel": {
+    "message": "Enter the model ID provided by your service."
+  },
+  "buttonTestCustomLLM": {
+    "message": "Authorize address and test connection"
+  },
+  "msgCustomLLMModelRequired": {
+    "message": "Enter a model name first."
+  },
+  "msgCustomLLMExtensionRequired": {
+    "message": "Open the installed extension settings to authorize an API address."
+  },
+  "msgCustomLLMPermissionDenied": {
+    "message": "Access to this API address was not authorized."
+  },
+  "msgCustomLLMTesting": {
+    "message": "Testing connection..."
+  },
+  "msgCustomLLMTestSuccess": {
+    "message": "Connection successful:"
+  },
+  "msgCustomLLMTestFailed": {
+    "message": "Connection failed:"
+  },
+  "labelPlayerFont": { "message": "Player font file" },
+  "descPlayerFont": { "message": "Import a TTF, OTF, WOFF or WOFF2 file to replace all player text. Stored locally in the extension; no system installation needed. Maximum 64 MB." },
+  "buttonDefaultPlayerFont": { "message": "Use default font" },
+  "buttonImportPlayerFont": { "message": "Import font file" },
+  "msgPlayerFontDefault": { "message": "Using default font" },
+  "msgPlayerFontImporting": { "message": "Importing font…" },
+  "msgPlayerFontImportFailed": { "message": "Unable to import this font. Choose a valid font file; the previous font is kept." },
+  "msgPlayerFontSize": { "message": "Choose a non-empty font file up to 64 MB." },
+  "msgPlayerFontLoadFailed": { "message": "Unable to load the font. Please import the file again." }
 }

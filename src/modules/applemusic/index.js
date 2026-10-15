@@ -1,247 +1,248 @@
-// src/modules/applemusic/index.js
-
-let lyricsRendererInstance = null;
-let portalObserver = null;
+// Apple Music content-script adapter. AMLL renders in a separate extension document.
 let currentSongInfo = {};
-let injectionInterval = null;
-let cachedAudioElement = null;
-let songChangeTimeout = null;
+let amllPlayer = null;
+let amllHost = null;
+let amllModal = null;
+let nativeMode = false;
+let trackerInjected = false;
+let platformStarted = false;
+let mountQueued = false;
+let cachedLyricsArguments = null;
+let cachedPlaybackState = null;
+let cachedLyricStatus = 'loading';
+let cachedProviders = [];
+let cachedOffset = 0;
+let manualProviderSelected = false;
+let commandSequence = 0;
+const pendingCommands = new Map();
+const songIdentity = (song) => song?.appleId || `${song?.title || ''}-${song?.artist || ''}-${song?.album || ''}`;
 
-// --- UI Configuration ---
-const uiConfig = {
-    player: '#apple-music-player',
-    patchParent: '#lyplus-patch-container',
-    selectors: [
-        '#lyplus-patch-container',
-        '[data-testid="modal"]',
-        '[data-testid="lyrics-fullscreen-modal"]'
-    ],
-    buttonParent: '[data-testid="lyrics-fullscreen-modal"]',
-    disableNativeTick: true,
-    seekTo: (time) => {
-        window.postMessage({ type: 'LYPLUS_SEEK_TO', time: time }, '*');
+function getAppleMusicLyricsLanguage() {
+    const target = currentSettings.customTranslateTarget;
+    for (const value of [target && target !== 'auto' ? target : '', navigator.language, document.documentElement.lang, 'en-US']) {
+        if (!value) continue;
+        try {
+            const locale = new Intl.Locale(value.replaceAll('_', '-'));
+            // Match AMDL's explicit simplified/traditional Chinese language tags.
+            return locale.language === 'zh' ? locale.maximize().toString() : locale.toString();
+        } catch (_) { }
     }
-};
+    return 'en-US';
+}
 
-// --- Globals ---
 function injectDOMScript() {
-    if (!pBrowser?.runtime?.getURL) {
-        console.warn('APPLE MUSIC: runtime.getURL unavailable, skipping DOM script inject');
-        return;
-    }
+    if (trackerInjected || !pBrowser?.runtime?.getURL) return;
+    trackerInjected = true;
     const script = document.createElement('script');
+    script.dataset.lyricsLanguage = getAppleMusicLyricsLanguage();
     script.src = pBrowser.runtime.getURL('src/inject/applemusic/songTracker.js');
-    script.onload = function () {
-        this.remove();
-    };
+    script.onload = () => script.remove();
+    script.onerror = () => { trackerInjected = false; script.remove(); console.warn('YouLy+: Apple Music bridge could not load'); };
     (document.head || document.documentElement).appendChild(script);
-    const parser = document.createElement('script');
-    parser.src = pBrowser.runtime.getURL('src/lib/parser.js');
-    parser.type = 'module';
-    parser.onload = function () {
-        this.remove();
-    };
-    (document.head || document.documentElement).appendChild(parser);
+}
+
+function loadPlatformStyle(path, attribute) {
+    let link = document.querySelector(`link[${attribute}]`);
+    if (link?.sheet) return Promise.resolve();
+    if (link?._lyplusLoading) return link._lyplusLoading;
+    if (!link) {
+        link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = pBrowser.runtime.getURL(path);
+        link.setAttribute(attribute, 'true');
+    }
+    link._lyplusLoading = new Promise((resolve, reject) => {
+        link.addEventListener('load', resolve, { once: true });
+        link.addEventListener('error', () => { link.remove(); reject(new Error('Player stylesheet could not load')); }, { once: true });
+    });
+    if (!link.isConnected) (document.head || document.documentElement).appendChild(link);
+    return link._lyplusLoading;
 }
 
 injectPlatformCSS = function () {
-    if (document.querySelector('link[data-lyrics-plus-platform-style]')) return;
-    const linkElement = document.createElement('link');
-    linkElement.rel = 'stylesheet';
-    linkElement.type = 'text/css';
-    const browserAPI = typeof browser !== 'undefined' ? browser : (typeof chrome !== 'undefined' ? chrome : null);
-    if (!browserAPI?.runtime?.getURL) return;
-
-    linkElement.href = browserAPI.runtime.getURL('src/modules/applemusic/style.css');
-    linkElement.setAttribute('data-lyrics-plus-platform-style', 'true');
-    document.head.appendChild(linkElement);
+    return loadPlatformStyle('src/modules/applemusic/style.css', 'data-lyrics-plus-platform-style');
 };
+
+function sendPlayerCommand(command, value) {
+    return new Promise((resolve, reject) => {
+        const requestId = `lyplus-${Date.now()}-${++commandSequence}`;
+        const timer = setTimeout(() => { pendingCommands.delete(requestId); reject(new Error('Apple Music did not respond. Try the native player.')); }, 6000);
+        pendingCommands.set(requestId, { resolve, reject, timer });
+        window.postMessage({ type: 'LYPLUS_PLAYER_COMMAND', command, value, requestId }, window.location.origin);
+    });
+}
+
+function unmountAMLL() {
+    amllModal?.removeAttribute('data-lyplus-amll-active');
+    amllPlayer?.dispose();
+    amllPlayer = null;
+    amllHost?.remove();
+    amllHost = null;
+}
+
+function showNativePlayer() {
+    nativeMode = true;
+    unmountAMLL();
+    if (!amllModal?.isConnected || amllModal.querySelector('#lyplus-amll-restore')) return;
+    const button = document.createElement('button');
+    button.id = 'lyplus-amll-restore';
+    button.type = 'button';
+    button.textContent = 'YouLy+ · AMLL';
+    button.addEventListener('click', () => { nativeMode = false; button.remove(); mountAMLL(); });
+    amllModal.appendChild(button);
+}
+
+function closePlayer() {
+    const scope = amllModal?.closest('[data-testid="modal"]') || amllModal?.parentElement;
+    const close = [...(scope?.querySelectorAll('[data-testid="close-button"], [data-testid="close-modal"], button[aria-label="Close"], button[aria-label="关闭"], .lyrics__close-button, .close-button') || [])]
+        .find(element => !amllHost?.contains(element));
+    if (close) { close.click(); return; }
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', code: 'Escape', bubbles: true }));
+    setTimeout(() => { if (amllModal?.isConnected) showNativePlayer(); }, 100);
+}
+
+function mountAMLL() {
+    const modal = document.querySelector('article[data-testid="lyrics-fullscreen-modal"]');
+    if (modal !== amllModal) {
+        unmountAMLL();
+        amllModal?.querySelector('#lyplus-amll-restore')?.remove();
+        amllModal = modal;
+        nativeMode = false;
+    }
+    if (!currentSettings.isEnabled || currentSettings.appleMusicAMLL === false || !modal || nativeMode) { unmountAMLL(); return; }
+    if (amllHost?.isConnected && amllPlayer) return;
+    if (amllPlayer) unmountAMLL();
+    if (!globalThis.LyPlusAMLLFrame?.createPlayer) { console.warn('YouLy+: AMLL frame bridge is unavailable'); return; }
+    const host = document.createElement('iframe');
+    host.id = 'lyplus-amll-root';
+    host.setAttribute('role', 'region');
+    host.setAttribute('aria-label', 'YouLy+ Apple Music player');
+    modal.appendChild(host);
+    amllHost = host;
+    const stylesReady = injectPlatformCSS();
+    try {
+        amllPlayer = globalThis.LyPlusAMLLFrame.createPlayer(host, {
+            sendCommand: sendPlayerCommand, onClose: closePlayer, onFallback: showNativePlayer,
+            translate: (key) => typeof t === 'function' ? t(key) : '',
+            settings: currentSettings,
+            onSettingsChange: (values) => storageLocalSet(values),
+            saveOffset: (song, value) => {
+                cachedOffset = Number(value) || 0;
+                if (cachedLyricsArguments) cachedLyricsArguments[11] = cachedOffset;
+                return saveLyricsOffset(song, value);
+            },
+            reloadLyrics: () => fetchAndDisplayLyrics(currentSongInfo, false, true),
+            setDisplayMode: (mode) => setCurrentDisplayModeAndRender(mode, currentSongInfo),
+            onReady: () => stylesReady.then(() => {
+                if (amllHost === host && host.isConnected && !nativeMode) { modal.setAttribute('data-lyplus-amll-active', 'true'); }
+            }).catch(() => { if (amllHost === host) showNativePlayer(); }),
+        });
+        amllPlayer.updateSettings(currentSettings);
+        amllPlayer.updateSong(currentSongInfo);
+        if (cachedPlaybackState) amllPlayer.updatePlayback(cachedPlaybackState);
+        if (cachedLyricsArguments) amllPlayer.displayLyrics(...cachedLyricsArguments);
+        else if (cachedLyricStatus === 'empty') amllPlayer.displaySongNotFound();
+        else if (cachedLyricStatus === 'error') amllPlayer.displaySongError();
+        amllPlayer.setAvailableProviders(cachedProviders);
+        amllPlayer.setUserOffset(cachedOffset);
+        amllPlayer.setVisible(!document.hidden);
+        sendPlayerCommand('snapshot').catch(error => amllPlayer?.showToast(error.message));
+    } catch (error) { console.error('YouLy+: could not mount AMLL', error); showNativePlayer(); }
+}
 
 const LyricsPlusAPI = {
-    displayLyrics: (...args) => lyricsRendererInstance?.displayLyrics(...args),
-    displaySongNotFound: () => lyricsRendererInstance?.displaySongNotFound(),
-    displaySongError: () => lyricsRendererInstance?.displaySongError(),
-    cleanupLyrics: () => lyricsRendererInstance?.cleanupLyrics(),
-    updateDisplayMode: (...args) => lyricsRendererInstance?.updateDisplayMode(...args),
-    updateCurrentTick: (...args) => lyricsRendererInstance?.updateCurrentTick(...args),
-    setTranslationLoading: (...args) => lyricsRendererInstance?.setTranslationLoading(...args),
-    showToast: (...args) => lyricsRendererInstance?.showToast(...args),
-    setUserOffset: (...args) => lyricsRendererInstance?.setUserOffset(...args),
-    setAvailableProviders: (...args) => lyricsRendererInstance?.setAvailableProviders(...args)
+    displayLyrics: (...args) => {
+        if (songIdentity(args[1]) !== songIdentity(currentSongInfo)) return;
+        const switchProvider = args[8];
+        const saveOffset = args[9];
+        manualProviderSelected = !!args[0]?.playerProviderPreference && args[0].playerProviderPreference !== 'auto';
+        args[8] = (...parameters) => { manualProviderSelected = parameters[0] !== 'auto'; return switchProvider?.(...parameters); };
+        args[9] = (song, value) => {
+            cachedOffset = Number(value) || 0;
+            if (cachedLyricsArguments) cachedLyricsArguments[11] = cachedOffset;
+            return saveOffset?.(song, value);
+        };
+        cachedLyricsArguments = args;
+        cachedLyricStatus = 'ready';
+        cachedOffset = Number(args[11]) || 0;
+        amllPlayer?.displayLyrics(...args);
+    },
+    displaySongNotFound: () => { cachedLyricStatus = 'empty'; cachedLyricsArguments = null; amllPlayer?.displaySongNotFound(); },
+    displaySongError: () => { cachedLyricStatus = 'error'; cachedLyricsArguments = null; amllPlayer?.displaySongError(); },
+    cleanupLyrics: () => { cachedLyricStatus = 'loading'; cachedLyricsArguments = null; amllPlayer?.cleanupLyrics(); },
+    updateDisplayMode: (...args) => amllPlayer?.updateDisplayMode(...args),
+    updateCurrentTick: (seconds) => {
+        if (cachedPlaybackState) cachedPlaybackState.currentTime = seconds;
+        amllPlayer?.updateCurrentTick(seconds);
+    },
+    setTranslationLoading: (value) => amllPlayer?.setTranslationLoading(value),
+    showToast: (...args) => amllPlayer?.showToast(...args),
+    setUserOffset: (value) => { cachedOffset = value; if (cachedLyricsArguments) cachedLyricsArguments[11] = value; amllPlayer?.setUserOffset(value); },
+    setAvailableProviders: (providers) => { cachedProviders = providers || []; amllPlayer?.setAvailableProviders(cachedProviders); },
 };
 
-// --- Injection ---
-
-function tryInject() {
-    const lyricsArticle = document.querySelector('article[data-testid="lyrics-fullscreen-modal"]');
-
-    if (lyricsArticle) {
-        let patchWrapper = document.getElementById('lyplus-patch-container');
-
-        if (!patchWrapper) {
-            console.log('LyricsPlus: Creating wrapper container...');
-            patchWrapper = document.createElement('div');
-            patchWrapper.id = 'lyplus-patch-container';
-            lyricsArticle.appendChild(patchWrapper);
-        }
-
-        if (!document.getElementById('lyrics-plus-container')) {
-            console.log('LyricsPlus: Lyrics container missing, checking for reuse...');
-
-            if (!lyricsRendererInstance) {
-                lyricsRendererInstance = new LyricsPlusRenderer(uiConfig);
-            }
-
-
-            const canReuse = lyricsRendererInstance.lyricsContainer &&
-                lyricsRendererInstance.lastKnownSongInfo &&
-                currentSongInfo &&
-                lyricsRendererInstance.lastKnownSongInfo.title === currentSongInfo.title &&
-                lyricsRendererInstance.lastKnownSongInfo.artist === currentSongInfo.artist &&
-                lyricsRendererInstance.lastKnownSongInfo.album === currentSongInfo.album;
-
-            if (canReuse) {
-                console.log('LyricsPlus: Reusing existing container');
-                patchWrapper.appendChild(lyricsRendererInstance.lyricsContainer);
-                lyricsRendererInstance.uiConfig.patchParent = '#lyplus-patch-container';
-                lyricsRendererInstance.restore();
-            } else {
-                console.log('LyricsPlus: Injecting new lyrics...');
-                lyricsRendererInstance.uiConfig.patchParent = '#lyplus-patch-container';
-                lyricsRendererInstance.lyricsContainer = null;
-
-                if (currentSongInfo && currentSongInfo.title && typeof fetchAndDisplayLyrics === 'function') {
-                    fetchAndDisplayLyrics(currentSongInfo, true);
-                }
-            }
-
-            injectShowHideButton();
-            disableNativeLyrics();
-        }
-    }
+function queueMount() {
+    if (mountQueued) return;
+    mountQueued = true;
+    queueMicrotask(() => { mountQueued = false; mountAMLL(); });
 }
 
-function startInjectionWatcher() {
-    if (injectionInterval) clearInterval(injectionInterval);
-
-    injectionInterval = setInterval(() => {
-        const modalExists = document.querySelector('article[data-testid="lyrics-fullscreen-modal"]');
-
-        if (modalExists) {
-            tryInject();
-        } else {
-            if (lyricsRendererInstance && document.getElementById('lyrics-plus-container')) {
-                lyricsRendererInstance.cleanupLyrics();
-            }
-        }
-    }, 1000);
-}
-
-// src/modules/applemusic/index.js
-
-function injectShowHideButton(retryCount = 0) {
-    if (document.getElementById('lyrics-plus-show-hide-btn')) return;
-
-    const lyricsArticle = document.querySelector('article[data-testid="lyrics-fullscreen-modal"]');
-    if (!lyricsArticle) return;
-
-    const buttonsWrapper = document.getElementById('lyrics-plus-buttons-wrapper');
-
-    if (!buttonsWrapper) {
-        if (retryCount > 60) {
-            console.log('LyricsPlus: Button wrapper never appeared.');
-            return;
-        }
-
-        setTimeout(() => injectShowHideButton(retryCount + 1), 500);
-        return;
-    }
-
-    const btn = document.createElement('button');
-    btn.id = 'lyrics-plus-show-hide-btn';
-    btn.className = 'lyrics-plus-button active';
-    btn.title = 'Show/Hide Lyrics';
-    btn.innerHTML = `
-        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 18 18" fill-rule="evenodd" clip-rule="evenodd" xml:space="preserve">
-            <path d="m9.67 13.982-2.43 2.474c-.472.471-.79.675-1.145.675-.479 0-.623-.314-.623-1.012v-2.137H5.26c-1.406 0-1.915-.146-2.429-.42a2.877 2.877 0 0 1-1.192-1.192c-.274-.514-.421-1.024-.421-2.429V6.464c0-1.405.147-1.915.421-2.428a2.872 2.872 0 0 1 1.192-1.192c.514-.275 1.023-.421 2.429-.421h7.68c1.406 0 1.915.146 2.429.421a2.86 2.86 0 0 1 1.192 1.192c.274.513.421 1.023.421 2.428v3.477c0 1.405-.147 1.915-.421 2.429a2.866 2.866 0 0 1-1.192 1.192c-.514.274-1.023.42-2.429.42H9.67Zm-.974-.957c.257-.261.608-.408.974-.408h3.27c1.076 0 1.426-.068 1.785-.26.276-.147.484-.356.631-.632.192-.358.26-.709.26-1.784V6.464c0-1.075-.068-1.426-.26-1.784a1.49 1.49 0 0 0-.631-.631c-.359-.192-.709-.26-1.785-.26H5.26c-1.075 0-1.425.068-1.785.26a1.5 1.5 0 0 0-.631.631c-.192.358-.26.709-.26 1.784v3.477c0 1.075.068 1.426.26 1.784.148.276.356.485.631.632.36.192.71.26 1.785.26h.212c.754 0 1.365.611 1.365 1.365v.934l1.859-1.891ZM5.422 8.01c0-.821.67-1.383 1.554-1.383.976 0 1.599.726 1.599 1.634 0 1.73-1.46 2.084-2.242 2.084-.222 0-.381-.148-.381-.329 0-.173.084-.294.372-.364.502-.12 1.005.028 1.274-.491h-.056c-.185.208-.483.242-.771.242-.837 0-1.349-.614-1.349-1.393Zm4.204 0c0-.821.669-1.383 1.553-1.383.976 0 1.6.726 1.6 1.634 0 1.73-1.46 2.084-2.242 2.084-.223 0-.381-.148-.381-.329 0-.173.084-.294.372-.364.502-.12 1.004.028 1.274-.491h-.056c-.186.208-.483.242-.772.242-.837 0-1.348-.614-1.348-1.393Z"></path>
-        </svg>
-    `;
-
-    btn.addEventListener('click', () => {
-        const container = document.querySelector(uiConfig.patchParent);
-        if (container) {
-            container.classList.toggle('lyrics-hidden');
-            btn.classList.toggle('active');
-        }
+window.initializeLyricsPlusPlatform = function () {
+    if (platformStarted) { mountAMLL(); return; }
+    if (!document.body) { setTimeout(window.initializeLyricsPlusPlatform, 100); return; }
+    platformStarted = true;
+    injectPlatformCSS().catch(error => console.warn('YouLy+:', error.message));
+    const observer = new MutationObserver(records => {
+        if (records.some(record => !amllHost?.contains(record.target))) queueMount();
     });
+    observer.observe(document.body, { childList: true, subtree: true });
+    document.addEventListener('visibilitychange', () => {
+        amllPlayer?.setVisible(!document.hidden);
+        if (!document.hidden && amllPlayer) sendPlayerCommand('snapshot').catch(() => {});
+    });
+    window.addEventListener('pagehide', () => { observer.disconnect(); unmountAMLL(); }, { once: true });
+    mountAMLL();
+};
 
-    buttonsWrapper.prepend(btn);
-}
-
-function disableNativeLyrics() {
-    const lyricsArticle = document.querySelector('article.lyrics__container[data-testid="lyrics-fullscreen-modal"]');
-    const lyricsToggleBtn = document.querySelector('article.lyrics__container[data-testid="lyrics-fullscreen-modal"] .toggle-button.toggle-button--lyrics.lyrics-button');
-
-    if (lyricsArticle && lyricsToggleBtn) {
-        const isNativeLyricsVisible = !lyricsArticle.classList.contains('is-lyrics-off');
-
-        if (isNativeLyricsVisible) {
-            console.log('LyricsPlus: Native lyrics detected. toggling off...');
-            lyricsToggleBtn.click();
-        }
+window.addEventListener('YOUPLUS_SETTINGS_UPDATED', (event) => {
+    if (!currentSettings.isEnabled) { unmountAMLL(); return; }
+    injectDOMScript();
+    window.initializeLyricsPlusPlatform();
+    // Frame messages clone their arguments; keep replay state current explicitly.
+    if (cachedLyricsArguments) {
+        cachedLyricsArguments[3] = event.detail.settings;
+        cachedLyricsArguments[6] = event.detail.settings.largerTextMode || 'lyrics';
     }
-}
-
-// --- Setup ---
-
-function setupObservers() {
-    const portal = document.querySelector('.portal');
-    if (portal) {
-        portalObserver = new MutationObserver((mutations) => {
-            for (const mutation of mutations) {
-                if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
-                    tryInject();
-                }
-            }
-        });
-        portalObserver.observe(portal, { childList: true, subtree: true });
-    } else {
-        setTimeout(setupObservers, 1000);
-    }
-
-    const lyricsButton = document.querySelector('[data-testid="lyrics-button"], .toggle-button--lyrics');
-    if (lyricsButton) {
-        lyricsButton.addEventListener('click', () => {
-            setTimeout(tryInject, 100);
-        });
-    }
-
-    startInjectionWatcher();
-}
-
-function initialize() {
-    console.log('LyricsPlus: Apple Music Module Initialized');
-    window.injectPlatformCSS();
-    setupObservers();
-    tryInject();
-}
-
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initialize);
-} else {
-    initialize();
-}
+    amllPlayer?.updateSettings(event.detail.settings);
+});
 
 window.addEventListener('message', (event) => {
-    if (event.source !== window || !event.data) {
-        return;
-    }
-
-    if (event.data.type === 'LYPLUS_TIME_UPDATE' && typeof event.data.currentTime === 'number') {
-        LyricsPlusAPI.updateCurrentTick(event.data.currentTime)
-    }
-
-    if (event.data.type === 'LYPLUS_SONG_CHANGED') {
-        currentSongInfo = event.data.songInfo;
+    if (event.source !== window || !event.data || event.origin !== window.location.origin) return;
+    const message = event.data;
+    if (message.type === 'LYPLUS_PLAYER_RESULT') {
+        const pending = pendingCommands.get(message.requestId);
+        if (!pending) return;
+        clearTimeout(pending.timer); pendingCommands.delete(message.requestId);
+        if (message.ok) pending.resolve(message.result); else pending.reject(new Error(message.error || 'Playback failed'));
+    } else if (message.type === 'LYPLUS_SONG_CHANGED' || message.type === 'LYPLUS_SONG_SNAPSHOT') {
+        const nextSong = message.songInfo || {};
+        const changed = songIdentity(nextSong) !== songIdentity(currentSongInfo);
+        if (changed) { cachedLyricsArguments = null; cachedProviders = []; cachedOffset = 0; cachedLyricStatus = 'loading'; manualProviderSelected = false; cachedPlaybackState = null; }
+        currentSongInfo = nextSong;
+        amllPlayer?.updateSong(currentSongInfo);
+        if (message.type === 'LYPLUS_SONG_SNAPSHOT' && !cachedLyricsArguments && nextSong.title && currentSettings.isEnabled) fetchAndDisplayLyrics(nextSong, false);
+    } else if (message.type === 'LYPLUS_NATIVE_LYRICS') {
+        if (songIdentity(message.songInfo) !== songIdentity(currentSongInfo)) return;
+        currentSongInfo = message.songInfo;
+        // Remember late native TTML for manual source switching, even if an external source won.
+        if (currentSettings.isEnabled) pBrowser.runtime.sendMessage({ type: 'FETCH_LYRICS', songInfo: currentSongInfo }).catch(() => {});
+        const activeProvider = cachedLyricsArguments?.[0]?.provider;
+        if (currentSettings.isEnabled && !manualProviderSelected && !['amll', 'lunabeat', 'amlyrics'].includes(activeProvider)) fetchAndDisplayLyrics(currentSongInfo, false, true);
+    } else if (message.type === 'LYPLUS_PLAYBACK_STATE') {
+        if (!message.state || message.state.songId !== (currentSongInfo.appleId || null)) return;
+        cachedPlaybackState = message.state;
+        amllPlayer?.updatePlayback(cachedPlaybackState);
+    } else if (message.type === 'LYPLUS_TIME_UPDATE' && message.songId === (currentSongInfo.appleId || null) && Number.isFinite(message.currentTime)) {
+        LyricsPlusAPI.updateCurrentTick(message.currentTime);
     }
 });

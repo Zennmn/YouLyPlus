@@ -14,6 +14,8 @@ import { UnisonService } from '../services/unisonService.js';
 import { LrcredService } from '../services/lrcredService.js';
 import { YouTubeService } from '../services/youtubeService.js';
 import { parseAppleTTML } from '../../lib/parser.js';
+import { appleMusicLyrics } from '../services/appleMusicLyricsService.js';
+import { normalizeAppleLyricsOrder } from '../../lib/appleLyricsSources.js';
 
 export class LyricsService {
   static songProvidersCache = new Map();
@@ -56,6 +58,7 @@ export class LyricsService {
   }
 
   static createCacheKey(songInfo) {
+    if (songInfo.appleId) return `apple-sources-v2-amll:${songInfo.appleId}`;
     const duration = songInfo.duration || '';
     return `${songInfo.title} - ${songInfo.artist} - ${songInfo.album} - ${duration}`;
   }
@@ -90,6 +93,10 @@ export class LyricsService {
   }
 
   static async getOrFetch(songInfo, forceReload = false, requestedSource = null) {
+    const cacheKey = this.createCacheKey(songInfo);
+    if (songInfo.appleId) {
+      return this.getAppleMusicLyrics(songInfo, forceReload, requestedSource);
+    }
     if (requestedSource && requestedSource !== 'auto') {
       return this.fetchSpecificSource(songInfo, requestedSource, forceReload);
     }
@@ -142,7 +149,6 @@ export class LyricsService {
       embeddedFallback = embeddedResult;
     }
 
-    const cacheKey = this.createCacheKey(songInfo);
     let result = null;
 
     if (songInfo.ytMusicLyrics) {
@@ -196,6 +202,31 @@ export class LyricsService {
       }
     }
 
+    return result;
+  }
+
+  static async getAppleMusicLyrics(songInfo, forceReload = false, provider = null) {
+    appleMusicLyrics.rememberNative(songInfo);
+    const settings = await SettingsManager.getLyricsSettings();
+    const order = normalizeAppleLyricsOrder(settings.appleMusicLyricsProviderOrder);
+    const cacheKey = this.createCacheKey(songInfo);
+    const preferenceKey = `lyplusApplePlayerProvider_${songInfo.appleId}`;
+    const saved = await SettingsManager.get({ [preferenceKey]: 'auto' });
+    const preference = provider || saved[preferenceKey] || 'auto';
+    const selected = ['amll', 'lunabeat', 'amlyrics', 'applemusic'].includes(preference) ? preference : null;
+    const cached = state.getCached(cacheKey);
+    if (!provider && !forceReload && cached?.lyrics && cached.sourceOrder === order.join(',') && cached.sourcePreference === preference) return cached;
+    let lyrics = selected
+      ? await appleMusicLyrics.provider(selected, songInfo, forceReload)
+      : await appleMusicLyrics.resolve(songInfo, forceReload, order);
+    // A saved source may go offline. Keep its preference but allow automatic fallback.
+    if (!lyrics && !provider) lyrics = await appleMusicLyrics.resolve(songInfo, forceReload, order);
+    if (!lyrics) throw new Error(`No lyrics found from source: ${selected}`);
+    if (provider) await SettingsManager.set({ [preferenceKey]: selected || 'auto' });
+    lyrics = { ...lyrics, playerProviderPreference: selected || 'auto' };
+    this.cacheProviderLyrics(cacheKey, lyrics.provider, lyrics);
+    const result = { lyrics, version: Date.now(), sourceOrder: order.join(','), sourcePreference: preference };
+    state.setCached(cacheKey, result);
     return result;
   }
 
@@ -549,6 +580,7 @@ export class LyricsService {
   }
 
   static async getProviderLyrics(songInfo, provider) {
+    if (songInfo.appleId) return this.getAppleMusicLyrics(songInfo, false, provider);
     const cacheKey = this.createCacheKey(songInfo);
     let lyrics = this.getProviderLyricsFromCache(cacheKey, provider);
     let fromCache = true;
@@ -663,7 +695,21 @@ export class LyricsService {
   }
 
   static async getLyricsOffset(songInfo) {
-    if (!songInfo || !songInfo.title) return 0;
+    if (!songInfo) return 0;
+    if (songInfo.appleId) {
+      const key = `lyplusApplePlayerOffset_${songInfo.appleId}`;
+      const saved = await SettingsManager.get({ [key]: null });
+      if (Number.isFinite(saved[key])) return saved[key];
+      // Offset preferences must survive parser/cache version changes.
+      for (const prefix of ['apple-sources-v2-amll:', 'apple-sources-v1:']) {
+        const old = await offsetsDB.get(`${prefix}${songInfo.appleId}`);
+        if (Number.isFinite(old?.offsetMs)) {
+          await SettingsManager.set({ [key]: old.offsetMs });
+          return old.offsetMs;
+        }
+      }
+    }
+    if (!songInfo.title) return 0;
     const artist = songInfo.artist || '';
     const album = (songInfo.album || '').trim();
     const duration = songInfo.duration || '';
@@ -696,6 +742,10 @@ export class LyricsService {
   }
 
   static async saveLyricsOffset(songInfo, offsetMs) {
+    if (songInfo?.appleId) {
+      if (!Number.isFinite(offsetMs)) throw new Error('Invalid lyrics offset');
+      return SettingsManager.set({ [`lyplusApplePlayerOffset_${songInfo.appleId}`]: offsetMs });
+    }
     if (!songInfo || !songInfo.title) return;
     const artist = songInfo.artist || '';
     const album = (songInfo.album || '').trim();
@@ -718,6 +768,7 @@ export class LyricsService {
 
   static async getAvailableProviders(songInfo) {
     if (!songInfo || !songInfo.title) return [];
+    if (songInfo.appleId) return normalizeAppleLyricsOrder((await SettingsManager.getLyricsSettings()).appleMusicLyricsProviderOrder);
     const cacheKey = this.createCacheKey(songInfo);
 
     const ongoingMap = this.ongoingProviderFetches.get(cacheKey);

@@ -4,6 +4,9 @@ const pBrowser = typeof browser !== 'undefined'
 
 const defaultSettings = {
     lyricsProviderOrder: 'kpoe,lrcred,unison,lrclib',
+    appleMusicLyricsProviderOrder: 'amll,lunabeat,amlyrics,applemusic',
+    customLLMBaseUrl: '',
+    customLLMModel: '',
     lyricsSourceOrder: 'apple,lyricsplus,qq,musixmatch,musixmatch-word',
     wordByWord: true,
     lightweight: false,
@@ -38,6 +41,11 @@ const defaultSettings = {
     bkgOverlap: true,
     customKpoeUrl: '',
     appleMusicTTMLBypass: false,
+    appleMusicAMLL: true,
+    appleMusicAMLLBackground: true,
+    appleMusicDisplayMode: 'none',
+    appleMusicPlayerFont: '',
+    appleMusicPlayerFontFile: null,
     YTSongInfo: false,
     YTSongInfoDisableSeekbar: false,
     openRouterApiKey: '',
@@ -50,14 +58,13 @@ let currentSettings = { ...defaultSettings };
 window.addEventListener('message', (event) => {
     if (event.source !== window || !event.data || event.data.type !== 'UPDATE_SETTINGS') return;
 
-    console.log("Received new settings:", event.data.settings);
+    console.log("Received new settings");
     updateSettings(event.data.settings);
 });
 
 function loadSettings(callback) {
     storageLocalGet(defaultSettings).then((items) => {
         currentSettings = items;
-        console.log(currentSettings);
         injectCustomCSS(currentSettings.customCSS);
         if (callback) callback();
     });
@@ -84,9 +91,13 @@ if (pBrowser && pBrowser.storage) {
         if (area === 'local') {
             const changedSettings = {};
             for (let key in changes) {
+                // Downloading a provider index is cache I/O, not a user setting.
+                // Re-rendering here can restart the previous track while the new one loads.
+                if (key.startsWith('lyplusAppleLyricsIndex_') || key.startsWith('lyplusApplePlayer')) continue;
                 changedSettings[key] = changes[key].newValue;
             }
-            console.log("Settings updated via storage:", changedSettings);
+            if (!Object.keys(changedSettings).length) return;
+            console.log("Settings updated via storage");
             updateSettings(changedSettings);
         }
     });

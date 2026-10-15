@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="800" viewBox="0 0 800 800">
+<defs><linearGradient id="sky" x2=".9" y2="1"><stop stop-color="#d188a2"/><stop offset=".48" stop-color="#8e5b92"/><stop offset="1" stop-color="#243c6c"/></linearGradient><radialGradient id="moon"><stop stop-color="#ffe7c5"/><stop offset="1" stop-color="#e4bcd0"/></radialGradient></defs>
+<path fill="url(#sky)" d="M0 0h800v800H0z"/><circle cx="537" cy="263" r="108" fill="url(#moon)"/>
+<path fill="#243054" d="M0 545L190 390 365 540 570 408 800 577v223H0z"/><path fill="#14263e" d="M0 658l278-132 250 113 272-66v227H0z"/>
+<path d="M0 694q205-35 399 4t401 0M0 722q220-24 390 7t410-2M0 754q200-24 410 3t390 2" fill="none" stroke="#b287a0" stroke-opacity=".35" stroke-width="2"/>
+<text x="68" y="117" font-family="sans-serif" font-size="54" fill="#fff" letter-spacing="15">夜航</text><text x="72" y="158" font-family="sans-serif" font-size="14" fill="#fff" letter-spacing="7" opacity=".7">NIGHT VOYAGE</text></svg>

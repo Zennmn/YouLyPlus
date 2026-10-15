@@ -9,3 +9,33 @@
 
 # Mac directory
 .DS_Store
+
+# Frontend dependencies and local development cache
+/node_modules/
+/.vite/
+
+# Local agent instructions, indexes, and planning records
+/.codegraph/
+/.planning/
+/AGENTS.md
+/task_plan.md
+/findings.md
+/progress.md
+/.plan-attestation
+
+# Local settings and credentials
+.env
+.env.*
+!.env.example
+!.env.*.example
+/.vscode/
+/.idea/
+*.pem
+*.key
+
+# Local logs and browser diagnostics
+*.log
+*.har
+/coverage/
+/playwright-report/
+/test-results/

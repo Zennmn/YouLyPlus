@@ -187,6 +187,25 @@
                 <h2 class="card-title" data-i18n="navAppearance">Appearance</h2>
 
                 <div class="settings-category">
+                    <h3 class="category-title">Apple Music</h3>
+                    <div class="settings-group">
+                        <div class="setting-item player-font-setting">
+                            <div class="setting-info">
+                                <label class="setting-title" for="player-font-file" data-i18n="labelPlayerFont">Player font</label>
+                                <span class="setting-description" data-i18n="descPlayerFont">Apply an installed font to all player text. Leave blank to use the default. Separate fallback font names with commas.</span>
+                            </div>
+                            <div class="setting-control player-font-control">
+                                <input type="file" id="player-font-file" accept=".ttf,.otf,.woff,.woff2" hidden>
+                                <button type="button" id="import-player-font" class="m3-button filled" data-i18n="buttonImportPlayerFont">Import font file</button>
+                                <span id="player-font-status" class="setting-description" role="status"></span>
+                                <button type="button" id="reset-player-font" class="m3-button tonal" data-i18n="buttonDefaultPlayerFont">Use default font</button>
+                                <div id="player-font-preview" class="player-font-preview">夜航 · Night Voyage<br><small>晚风轻轻掠过海面 · 01:23 / 04:56</small></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="settings-category">
                     <h3 class="category-title" data-i18n="categoryTextDisplay">Text Display</h3>
                     <div class="settings-group">
                         <div class="setting-item">
@@ -499,6 +518,14 @@
 
             <section class="settings-card" id="sources">
                 <h2 class="card-title" data-i18n="navSources">Sources</h2>
+                <div class="settings-group">
+                    <div class="setting-item">
+                        <div class="setting-info"><span class="setting-title" data-i18n="labelSourcePlatform">Music platform</span></div>
+                        <div class="setting-control"><div class="form-group margin-0">
+                            <select id="source-platform"><option value="applemusic">Apple Music</option><option value="other">YouTube Music / Tidal</option></select>
+                        </div></div>
+                    </div>
+                </div>
 
                 <div class="settings-category">
                     <h3 class="category-title" data-i18n="categoryLyricsProvider">Primary Lyrics Provider</h3>
@@ -550,7 +577,7 @@
                 </div>
 
                 <div class="settings-category">
-                    <h3 class="category-title" data-i18n="categoryUnison">Unison</h3>
+                    <h3 class="category-title" data-i18n="categoryUnison" id="legacy-unison-title">Unison</h3>
                     <div class="settings-group">
                         <div class="setting-item has-switch">
                             <div class="setting-info">
@@ -621,6 +648,7 @@
                                         <option value="google" data-i18n="optionGoogleTranslate">Google Translate</option>
                                         <option value="gemini" data-i18n="optionGeminiAI">Gemini AI</option>
                                         <option value="openrouter" data-i18n="optionOpenRouter">OpenRouter (LLM)</option>
+                                        <option value="customllm" data-i18n="optionCustomLLM">Third-party LLM (Chat Completions)</option>
                                         <option value="deepl" data-i18n="optionDeepL">DeepL</option>
                                         <option value="deepl-keyless" data-i18n="optionDeepLKeyless">DeepL (Keyless)</option>
                                     </select>
@@ -719,6 +747,28 @@
                                     <input type="text" id="openrouter-model" placeholder="google/gemini-2.0-flash-001" data-i18n-placeholder="placeholderOpenRouterModel">
                                 </div>
                             </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="settings-category" id="custom-llm-settings-category" style="display: none;">
+                    <h3 class="category-title" data-i18n="categoryCustomLLM">Third-party LLM</h3>
+                    <div class="settings-group">
+                        <div class="setting-item">
+                            <div class="setting-info"><span class="setting-title" data-i18n="labelCustomLLMUrl">API address</span><span class="setting-description" data-i18n="descCustomLLMUrl">Use a Chat Completions compatible base URL or full endpoint.</span></div>
+                            <div class="setting-control"><div class="form-group margin-0"><input type="url" id="custom-llm-url" placeholder="https://api.example.com/v1" autocomplete="off"></div></div>
+                        </div>
+                        <div class="setting-item">
+                            <div class="setting-info"><span class="setting-title">API Key</span><span class="setting-description" data-i18n="descCustomLLMKey">Stored locally and sent only to the API address you configure. Leave blank if the service needs no key.</span></div>
+                            <div class="setting-control"><div class="form-group margin-0"><input type="password" id="custom-llm-key" placeholder="API Key" autocomplete="off"></div></div>
+                        </div>
+                        <div class="setting-item">
+                            <div class="setting-info"><span class="setting-title" data-i18n="labelCustomLLMModel">Model name</span><span class="setting-description" data-i18n="descCustomLLMModel">Enter the model ID provided by your service.</span></div>
+                            <div class="setting-control"><div class="form-group margin-0"><input type="text" id="custom-llm-model" placeholder="model-id" autocomplete="off"></div></div>
+                        </div>
+                        <div class="setting-item full-width">
+                            <button type="button" class="m3-button tonal" id="test-custom-llm" data-i18n="buttonTestCustomLLM">Authorize address and test connection</button>
+                            <span class="status-message" id="custom-llm-status" role="status"></span>
                         </div>
                     </div>
                 </div>

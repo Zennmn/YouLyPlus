@@ -26,11 +26,13 @@ function initializeLyricsPlus() {
     
     // Inject the DOM script
     injectDOMScript();
+    // Apple Music supplies a full-player adapter; other platforms keep their existing initialization.
+    window.initializeLyricsPlusPlatform?.();
 
     // Listen for messages from the injected script
     window.addEventListener('message', function (event) {
         // Only accept messages from the same frame
-        if (event.source !== window) return;
+        if (event.source !== window || !event.data || !currentSettings.isEnabled) return;
 
         // Check if the message has our prefix
         if (event.data.type && event.data.type.startsWith('LYPLUS_')) {
@@ -40,7 +42,7 @@ function initializeLyricsPlus() {
                 console.log('Song changed (received in extension):', songInfo);
 
                 // Don't fetch lyrics if title or artist is empty
-                if (!songInfo.title.trim() || !songInfo.artist.trim()) {
+                if (!songInfo?.title?.trim() || !songInfo?.artist?.trim()) {
                     console.log('Missing title or artist, skipping lyrics fetch.');
                     return;
                 }
@@ -81,7 +83,8 @@ function injectCssFile() {
 
 function startCssWatchdog() {
     const ensureStyles = () => {
-        injectPlatformCSS();
+        const platformStyleLoad = injectPlatformCSS();
+        platformStyleLoad?.catch?.(error => console.warn('YouLy+: stylesheet load failed', error));
         injectCssFile();
         if (typeof injectCustomCSS === 'function') {
             injectCustomCSS(currentSettings.customCSS);

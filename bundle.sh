@@ -3,6 +3,9 @@
 # Exit immediately if a command exits with a non-zero status.
 set -e
 
+# Compile the locally vendored Apple Music player before packaging.
+npm run build
+
 # Get version from manifest.json
 VERSION=$(jq -r .version manifest.json)
 if [ -z "$VERSION" ]; then
@@ -43,7 +46,7 @@ minify_dir() {
 }
 
 # Define common files/directories to bundle
-COMMON_FILES="LICENSE icons src readme.md _locales"
+COMMON_FILES="LICENSE THIRD_PARTY_NOTICES.md icons src readme.md _locales"
 
 # --- Bundle for Chrome/Edge (Manifest V3, no browser_specific_settings, no background.scripts) ---
 echo "Creating youlyplus-v${VERSION}-chrome-edge.zip..."

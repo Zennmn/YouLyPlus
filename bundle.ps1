@@ -23,7 +23,11 @@ if (-not (Test-Path -Path "dist" -PathType Container)) {
 }
 
 # Define common files/directories to bundle
-$COMMON_FILES = @("LICENSE", "icons", "src", "readme.md", "_locales")
+$COMMON_FILES = @("LICENSE", "THIRD_PARTY_NOTICES.md", "icons", "src", "readme.md", "_locales")
+
+# Build the Apple Music UI before copying the extension files.
+& npm.cmd run build
+if ($LASTEXITCODE -ne 0) { throw "Apple Music UI build failed." }
 
 # --- Minification setup ---
 # Resolve esbuild for minifying JS/CSS copies (local install > PATH > npm/npx).

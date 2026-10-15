@@ -7,6 +7,7 @@ import { translationsDB } from '../storage/database.js';
 import { SettingsManager } from '../storage/settings.js';
 import { PROVIDERS } from '../constants.js';
 import { Utilities } from '../utils/utilities.js';
+import { shouldMachineTranslateLyrics, sourceTranslationData } from '../utils/lyricsLanguage.js';
 import { LyricsService } from './lyricsService.js';
 
 import { GoogleProvider } from '../services/translation/providers/GoogleProvider.js';
@@ -15,6 +16,7 @@ import { OpenRouterProvider } from '../services/translation/providers/OpenRouter
 import { DeepLProvider } from '../services/translation/providers/DeepLProvider.js';
 import { DeepLKeylessProvider } from '../services/translation/providers/DeepLKeylessProvider.js';
 import { OfflineRomanizationProvider } from '../services/translation/providers/OfflineRomanizationProvider.js';
+import { CustomLLMProvider } from '../services/translation/providers/CustomLLMProvider.js';
 
 export class TranslationService {
   static createCacheKey(songInfo, action, targetLang, targetScript) {
@@ -30,13 +32,20 @@ export class TranslationService {
 
     const targetScript = settings.transliterationTargetScript || 'latin';
 
-    const translatedKey = this.createCacheKey(songInfo, action, actualTargetLang, targetScript);
+    const customCache = action === 'translate' && settings.translationProvider === 'customllm'
+      ? ` - customllm:${settings.customLLMBaseUrl}:${settings.customLLMModel}` : '';
+    const translatedKey = this.createCacheKey(songInfo, action, actualTargetLang, targetScript) + customCache;
 
     const { lyrics: originalLyrics, version: originalVersion } =
       await LyricsService.getOrFetch(songInfo, forceReload);
 
     if (Utilities.isEmptyLyrics(originalLyrics)) {
       throw new Error('Original lyrics not found or empty');
+    }
+
+    // Run this before cached machine translations so old Chinese results cannot reappear.
+    if (action === 'translate' && !shouldMachineTranslateLyrics(originalLyrics, songInfo)) {
+      return { ...originalLyrics, data: sourceTranslationData(originalLyrics) };
     }
 
     if (!forceReload) {
@@ -98,6 +107,8 @@ export class TranslationService {
 
   static getProvider(providerName, settings) {
     switch (providerName) {
+      case 'customllm':
+        return new CustomLLMProvider(settings);
       case PROVIDERS.GEMINI:
         return new GeminiProvider(settings);
       case PROVIDERS.OPENROUTER:
@@ -125,6 +136,7 @@ export class TranslationService {
   }
 
   static async translate(originalLyrics, targetLang, settings, songInfo = {}) {
+    if (!shouldMachineTranslateLyrics(originalLyrics, songInfo)) return sourceTranslationData(originalLyrics);
     const provider = this.getProvider(settings.translationProvider, settings);
 
     const normalizeLang = (l) => l ? l.toLowerCase().split('-')[0].trim() : '';
@@ -150,6 +162,7 @@ export class TranslationService {
       try {
         fetchedTranslations = await provider.translate(linesToTranslate, targetLang, songInfo);
       } catch (error) {
+        if (settings.translationProvider === 'customllm') throw error;
         console.warn(`Translation with ${settings.translationProvider} failed, falling back to Google:`, error);
         // Fallback to Google if the primary provider fails
         if (settings.translationProvider !== PROVIDERS.GOOGLE) {
@@ -209,9 +222,14 @@ export class TranslationService {
 
       if (hasPrebuilt) {
         console.log("Using prebuilt romanization");
-        return originalLyrics.data.map(line => ({
-          text: line.romanizedText || line.text
-        }));
+        return originalLyrics.data.map(line => {
+          const words = line.syllabus || [];
+          const hasWordRomanization = words.some(syl => syl.romanizedText);
+          return {
+            text: line.romanizedText || (hasWordRomanization ? words.map(syl => syl.romanizedText || syl.text).join('') : line.text),
+            ...(hasWordRomanization ? { chunk: words.map(syl => ({ text: syl.romanizedText || syl.text })) } : {}),
+          };
+        });
       }
     }
 

@@ -1222,5 +1222,62 @@
         "content": "$2"
       }
     }
-  }
+  },
+  "labelSourcePlatform": {
+    "message": "音乐平台"
+  },
+  "helperAppleProviderOrder": {
+    "message": "按下列顺序获取歌词，可拖动排序或移除来源。Apple Music 始终作为最后的回退源。"
+  },
+  "optionCustomLLM": {
+    "message": "第三方 LLM（兼容 Chat Completions）"
+  },
+  "categoryCustomLLM": {
+    "message": "第三方 LLM"
+  },
+  "labelCustomLLMUrl": {
+    "message": "API 地址"
+  },
+  "descCustomLLMUrl": {
+    "message": "填写兼容 Chat Completions 的服务地址，可填基础地址或完整接口地址。"
+  },
+  "descCustomLLMKey": {
+    "message": "密钥保存在本地，仅发送给你配置的 API 地址；无需密钥的本地服务可留空。"
+  },
+  "labelCustomLLMModel": {
+    "message": "模型名称"
+  },
+  "descCustomLLMModel": {
+    "message": "填写服务商提供的模型 ID。"
+  },
+  "buttonTestCustomLLM": {
+    "message": "授权此地址并测试连接"
+  },
+  "msgCustomLLMModelRequired": {
+    "message": "请先填写模型名称。"
+  },
+  "msgCustomLLMExtensionRequired": {
+    "message": "请在已安装扩展的设置页中授权 API 地址。"
+  },
+  "msgCustomLLMPermissionDenied": {
+    "message": "尚未授权访问该 API 地址。"
+  },
+  "msgCustomLLMTesting": {
+    "message": "正在测试连接…"
+  },
+  "msgCustomLLMTestSuccess": {
+    "message": "连接成功："
+  },
+  "msgCustomLLMTestFailed": {
+    "message": "连接失败："
+  },
+  "labelPlayerFont": { "message": "播放器字体文件" },
+  "descPlayerFont": { "message": "导入 TTF、OTF、WOFF 或 WOFF2 字体文件，统一替换播放器全部文字。字体保存在扩展本地，无需安装到系统，单文件最大 64 MB。" },
+  "buttonDefaultPlayerFont": { "message": "恢复默认字体" },
+  "buttonImportPlayerFont": { "message": "导入字体文件" },
+  "msgPlayerFontDefault": { "message": "当前使用默认字体" },
+  "msgPlayerFontImporting": { "message": "正在导入字体…" },
+  "msgPlayerFontImportFailed": { "message": "字体导入失败，请选择有效的字体文件；原字体已保留。" },
+  "msgPlayerFontSize": { "message": "请选择非空且不超过 64 MB 的字体文件。" },
+  "msgPlayerFontLoadFailed": { "message": "字体加载失败，请重新导入字体文件。" }
 }

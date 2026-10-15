@@ -23,8 +23,10 @@
     "https://lyrics-storage.binimum.org/*",
     "https://cdn.jsdelivr.net/*",
     "https://github.com/*",
-    "https://*.githubusercontent.com/*"
+    "https://*.githubusercontent.com/*",
+    "https://2755337087.github.io/ttml-hub/*"
   ],
+  "optional_host_permissions": ["https://*/*", "http://*/*"],
   "action": {
     "default_popup": "src/popup/ui.html",
     "default_icon": {
@@ -82,8 +84,7 @@
         "src/localization.js",
         "src/modules/lyrics/settings.js",
         "src/modules/lyrics/lyricsManager.js",
-        "src/modules/lyrics/lyricsRenderer.js",
-        "src/modules/lyrics/dynamicBkg.js",
+        "src/modules/applemusic/framePlayer.js",
         "src/modules/applemusic/index.js",
         "src/content.js"
       ]
@@ -114,6 +115,8 @@
         "src/lib/parser.js",
         "src/modules/applemusic/style.css",
         "src/inject/applemusic/songTracker.js",
+        "src/player-frame/index.html",
+        "src/vendor/amll-player/player.css",
         "src/assets/loading.gif"
       ],
       "matches": [

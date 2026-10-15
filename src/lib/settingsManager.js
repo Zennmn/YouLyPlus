@@ -8,6 +8,15 @@ export const pBrowser = typeof browser !== 'undefined'
 
 export const defaultSettings = {
     lyricsProviderOrder: 'kpoe,lrcred,unison,lrclib',
+    appleMusicLyricsProviderOrder: 'amll,lunabeat,amlyrics,applemusic',
+    appleMusicAMLL: true,
+    appleMusicAMLLBackground: true,
+    appleMusicDisplayMode: 'none',
+    appleMusicPlayerFont: '',
+    appleMusicPlayerFontFile: null,
+    customLLMBaseUrl: '',
+    customLLMApiKey: '',
+    customLLMModel: '',
     lyricsSourceOrder: 'apple,lyricsplus,qq,musixmatch,musixmatch-word',
     wordByWord: true,
     lightweight: false,
@@ -422,8 +431,10 @@ if (pBrowser && pBrowser.storage) {
         if (area === 'local') {
             const newSettings = {};
             for (let key in changes) {
+                if (key.startsWith('lyplusAppleLyricsIndex_') || key.startsWith('lyplusApplePlayer')) continue;
                 newSettings[key] = changes[key].newValue;
             }
+            if (!Object.keys(newSettings).length) return;
             updateSettings(newSettings);
         }
     });

@@ -873,3 +873,9 @@ div#local-lyrics-list .draggable-source-item:only-of-type {
         padding: 14px 16px;
     }
 }
+.player-font-setting { align-items: flex-start; }
+.player-font-control { display: flex; flex-direction: column; align-items: stretch; gap: 12px; width: min(100%, 360px); }
+.player-font-control input { width: 100%; box-sizing: border-box; padding: 14px 16px; border: 1px solid var(--md-sys-color-outline); border-radius: 12px; background: var(--md-sys-color-surface-container-high); color: var(--md-sys-color-on-surface); font: inherit; }
+.player-font-preview { padding: 16px; border-radius: 12px; background: var(--md-sys-color-surface-container-high); font-size: 22px; line-height: 1.6; overflow-wrap: anywhere; }
+.player-font-preview small { font-size: 14px; }
+@media (max-width: 768px) { .player-font-setting { flex-direction: column; gap: 16px; } .player-font-control { width: 100%; } }

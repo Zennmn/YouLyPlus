@@ -2,6 +2,29 @@
 
 A web extension to elevate your **YouTube Music, Tidal & Apple Music** Experience with **ultra-performant, word-by-word lyrics**.
 
+## AMLL Apple Music player (this fork)
+
+This fork adds the AMLL full-screen Apple Music player, additional TTML lyric
+sources, custom LLM translation, saved player preferences, browser fullscreen,
+and player font-file imports. The original project is
+[ibratabian17/YouLyPlus](https://github.com/ibratabian17/YouLyPlus).
+
+To build this fork for Chrome / Edge, install Node.js and npm, then run:
+
+```sh
+git clone https://github.com/Zennmn/YouLyPlus.git
+cd YouLyPlus
+npm ci
+npm run package:chrome
+```
+
+Enable developer mode in the browser's extensions page and load
+`dist/youlyplus-amll-chrome` as an unpacked extension. After updates, rebuild
+and reload the extension. See [the player guide](docs/applemusic-amll-testing.md)
+for settings and manual checks, and [third-party notices](THIRD_PARTY_NOTICES.md)
+for AMLL and OpenCC licenses. The sections below describe the original project;
+its store listings and release links refer to the upstream version.
+
 [![License](https://img.shields.io/github/license/ibratabian17/YouLyPlus?style=for-the-badge)](https://github.com/ibratabian17/YouLyPlus/blob/main/LICENSE)
 [![Latest Version](https://img.shields.io/github/v/release/ibratabian17/YouLyPlus?style=for-the-badge)](https://github.com/ibratabian17/YouLyPlus/releases)
 [![GitHub Stars](https://img.shields.io/github/stars/ibratabian17/YouLyPlus?style=for-the-badge&color=yellow)](https://github.com/ibratabian17/YouLyPlus/stargazers)

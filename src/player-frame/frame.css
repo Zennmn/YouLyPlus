@@ -1,0 +1,3 @@
+html, body, #player { width: 100%; height: 100%; margin: 0; overflow: hidden; }
+html { color-scheme: dark; }
+body { background: transparent; }

@@ -16,6 +16,7 @@ let lastRomanizationResponse = null;
 
 let userOffsetMs = 0;
 let saveOffsetTimeout = null;
+let offsetEditVersion = 0;
 let userSelectedProvider = null;
 const availableProviders = new Set();
 const notFoundProviders = new Set();
@@ -27,6 +28,7 @@ const DEBOUNCE_TIME_MS = 200;
 
 // Settings keys that affect which cached responses to invalidate
 const TRANSLATION_SETTING_KEYS = [
+  'customLLMBaseUrl', 'customLLMApiKey', 'customLLMModel',
   'translationProvider',
   'geminiApiKey',
   'geminiModel',
@@ -141,7 +143,12 @@ function convertWordLyricsToLine(lyrics) {
 
   return {
     type: "Line",
-    data: lyrics.data.map(line => ({ ...line, syllabus: [] })),
+    data: lyrics.data.map(line => ({
+      ...line,
+      ...(line.amll && !line.romanizedText && line.syllabus?.some(syl => syl.romanizedText)
+        ? { romanizedText: line.syllabus.map(syl => syl.romanizedText || syl.text).join('') } : {}),
+      syllabus: [],
+    })),
     metadata: lyrics.metadata,
     ignoreSponsorblock: lyrics.ignoreSponsorblock,
     provider: lyrics.provider,
@@ -172,7 +179,8 @@ function shouldFetchLyrics(songKey, forceReload) {
  * For new songs with no prior state, the mode is derived from current settings;
  * otherwise the user's existing selection is preserved.
  */
-function resolveEffectiveMode(isNewSong) {
+function resolveEffectiveMode(isNewSong, currentSong) {
+  if (currentSong?.appleId && ['none', 'translate', 'romanize', 'both'].includes(currentSettings.appleMusicDisplayMode)) return currentSettings.appleMusicDisplayMode;
   if (!isNewSong || lastKnownSongInfo) return currentDisplayMode;
 
   const { translationEnabled, romanizationEnabled } = currentSettings;
@@ -237,6 +245,11 @@ let lastSubtitleVideoId = null;
  * Initiates translation and romanization fetches independently without blocking each other.
  * Each fetch updates the UI as soon as its data is ready.
  */
+function getLyricsTargetLanguage(currentSong) {
+  if (currentSong?.appleId && typeof getAppleMusicLyricsLanguage === 'function') return getAppleMusicLyricsLanguage();
+  return document.documentElement.getAttribute('lang');
+}
+
 function fetchAdditionalData(currentSong, effectiveMode, htmlLang, fetchId) {
   const needsTranslation = effectiveMode === 'translate' || effectiveMode === 'both';
   const needsRomanization = effectiveMode === 'romanize' || effectiveMode === 'both' || currentSettings.largerTextMode === "romanization";
@@ -405,6 +418,9 @@ async function applySponsorBlock(lyrics, currentSong, fetchId) {
 function detectLyricsProviderFromSource(source) {
   if (!source) return '';
   const s = source.toLowerCase();
+  if (s.includes('amll')) return 'amll';
+  if (s.includes('lunabeat')) return 'lunabeat';
+  if (s.includes('amlyrics')) return 'amlyrics';
   if (s.includes('lrcred') || s.includes('lrc-red') || s.includes('lrc.red') || s.includes('bini')) return 'lrcred';
   if (s.includes('unison')) return 'unison';
   if (s.includes('lrclib')) return 'lrclib';
@@ -422,6 +438,7 @@ function isValidLyricsSource(source, settings = currentSettings, lyrics = lastBa
   if (!s || s === 'unknown' || s === 'undefined' || s === 'null' || s === 'none' || s === 'youtube music' || s === 'ytmusic') return false;
 
   const knownSources = [
+    'amll', 'lunabeat', 'amlyrics', 'applemusic',
     'lyricsplus', 'lyrics+', 'apple', 'apple music', 'qq', 'musixmatch', 'musixmatch-word',
     'unison', 'lrclib', 'lrcred', 'lrc.red', 'lrc-red', 'binilyrics', 'subtitles', 'youtube captions', 'youtube subtitles',
     'local', 'local lyrics', 'spotify', 'kpoe', 'customkpoe', 'lyricfind'
@@ -440,13 +457,15 @@ function isValidLyricsSource(source, settings = currentSettings, lyrics = lastBa
 }
 
 function getLyricsProviderContext(songInfo = lastKnownSongInfo, lyrics = lastBaseLyrics, settings = currentSettings, selectedProvider = userSelectedProvider) {
-  const providerOrderStr = settings?.lyricsProviderOrder || 'kpoe,lrcred,unison,lrclib';
+  const isApple = !!(songInfo || lastKnownSongInfo)?.appleId;
+  const appleOrder = [...new Set((settings?.appleMusicLyricsProviderOrder ?? 'amll,lunabeat,amlyrics').split(',').map(x => x.trim()).filter(x => ['amll', 'lunabeat', 'amlyrics'].includes(x))), 'applemusic'].join(',');
+  const providerOrderStr = isApple ? appleOrder : settings?.lyricsProviderOrder || 'kpoe,lrcred,unison,lrclib';
   const providerKeys = providerOrderStr.split(',').map(s => {
     const trimmed = s.trim();
     return trimmed === 'binilyrics' ? 'lrcred' : trimmed;
   }).filter(Boolean);
 
-  if (settings?.customKpoeUrl && !providerKeys.includes('customKpoe')) {
+  if (!isApple && settings?.customKpoeUrl && !providerKeys.includes('customKpoe')) {
     providerKeys.push('customKpoe');
   }
 
@@ -473,6 +492,10 @@ function getLyricsProviderContext(songInfo = lastKnownSongInfo, lyrics = lastBas
     || info?.ytMusicLyrics?.provider
     || 'YouTube Music';
   const providerDisplayNames = {
+    'amll': 'AMLL TTML DB',
+    'lunabeat': 'LunaBeat',
+    'amlyrics': 'AmLyrics',
+    'applemusic': 'Apple Music',
     'lrcred': 'lrc.red',
     'binilyrics': 'lrc.red',
     'kpoe': 'Lyrics+',
@@ -488,6 +511,13 @@ function getLyricsProviderContext(songInfo = lastKnownSongInfo, lyrics = lastBas
 
 function saveLyricsOffset(songInfo, offsetMs) {
   userOffsetMs = offsetMs;
+  offsetEditVersion++;
+  if (songInfo?.appleId) {
+    // Hand the write to the background immediately so a refresh cannot cancel a timer.
+    return pBrowser.runtime.sendMessage({ type: 'SAVE_LYRICS_OFFSET', songInfo, offsetMs }).then(response => {
+      if (response?.success === false) throw new Error(response.error || 'Could not save lyrics offset');
+    }).catch(error => { console.warn('Failed to save offset:', error); LyricsPlusAPI.showToast?.('歌词偏移保存失败，请重试'); });
+  }
   clearTimeout(saveOffsetTimeout);
   saveOffsetTimeout = setTimeout(() => {
     if (typeof pBrowser !== 'undefined' && pBrowser.runtime?.sendMessage) {
@@ -500,14 +530,16 @@ function saveLyricsOffset(songInfo, offsetMs) {
   }, 400);
 }
 
-async function loadLyricsOffset(songInfo) {
+async function loadLyricsOffset(songInfo, fetchId) {
   if (!songInfo || typeof pBrowser === 'undefined' || !pBrowser.runtime?.sendMessage) return 0;
+  const editVersion = offsetEditVersion;
   try {
     const response = await pBrowser.runtime.sendMessage({
       type: 'GET_LYRICS_OFFSET',
       songInfo
     });
-    if (response && typeof response.offsetMs === 'number') {
+    if ((fetchId && currentFetchMediaId !== fetchId) || editVersion !== offsetEditVersion) return userOffsetMs;
+    if (response && Number.isFinite(response.offsetMs)) {
       userOffsetMs = response.offsetMs;
       if (LyricsPlusAPI.setUserOffset) {
         LyricsPlusAPI.setUserOffset(response.offsetMs);
@@ -558,6 +590,10 @@ function setAvailableProviders(providers) {
 
 function getProviderDisplayName(provider, lyrics) {
   const map = {
+    'amll': 'AMLL TTML DB',
+    'lunabeat': 'LunaBeat',
+    'amlyrics': 'AmLyrics',
+    'applemusic': 'Apple Music',
     'lrcred': 'lrc.red',
     'binilyrics': 'lrc.red',
     'kpoe': 'Lyrics+',
@@ -592,8 +628,8 @@ async function switchLyricsProvider(providerId) {
     }
 
     if (response?.success && response.lyrics) {
-      userSelectedProvider = providerId;
-      availableProviders.add(providerId.toLowerCase());
+      userSelectedProvider = providerId === 'auto' ? null : providerId;
+      if (providerId !== 'auto') availableProviders.add(providerId.toLowerCase());
       if (response.availableProviders) {
         setAvailableProviders(response.availableProviders);
       } else if (LyricsPlusAPI.setAvailableProviders) {
@@ -612,7 +648,7 @@ async function switchLyricsProvider(providerId) {
       const needsRomanization = currentDisplayMode === 'romanize' || currentDisplayMode === 'both' || currentSettings.largerTextMode === "romanization";
       if (needsTranslation || needsRomanization) {
         if (LyricsPlusAPI.setTranslationLoading) LyricsPlusAPI.setTranslationLoading(true);
-        const htmlLang = document.documentElement.getAttribute('lang');
+        const htmlLang = getLyricsTargetLanguage(currentSong);
         fetchAdditionalData(currentSong, currentDisplayMode, htmlLang, fetchId);
       }
 
@@ -693,13 +729,17 @@ function renderFinalLyrics(lyrics, currentSong, displayMode) {
 async function updateAndRenderCombinedLyrics(currentSong, fetchId) {
   if (currentFetchMediaId !== fetchId || !lastBaseLyrics) return;
 
-  const hasTranslation = lastTranslationResponse?.success && lastTranslationResponse.translatedLyrics;
-  const hasRomanization = lastRomanizationResponse?.success && lastRomanizationResponse.translatedLyrics;
+  const hasTranslationResponse = lastTranslationResponse?.success && lastTranslationResponse.translatedLyrics?.data?.some(line => line.translatedText || line.translation?.text);
+  const hasSourceTranslation = lastBaseLyrics.data.some(line => line.translatedText || line.translation?.text || (typeof line.translation === 'string' && line.translation));
+  const hasTranslation = hasSourceTranslation || hasTranslationResponse;
+  const hasRomanizationResponse = lastRomanizationResponse?.success && lastRomanizationResponse.translatedLyrics;
+  const hasSourceRomanization = lastBaseLyrics.data.some(line => line.romanizedText || line.syllabus?.some(syl => syl.romanizedText));
+  const hasRomanization = hasRomanizationResponse || hasSourceRomanization;
 
   let lyrics = combineLyricsData(
     lastBaseLyrics,
-    hasTranslation ? lastTranslationResponse.translatedLyrics : null,
-    hasRomanization ? lastRomanizationResponse.translatedLyrics : null
+    hasTranslationResponse ? lastTranslationResponse.translatedLyrics : null,
+    hasRomanizationResponse ? lastRomanizationResponse.translatedLyrics : null
   );
 
   const finalDisplayMode = determineFinalDisplayMode(currentDisplayMode, hasTranslation, hasRomanization);
@@ -725,8 +765,8 @@ async function updateAndRenderCombinedLyrics(currentSong, fetchId) {
 
   const needsTranslation = currentDisplayMode === 'translate' || currentDisplayMode === 'both';
   const needsRomanization = currentDisplayMode === 'romanize' || currentDisplayMode === 'both' || currentSettings.largerTextMode === "romanization";
-  const isTranslationPending = needsTranslation && !lastTranslationResponse;
-  const isRomanizationPending = needsRomanization && !lastRomanizationResponse;
+  const isTranslationPending = needsTranslation && !lastTranslationResponse && !hasSourceTranslation;
+  const isRomanizationPending = needsRomanization && !lastRomanizationResponse && !hasSourceRomanization;
 
   if (LyricsPlusAPI.setTranslationLoading) {
     LyricsPlusAPI.setTranslationLoading(isTranslationPending || isRomanizationPending);
@@ -755,7 +795,7 @@ async function fetchAndDisplayLyrics(currentSong, isNewSong = false, forceReload
   currentFetchMediaId = fetchId;
 
   try {
-    const effectiveMode = resolveEffectiveMode(isNewSong);
+    const effectiveMode = resolveEffectiveMode(isNewSong, currentSong);
     currentDisplayMode = effectiveMode;
 
     const isDifferentSong =
@@ -769,8 +809,9 @@ async function fetchAndDisplayLyrics(currentSong, isNewSong = false, forceReload
       availableProviders.clear();
       notFoundProviders.clear();
       userOffsetMs = 0;
-      loadLyricsOffset(currentSong);
       loadAvailableProviders(currentSong);
+      await loadLyricsOffset(currentSong, fetchId);
+      if (currentFetchMediaId !== fetchId) return;
     }
 
     const baseLyrics = await fetchBaseLyrics(currentSong, isNewSong, forceReload, fetchId);
@@ -789,7 +830,7 @@ async function fetchAndDisplayLyrics(currentSong, isNewSong = false, forceReload
 
     if (isMissingTranslation || isMissingRomanization) {
       if (LyricsPlusAPI.setTranslationLoading) LyricsPlusAPI.setTranslationLoading(true);
-      const htmlLang = document.documentElement.getAttribute('lang');
+      const htmlLang = getLyricsTargetLanguage(currentSong);
       fetchAdditionalData(currentSong, effectiveMode, htmlLang, fetchId);
     }
 
@@ -810,8 +851,16 @@ async function fetchAndDisplayLyrics(currentSong, isNewSong = false, forceReload
    ================================================================= */
 
 function setCurrentDisplayModeAndRender(mode, overrideSongInfo) {
+  if (!['none', 'translate', 'romanize', 'both'].includes(mode)) return;
   currentDisplayMode = mode;
   const song = overrideSongInfo || lastKnownSongInfo;
+  if (song?.appleId) {
+    currentSettings = { ...currentSettings, appleMusicDisplayMode: mode };
+    storageLocalSet({ appleMusicDisplayMode: mode }).catch(error => {
+      console.warn('Failed to save display mode:', error);
+      LyricsPlusAPI.showToast?.('歌词显示模式保存失败，请重试');
+    });
+  }
 
   if (song) {
     fetchAndDisplayLyrics(song, false, false);
@@ -830,6 +879,8 @@ function setCurrentDisplayModeAndRender(mode, overrideSongInfo) {
 window.addEventListener('YOUPLUS_SETTINGS_UPDATED', ({ detail }) => {
   const { changedKeys } = detail;
   if (!changedKeys) return;
+  // The player applies these immediately; a storage echo must not restart an older song.
+  if (changedKeys.every(key => ['appleMusicDisplayMode', 'appleMusicAMLLBackground'].includes(key))) return;
 
   if (changedKeys.some(k => TRANSLATION_SETTING_KEYS.includes(k))) lastTranslationResponse = null;
   if (changedKeys.some(k => ROMANIZATION_SETTING_KEYS.includes(k))) lastRomanizationResponse = null;
@@ -837,6 +888,12 @@ window.addEventListener('YOUPLUS_SETTINGS_UPDATED', ({ detail }) => {
   lastProcessedDisplayMode = 'none';
 
   if (!lastKnownSongInfo) return;
+
+  if (changedKeys.includes('appleMusicLyricsProviderOrder') && lastKnownSongInfo.appleId) {
+    userSelectedProvider = null;
+    fetchAndDisplayLyrics(lastKnownSongInfo, false, true);
+    return;
+  }
 
   const nonRenderingKeys = [...TRANSLATION_SETTING_KEYS, ...ROMANIZATION_SETTING_KEYS, ...RESTART_REQUIRED_KEYS];
   const shouldRender = changedKeys.some(k => !nonRenderingKeys.includes(k));

@@ -1222,5 +1222,62 @@
         "content": "$2"
       }
     }
-  }
+  },
+  "labelSourcePlatform": {
+    "message": "音樂平台"
+  },
+  "helperAppleProviderOrder": {
+    "message": "按下列順序取得歌詞，可拖動排序或移除來源。Apple Music 始終作為最後的備援來源。"
+  },
+  "optionCustomLLM": {
+    "message": "第三方 LLM（相容 Chat Completions）"
+  },
+  "categoryCustomLLM": {
+    "message": "第三方 LLM"
+  },
+  "labelCustomLLMUrl": {
+    "message": "API 位址"
+  },
+  "descCustomLLMUrl": {
+    "message": "填寫相容 Chat Completions 的服務位址，可填基礎位址或完整介面位址。"
+  },
+  "descCustomLLMKey": {
+    "message": "金鑰儲存在本機，僅傳送至你設定的 API 位址；無需金鑰的本機服務可留空。"
+  },
+  "labelCustomLLMModel": {
+    "message": "模型名稱"
+  },
+  "descCustomLLMModel": {
+    "message": "填寫服務商提供的模型 ID。"
+  },
+  "buttonTestCustomLLM": {
+    "message": "授權此位址並測試連線"
+  },
+  "msgCustomLLMModelRequired": {
+    "message": "請先填寫模型名稱。"
+  },
+  "msgCustomLLMExtensionRequired": {
+    "message": "請在已安裝擴充功能的設定頁中授權 API 位址。"
+  },
+  "msgCustomLLMPermissionDenied": {
+    "message": "尚未授權存取該 API 位址。"
+  },
+  "msgCustomLLMTesting": {
+    "message": "正在測試連線…"
+  },
+  "msgCustomLLMTestSuccess": {
+    "message": "連線成功："
+  },
+  "msgCustomLLMTestFailed": {
+    "message": "連線失敗："
+  },
+  "labelPlayerFont": { "message": "播放器字體檔案" },
+  "descPlayerFont": { "message": "匯入 TTF、OTF、WOFF 或 WOFF2 字體檔案，統一替換播放器全部文字。字體儲存在擴充功能本機，無需安裝到系統，單檔最大 64 MB。" },
+  "buttonDefaultPlayerFont": { "message": "恢復預設字體" },
+  "buttonImportPlayerFont": { "message": "匯入字體檔案" },
+  "msgPlayerFontDefault": { "message": "目前使用預設字體" },
+  "msgPlayerFontImporting": { "message": "正在匯入字體…" },
+  "msgPlayerFontImportFailed": { "message": "字體匯入失敗，請選擇有效的字體檔案；原字體已保留。" },
+  "msgPlayerFontSize": { "message": "請選擇非空且不超過 64 MB 的字體檔案。" },
+  "msgPlayerFontLoadFailed": { "message": "字體載入失敗，請重新匯入字體檔案。" }
 }

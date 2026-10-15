@@ -11,6 +11,7 @@ import { SponsorBlockService } from '../services/sponsorblockService.js';
 import { YouTubeService } from '../services/youtubeService.js';
 import { DataParser } from '../utils/dataParser.js';
 import { dictionaryService } from '../services/romanization/dictionaryService.js';
+import { browserFullscreen } from '../services/browserFullscreen.js';
 
 export class MessageHandler {
   static handle(message, sender, sendResponse) {
@@ -19,6 +20,7 @@ export class MessageHandler {
     }
 
     const handlers = {
+      BROWSER_FULLSCREEN: async () => sendResponse({ success: true, ...await browserFullscreen(message, sender) }),
       [MESSAGE_TYPES.FETCH_LYRICS]: () => this.fetchLyrics(message, sendResponse),
       [MESSAGE_TYPES.RESET_CACHE]: () => this.resetCache(message, sendResponse),
       [MESSAGE_TYPES.GET_CACHED_SIZE]: () => this.getCacheSize(sendResponse),

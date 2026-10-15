@@ -1,8 +1,92 @@
 import { loadSettings, saveSettings, updateSettings, getSettings, updateCacheSize, clearCache, setupSettingsMessageListener, uploadLocalLyrics, getLocalLyricsList, deleteLocalLyrics, getDictionaryStatus, downloadDictionary, deleteDictionary } from '../lib/settingsManager.js';
 import { initRipple, createSvgIcon, swapSvgIconPath, debounce, bindAutoSave } from '../lib/uiUtils.js';
 import { parseSyncedLyrics, parseAppleTTML, convertToStandardJson, v1Tov2 } from '../lib/parser.js';
+import { APPLE_LYRICS_ORDER, APPLE_LYRICS_NAMES, normalizeAppleLyricsOrder } from '../lib/appleLyricsSources.js';
+import { CustomLLMProvider, customLLMEndpoint } from '../background/services/translation/providers/CustomLLMProvider.js';
+import { playerFontFamily } from '../lib/playerFont.js';
+import { createImportedFontLoader, importPlayerFont, deleteImportedFont } from '../lib/importedPlayerFont.js';
 
 let currentSettings = getSettings();
+const fontInput = document.getElementById('player-font-file');
+const importFontButton = document.getElementById('import-player-font');
+const resetFontButton = document.getElementById('reset-player-font');
+const fontStatus = document.getElementById('player-font-status');
+const fontPreviewLoader = createImportedFontLoader(family => {
+    document.getElementById('player-font-preview').style.fontFamily = family || 'inherit';
+}, () => { fontStatus.textContent = msg('msgPlayerFontLoadFailed'); });
+function previewPlayerFont(value) {
+    const metadata = getSettings().appleMusicPlayerFontFile;
+    fontStatus.textContent = metadata?.name || msg('msgPlayerFontDefault');
+    fontPreviewLoader.update(metadata, playerFontFamily(value));
+}
+importFontButton.addEventListener('click', () => fontInput.click());
+fontInput.addEventListener('change', async () => {
+    const file = fontInput.files?.[0];
+    if (!file) return;
+    importFontButton.disabled = resetFontButton.disabled = true;
+    fontStatus.textContent = msg('msgPlayerFontImporting');
+    const previous = { appleMusicPlayerFont: getSettings().appleMusicPlayerFont, appleMusicPlayerFontFile: getSettings().appleMusicPlayerFontFile };
+    let imported;
+    try {
+        imported = await importPlayerFont(file);
+        currentSettings = updateSettings({ appleMusicPlayerFont: '', appleMusicPlayerFontFile: imported });
+        await saveSettings();
+        previewPlayerFont('');
+        if (previous.appleMusicPlayerFontFile?.id) deleteImportedFont(previous.appleMusicPlayerFontFile.id).catch(() => {});
+    } catch (error) {
+        if (imported) { currentSettings = updateSettings(previous); deleteImportedFont(imported.id).catch(() => {}); }
+        fontStatus.textContent = msg(error?.message === 'FONT_SIZE' ? 'msgPlayerFontSize' : 'msgPlayerFontImportFailed');
+    } finally { importFontButton.disabled = resetFontButton.disabled = false; fontInput.value = ''; }
+});
+resetFontButton.addEventListener('click', async () => {
+    const previous = { appleMusicPlayerFont: getSettings().appleMusicPlayerFont, appleMusicPlayerFontFile: getSettings().appleMusicPlayerFontFile };
+    try {
+        currentSettings = updateSettings({ appleMusicPlayerFont: '', appleMusicPlayerFontFile: null });
+        await saveSettings();
+        previewPlayerFont('');
+        if (previous.appleMusicPlayerFontFile?.id) deleteImportedFont(previous.appleMusicPlayerFontFile.id).catch(() => {});
+    } catch { currentSettings = updateSettings(previous); fontStatus.textContent = msg('msgPlayerFontImportFailed'); }
+});
+window.addEventListener('pagehide', () => fontPreviewLoader.dispose(), { once: true });
+const saveCustomLLM = debounce(() => saveSettings(), 500);
+for (const [id, key] of [['custom-llm-url', 'customLLMBaseUrl'], ['custom-llm-key', 'customLLMApiKey'], ['custom-llm-model', 'customLLMModel']]) {
+    document.getElementById(id).addEventListener('input', event => {
+        // Stage values immediately so an adjacent field's save cannot restore stale input.
+        currentSettings = updateSettings({ [key]: event.target.value });
+        saveCustomLLM();
+    });
+}
+
+document.getElementById('source-platform').addEventListener('change', () => {
+    populateDraggableProviders();
+    toggleKpoeSourcesVisibility();
+    toggleCustomKpoeUrlVisibility();
+});
+
+document.getElementById('test-custom-llm').addEventListener('click', async () => {
+    const button = document.getElementById('test-custom-llm');
+    const status = document.getElementById('custom-llm-status');
+    try {
+        const values = {
+            customLLMBaseUrl: document.getElementById('custom-llm-url').value.trim(),
+            customLLMApiKey: document.getElementById('custom-llm-key').value.trim(),
+            customLLMModel: document.getElementById('custom-llm-model').value.trim(),
+        };
+        const endpoint = customLLMEndpoint(values.customLLMBaseUrl);
+        if (!values.customLLMModel) throw new Error(msg('msgCustomLLMModelRequired'));
+        const api = typeof browser !== 'undefined' ? browser : typeof chrome !== 'undefined' ? chrome : null;
+        if (!api?.permissions) throw new Error(msg('msgCustomLLMExtensionRequired'));
+        const granted = await api.permissions.request({ origins: [`${endpoint.origin}/*`] });
+        if (!granted) throw new Error(msg('msgCustomLLMPermissionDenied'));
+        button.disabled = true;
+        status.textContent = msg('msgCustomLLMTesting');
+        currentSettings = updateSettings(values);
+        await saveSettings();
+        const result = await new CustomLLMProvider(values).translate(['Hello, world.'], 'zh-CN');
+        status.textContent = `${msg('msgCustomLLMTestSuccess')} ${result[0]}`;
+    } catch (error) { status.textContent = `${msg('msgCustomLLMTestFailed')} ${error.message}`; }
+    finally { button.disabled = false; }
+});
 
 // SVG icon paths (Material Icons)
 const SVG_ICONS = {
@@ -138,7 +222,6 @@ function setupAutoSaveListeners() {
 
 function updateUI(settings) {
     currentSettings = settings;
-    console.log("Updating UI with settings:", currentSettings);
 
     // Helper to safely set element value
     const setVal = (id, val) => {
@@ -171,6 +254,9 @@ function updateUI(settings) {
     updateCustomSelectDisplay('gemini-model');
     setVal('openrouter-api-key', currentSettings.openRouterApiKey);
     setVal('openrouter-model', currentSettings.openRouterModel);
+    setVal('custom-llm-url', currentSettings.customLLMBaseUrl);
+    setVal('custom-llm-key', currentSettings.customLLMApiKey);
+    setVal('custom-llm-model', currentSettings.customLLMModel);
     setVal('deepl-api-key', currentSettings.deeplApiKey);
     document.getElementById('deepl-api-key').type = 'password';
 
@@ -189,6 +275,7 @@ function updateUI(settings) {
     setVal('custom-gemini-romanize-prompt', currentSettings.customGeminiRomanizePrompt);
 
     // Appearance
+    previewPlayerFont(currentSettings.appleMusicPlayerFont);
     setVal('larger-text-mode', currentSettings.largerTextMode);
     updateCustomSelectDisplay('larger-text-mode');
     setCheck('hide-phoneticdup', currentSettings.hidePhoneticDup);
@@ -291,6 +378,7 @@ setupSettingsMessageListener(updateUI);
 let draggedItem = null;
 
 function getSourceDisplayName(sourceName) {
+    if (APPLE_LYRICS_NAMES[sourceName]) return APPLE_LYRICS_NAMES[sourceName];
     const sourceKeys = {
         'kpoe': 'sourceNameLyricsPlusProvider',
         'customKpoe': 'sourceNameCustomKpoe',
@@ -341,6 +429,10 @@ function createDraggableProviderItem(providerName) {
 
     removeBtn.appendChild(deleteIcon);
     removeBtn.onclick = () => removeProvider(providerName);
+    if (isAppleSourceSettings() && providerName === 'applemusic') {
+        removeBtn.disabled = true;
+        li.draggable = false;
+    }
 
     li.appendChild(dragHandle);
     li.appendChild(nameSpan);
@@ -349,17 +441,24 @@ function createDraggableProviderItem(providerName) {
     return li;
 }
 
+function isAppleSourceSettings() { return document.getElementById('source-platform')?.value !== 'other'; }
+function providerOrderKey() { return isAppleSourceSettings() ? 'appleMusicLyricsProviderOrder' : 'lyricsProviderOrder'; }
+function currentProviderOrder() {
+    return isAppleSourceSettings() ? normalizeAppleLyricsOrder(currentSettings.appleMusicLyricsProviderOrder).join(',')
+        : currentSettings.lyricsProviderOrder || 'kpoe,lrcred,unison,lrclib';
+}
+
 function populateDraggableProviders() {
     const draggableContainer = document.getElementById('provider-order-draggable');
     const availableProvidersDropdown = document.getElementById('available-providers-dropdown');
-    const allowedProviders = ['kpoe', 'lrcred', 'customKpoe', 'unison', 'lrclib'];
+    const allowedProviders = isAppleSourceSettings() ? APPLE_LYRICS_ORDER : ['kpoe', 'lrcred', 'customKpoe', 'unison', 'lrclib'];
 
     if (!draggableContainer || !availableProvidersDropdown) return;
 
     draggableContainer.innerHTML = '';
     availableProvidersDropdown.innerHTML = '<option value="" disabled selected></option>';
 
-    const currentActiveProviders = (currentSettings.lyricsProviderOrder || 'kpoe,lrcred,unison,lrclib')
+    const currentActiveProviders = currentProviderOrder()
         .split(',')
         .map(s => {
             const trimmed = s?.trim();
@@ -373,6 +472,9 @@ function populateDraggableProviders() {
     });
 
     updateFastPathIndicators();
+    document.querySelector('#setting-provider-order .setting-description').textContent = msg(isAppleSourceSettings() ? 'helperAppleProviderOrder' : 'helperProviderOrder');
+    document.getElementById('custom-kpoe-category').hidden = isAppleSourceSettings();
+    document.getElementById('legacy-unison-title').closest('.settings-category').hidden = isAppleSourceSettings();
 
     const providersToAdd = allowedProviders.filter(provider => !currentActiveProviders.includes(provider));
     const addProviderButton = document.getElementById('add-provider-button');
@@ -413,17 +515,17 @@ function saveProviderOrder() {
     const draggableContainer = document.getElementById('provider-order-draggable');
     if (!draggableContainer) return;
 
-    const orderedProviders = Array.from(draggableContainer.children)
+    let orderedProviders = Array.from(draggableContainer.children)
         .map(item => item.dataset.provider);
-
-    updateSettings({
-        lyricsProviderOrder: orderedProviders.join(',')
-    });
+    if (isAppleSourceSettings()) orderedProviders = normalizeAppleLyricsOrder(orderedProviders);
+    currentSettings[providerOrderKey()] = orderedProviders.join(',');
+    updateSettings({ [providerOrderKey()]: orderedProviders.join(',') });
     saveSettings();
     updateFastPathIndicators();
     toggleKpoeSourcesVisibility();
     toggleCustomKpoeUrlVisibility();
     showReloadNotification('lyricsProviderOrder');
+    if (isAppleSourceSettings()) populateDraggableProviders();
 }
 
 function addProvider() {
@@ -433,15 +535,15 @@ function addProvider() {
         return;
     }
 
-    const providers = (currentSettings.lyricsProviderOrder || 'kpoe,lrcred,unison,lrclib').split(',').filter(s => s?.trim());
+    const providers = currentProviderOrder().split(',').filter(s => s?.trim());
     if (providers.includes(providerName)) {
         showStatusMessage('add-provider-status', msg('msgSourceExists', getSourceDisplayName(providerName)), true);
         return;
     }
 
     providers.push(providerName);
-    currentSettings.lyricsProviderOrder = providers.join(',');
-    updateSettings({ lyricsProviderOrder: currentSettings.lyricsProviderOrder });
+    currentSettings[providerOrderKey()] = (isAppleSourceSettings() ? normalizeAppleLyricsOrder(providers) : providers).join(',');
+    updateSettings({ [providerOrderKey()]: currentSettings[providerOrderKey()] });
     saveSettings();
     showReloadNotification('lyricsProviderOrder');
 
@@ -450,16 +552,16 @@ function addProvider() {
 }
 
 function removeProvider(providerName) {
-    const providers = (currentSettings.lyricsProviderOrder || 'kpoe,lrcred,unison,lrclib').split(',').filter(s => s?.trim());
+    if (isAppleSourceSettings() && providerName === 'applemusic') return;
+    const providers = currentProviderOrder().split(',').filter(s => s?.trim());
 
     if (providers.length <= 1) {
         showStatusMessage('add-provider-status', "Cannot remove last provider", true);
         return;
     }
 
-    currentSettings.lyricsProviderOrder = providers.filter(s => s !== providerName).join(',');
-
-    updateSettings({ lyricsProviderOrder: currentSettings.lyricsProviderOrder });
+    currentSettings[providerOrderKey()] = providers.filter(s => s !== providerName).join(',');
+    updateSettings({ [providerOrderKey()]: currentSettings[providerOrderKey()] });
     saveSettings();
     showReloadNotification('lyricsProviderOrder');
 
@@ -850,7 +952,7 @@ function toggleElementVisibility(elementId, isVisible, displayType = null) {
 function toggleKpoeSourcesVisibility() {
     const providerOrderStr = currentSettings.lyricsProviderOrder || 'kpoe,lrcred,unison,lrclib';
     const providers = providerOrderStr.split(',').map(s => s.trim());
-    const isVisible = providers.includes('kpoe') || providers.includes('customKpoe');
+    const isVisible = !isAppleSourceSettings() && (providers.includes('kpoe') || providers.includes('customKpoe'));
     const sourceOrderContainer = document.getElementById('setting-source-order');
     if (sourceOrderContainer) {
         sourceOrderContainer.style.display = isVisible ? 'block' : 'none';
@@ -885,6 +987,7 @@ function toggleGeminiSettingsVisibility() {
 }
 
 function toggleOpenRouterSettingsVisibility() {
+    toggleElementVisibility('custom-llm-settings-category', document.getElementById('translation-provider').value === 'customllm');
     const isTranslationOpenRouter = document.getElementById('translation-provider').value === 'openrouter';
     const isRomanizationOpenRouter = document.getElementById('romanization-provider').value === 'openrouter';
     toggleElementVisibility('openrouter-settings-category', isTranslationOpenRouter || isRomanizationOpenRouter);

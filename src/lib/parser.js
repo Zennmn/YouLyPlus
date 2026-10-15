@@ -376,7 +376,7 @@ function parseAppleTTML(ttml, offset = 0, separate = false) {
   if (!root) return null;
 
   const rawTiming = getAttr(root, 'timing', 'itunes:timing');
-  const timingMode = rawTiming || 'Word';
+  const timingMode = ({ word: 'Word', line: 'Line', none: 'None' })[rawTiming?.toLowerCase()] || rawTiming || 'Word';
 
   const bodyEl = getFirstElementByLocalName(doc, 'body');
   const metadata = {
@@ -510,6 +510,7 @@ function parseAppleTTML(ttml, offset = 0, separate = false) {
   }
 
   const lyrics = [];
+  const seenParagraphs = new Set();
   const divs = getElementsByLocalName(doc, 'div');
   const divContainers = divs.length > 0 ? divs : (bodyEl ? [bodyEl] : [doc.documentElement]);
 
@@ -538,7 +539,20 @@ function parseAppleTTML(ttml, offset = 0, separate = false) {
     });
 
     for (let j = 0; j < ps.length; j++) {
-      const p = ps[j];
+      if (seenParagraphs.has(ps[j])) continue;
+      seenParagraphs.add(ps[j]);
+      const p = ps[j].cloneNode(true);
+      // AMLL stores translation/romanization inside the paragraph. Remove these
+      // spans before extracting sung words so they never become part of the main lyric.
+      const inline = {};
+      for (const span of getElementsByLocalName(p, 'span')) {
+        const role = getAttr(span, 'ttm:role', 'role');
+        const field = role === 'x-translation' ? 'translation' : role === 'x-roman' ? 'transliteration' : null;
+        if (!field) continue;
+        const lang = getAttr(span, 'xml:lang', 'lang') || '';
+        if (!inline[field] || /^zh/i.test(lang)) inline[field] = { text: span.textContent.trim(), lang };
+        span.parentNode?.removeChild(span);
+      }
       const key = getAttr(p, 'key', 'itunes:key') || '';
       const singerId = getAttr(p, 'agent', 'ttm:agent', 'singer') || '';
       const singer = singerId.replace('voice', 'v');
@@ -625,6 +639,8 @@ function parseAppleTTML(ttml, offset = 0, separate = false) {
 
       // Add if valid
       if (currentLine.text || currentLine.syllabus.length > 0) {
+        if (inline.translation) currentLine.translation = inline.translation;
+        if (inline.transliteration) currentLine.transliteration = inline.transliteration;
         if (key && translationMap[key]) currentLine.translation = translationMap[key];
         if (key && transliterationMap[key]) currentLine.transliteration = transliterationMap[key];
         lyrics.push(currentLine);
