@@ -40,6 +40,8 @@ Apple Music 原生源的逐字和普通歌词均参考 AMDL 的获取方法：�
 
 原生歌词语言优先使用设置中的翻译目标，其次使用浏览器语言，中文补全为 `zh-Hans-CN` / `zh-Hant-TW` 等标签，不再随 Apple Music 网页语言变化。修改翻译目标后刷新网页，使原生请求重新使用新语言。开启“翻译”或“双语/音译”显示模式时，TTML 自带译文可立即显示，翻译服务失败不会隐藏已有译文；关闭翻译显示仍会隐藏译文。
 
+播放器“…”菜单中的“下载 AM 原生 TTML”可保存当前歌曲的 Apple Music 原始 `.ttml` 文件，文件名包含歌手、歌名和 Apple Music ID。即使当前显示第三方源也可下载，不会切换歌词源。优先复用已获取的原生文件，没有时通过现有登录会话重新获取，保留 AM 返回的逐字/逐行时间及自带翻译，不加入机器翻译或显示阶段的繁简转换。获取期间切歌会取消本次下载；未获取到原生 TTML 时显示提示，不用第三方歌词代替。
+
 源说明：[AMLL TTML DB](https://github.com/amll-dev/amll-ttml-db)、[LunaBeat 接入文档](https://github.com/2755337087/ttml-hub/blob/main/docs/integration.md)、[AmLyrics](https://github.com/Zennmn/am-lyrics)。
 
 Apple Music 的机器/AI翻译仅在使用原生歌词源、完全没有自带翻译轴且歌曲判定为外文时允许；只要存在翻译轴，无论语言是否匹配、是否翻译完整，都只显示自带译文，不补译，也不读取旧机翻缓存。AMLL、LunaBeat、AmLyrics只显示自带译文，不调用机翻服务，也不读取旧机翻缓存。翻译到中文时逐句跳过中文原句和无文字行，无待翻译句子时不请求服务。语言识别和音译功能沿用现有逻辑；歌词源顺序仍为AMLL → LunaBeat → AmLyrics → Apple Music原生（第三方顺序可按设置调整）。

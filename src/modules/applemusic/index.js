@@ -66,7 +66,7 @@ injectPlatformCSS = function () {
 function sendPlayerCommand(command, value) {
     return new Promise((resolve, reject) => {
         const requestId = `lyplus-${Date.now()}-${++commandSequence}`;
-        const timer = setTimeout(() => { pendingCommands.delete(requestId); reject(new Error('Apple Music did not respond. Try the native player.')); }, 6000);
+        const timer = setTimeout(() => { pendingCommands.delete(requestId); reject(new Error('Apple Music did not respond. Try the native player.')); }, command === 'nativeTTML' ? 16000 : 6000);
         pendingCommands.set(requestId, { resolve, reject, timer });
         window.postMessage({ type: 'LYPLUS_PLAYER_COMMAND', command, value, requestId }, window.location.origin);
     });

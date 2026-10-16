@@ -10,6 +10,7 @@
   let poll;
   let lastState = '';
   let pendingLyrics;
+  let nativeLyricsRequest;
   let accountStorefront;
   let pendingStorefront;
   const subscriptions = [];
@@ -97,7 +98,17 @@
     return entry.promise;
   }
 
-  async function fetchNativeLyrics(id) {
+  function fetchNativeLyrics(id) {
+    if (nativeLyricsRequest?.id === id && !pendingLyrics?.signal.aborted) return nativeLyricsRequest.promise;
+    const entry = { id };
+    entry.promise = requestNativeLyrics(id).finally(() => {
+      if (nativeLyricsRequest === entry) nativeLyricsRequest = null;
+    });
+    nativeLyricsRequest = entry;
+    return entry.promise;
+  }
+
+  async function requestNativeLyrics(id) {
     if (!id || !music) return null;
     const developerToken = music.developerToken || music.configuration?.app?.developerToken;
     if (!developerToken) return null;
@@ -171,6 +182,18 @@
   async function execute(command, value) {
     if (!music) throw new Error('Apple Music is not ready yet');
     if (command === 'snapshot') { syncSong(true); publishState(true); return; }
+    if (command === 'nativeTTML') {
+      syncSong();
+      if (!songInfo?.appleId || songInfo.isVideo) throw new Error('nativeTTMLUnavailable');
+      if (value !== songInfo.appleId) throw new Error('nativeTTMLSongChanged');
+      const current = songInfo;
+      const request = lyricRequest;
+      const ttml = current.appleMusicTTML || await fetchNativeLyrics(current.appleId);
+      if (request !== lyricRequest || songInfo?.appleId !== current.appleId) throw new Error('nativeTTMLSongChanged');
+      if (typeof ttml !== 'string' || !/<(?:\w+:)?tt[\s>]/.test(ttml)) throw new Error('nativeTTMLUnavailable');
+      songInfo = { ...songInfo, appleMusicTTML: ttml };
+      return { ttml, appleId: current.appleId, title: current.title, artist: current.artist };
+    }
     if (command === 'queue') {
       const queue = read('queue', null);
       return {

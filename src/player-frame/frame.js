@@ -18,7 +18,7 @@
         if (disposed) return Promise.reject(new Error('Player closed'));
         return new Promise((resolve, reject) => {
             const id = ++sequence;
-            const timer = setTimeout(() => { pending.delete(id); reject(new Error('Apple Music did not respond')); }, 15000);
+            const timer = setTimeout(() => { pending.delete(id); reject(new Error('Apple Music did not respond')); }, name === 'command' && args[0] === 'nativeTTML' ? 20000 : 15000);
             pending.set(id, { resolve, reject, timer });
             send({ kind: 'action', id, action: name, args });
         });

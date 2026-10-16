@@ -35,6 +35,7 @@ export function createPlayer(host, options = {}) {
   };
   const zh = { close: '关闭', settings: '歌词设置', lyrics: '歌词', nativePlayer: '原生播放器', connecting: '正在连接 Apple Music…', loadingLyrics: '正在加载歌词…', songNotFound: '暂无歌词', translation: '翻译', original: '原文', romanization: '音译', both: '翻译与音译', lyricsSource: '歌词来源', automatic: '自动', lyricsOffset: '歌词偏移（毫秒）', animatedBackground: '动态背景', reset: '重置偏移', reloadLyrics: '重新加载歌词', translating: '正在加载翻译…' };
   Object.assign(zh, { diagnose: '卡顿诊断（20 秒）', diagnosing: '正在采集卡顿数据，请保持播放…', exportDiagnostics: '导出诊断报告', diagnosticReady: '采集完成，可导出报告', diagnosticStopped: '采集已提前结束，可导出部分报告', diagnosticNeedsPlayback: '请先播放歌曲并等待歌词显示', diagnosticRate: '页面回调频率', diagnosticSlow: '长帧（>50ms）' });
+  Object.assign(zh, { downloadNativeTTML: '下载 AM 原生 TTML', downloadingNativeTTML: '正在获取原生 TTML…', nativeTTMLUnavailable: '未获取到这首歌的 AM 原生 TTML，请稍后重试', nativeTTMLSongChanged: '歌曲已切换，请重新下载', nativeTTMLFailed: '原生 TTML 下载失败，请重试' });
   const label = (key, fallback) => {
     const translated = options.translate?.(key);
     if (translated && translated !== key) return translated;
@@ -75,16 +76,37 @@ export function createPlayer(host, options = {}) {
   function exportDiagnostics() {
     if (!diagnosticReport) return;
     try {
-      clearTimeout(downloadTimer);
-      if (downloadURL) URL.revokeObjectURL(downloadURL);
-      downloadURL = URL.createObjectURL(new Blob([JSON.stringify(diagnosticReport, null, 2)], { type: 'application/json' }));
-      const link = document.createElement('a');
-      link.href = downloadURL;
-      link.download = `youlyplus-performance-${Date.now()}.json`;
-      host.appendChild(link);
-      try { link.click(); } finally { link.remove(); }
-      downloadTimer = setTimeout(() => { URL.revokeObjectURL(downloadURL); downloadURL = null; }, 60000);
+      downloadFile(new Blob([JSON.stringify(diagnosticReport, null, 2)], { type: 'application/json' }), `youlyplus-performance-${Date.now()}.json`);
     } catch (error) { toast(error?.message || 'Unable to export diagnostics'); }
+  }
+  function downloadFile(blob, filename) {
+    clearTimeout(downloadTimer);
+    if (downloadURL) URL.revokeObjectURL(downloadURL);
+    downloadURL = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = downloadURL;
+    link.download = filename;
+    host.appendChild(link);
+    try { link.click(); } finally { link.remove(); }
+    downloadTimer = setTimeout(() => { URL.revokeObjectURL(downloadURL); downloadURL = null; }, 60000);
+  }
+  async function downloadNativeTTML() {
+    if (!song?.appleId || store.get(viewAtom).downloadingNativeTTML) return;
+    const id = song.appleId;
+    patchView({ downloadingNativeTTML: true });
+    try {
+      const result = await options.sendCommand?.('nativeTTML', id);
+      if (destroyed) return;
+      if (song?.appleId !== id || result?.appleId !== id) throw new Error('nativeTTMLSongChanged');
+      if (typeof result.ttml !== 'string' || !/<(?:\w+:)?tt[\s>]/.test(result.ttml)) throw new Error('nativeTTMLUnavailable');
+      const name = [result.artist, result.title].filter(Boolean).join(' - ').replace(/[<>:"/\\|?*\u0000-\u001f]/g, '_').trim().slice(0, 160) || 'Apple Music';
+      downloadFile(new Blob([result.ttml], { type: 'application/ttml+xml;charset=utf-8' }), `${name} [${id.replace(/[^a-z0-9.-]/gi, '_')}].ttml`);
+    } catch (error) {
+      if (!destroyed) {
+        const key = ['nativeTTMLUnavailable', 'nativeTTMLSongChanged'].includes(error?.message) ? error.message : 'nativeTTMLFailed';
+        toast(label(key, key === 'nativeTTMLSongChanged' ? 'The song changed; download again' : key === 'nativeTTMLUnavailable' ? 'No native TTML was retrieved for this song; try again later' : 'Unable to download native TTML; try again'));
+      }
+    } finally { if (!destroyed) patchView({ downloadingNativeTTML: false }); }
   }
   const setCallback = (key, onEmit) => store.set(callbacks[key], { onEmit });
   setCallback('onPlayOrResumeAtom', () => command('playPause'));
@@ -262,6 +284,7 @@ export function createPlayer(host, options = {}) {
         <label>{label('lyricsOffset', 'Lyrics offset (ms)')}<input type="number" min="-10000" max="10000" step="10" value={view.offset} onChange={event => setOffset(event.target.value)} /></label>
         <label>{label('animatedBackground', 'Animated background')}<input type="checkbox" checked={view.animated !== false} onChange={event => changeSettings({ appleMusicAMLLBackground: event.target.checked })} /></label>
         <div className="lyplus-amll-settings-actions"><button type="button" onClick={() => setOffset(0)}>{label('reset', 'Reset offset')}</button><button type="button" onClick={() => (lastArgs?.[4] || options.reloadLyrics)?.(song, false, true)}>{label('reloadLyrics', 'Reload lyrics')}</button></div>
+        <button type="button" disabled={!song?.appleId || !!view.downloadingNativeTTML} onClick={downloadNativeTTML}>{view.downloadingNativeTTML ? label('downloadingNativeTTML', 'Fetching native TTML…') : label('downloadNativeTTML', 'Download AM native TTML')}</button>
         <button type="button" onClick={() => options.onFallback?.()}>{label('nativePlayer', 'Native player')}</button>
         <button type="button" disabled={view.diagnosing} onClick={startDiagnostics}>{label('diagnose', 'Diagnose stutter (20 seconds)')}</button>
         {view.diagnosticSummary && <div className="lyplus-amll-diagnostic-result">
