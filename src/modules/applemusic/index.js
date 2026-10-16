@@ -20,7 +20,7 @@ const TITLE_FIX_MISS_TTL = 30 * 60 * 1000;
 const TITLE_FIX_MEMORY_LIMIT = 80;
 const TITLE_FIX_BUCKET_LIMIT = 150;
 // Bump when the original-region pick rule changes so cached picks are dropped.
-const TITLE_FIX_RULE = 4;
+const TITLE_FIX_RULE = 6;
 const titleFixMemory = new Map();
 let titleFix = null;
 let titleFixRequest = 0;

@@ -153,23 +153,48 @@
   const METADATA_TTL = 6 * 60 * 60 * 1000;
   const METADATA_MISS_TTL = 30 * 60 * 1000;
 
-  const hasKanaText = value => /[\u3041-\u30ff\uff66-\uff9d]/.test(value || '');
   const hasCjkText = value => /[\u3041-\u30ff\u3400-\u4dbf\u4e00-\u9fff\uac00-\ud7af\uff66-\uff9d]/.test(value || '');
+  const hasHangulText = value => /[\uac00-\ud7af]/.test(value || '');
+  const JAPANESE_METADATA = /j-pop|j-rock|japanese|anime|日本流行|日语流行|日語流行|动画|動畫/;
+  const KOREAN_METADATA = /k-pop|korean|韩国流行|韓國流行|韩语流行|韓語流行/;
+  const CHINESE_METADATA = /mandopop|cantopop|mandarin|chinese|hong kong|taiwan|国语流行|國語流行|华语流行|華語流行|中文流行|粤语流行|粵語流行/;
 
-  // Original-region pick over the probed storefronts: kana marks a Japanese
-  // title, CJK marks a Chinese one. Artist names decide nothing, because Apple
-  // localizes those too (the JP storefront lists The Score as ザ・スコア) and
-  // that must not move a song to a region.
-  function pickOriginalMetadata(results) {
-    const jp = results.get('jp');
-    if (jp && hasKanaText(jp.name)) return jp;
+  // The original region comes from the recording itself, the way AM++ resolves it:
+  // the ISRC country prefix names the release country (JP, KR, CN/HK/MO/TW) and the
+  // genre covers what the ISRC does not. Scripts only corroborate a found entry, so
+  // the JP storefront rewriting a foreign song in katakana can no longer win.
+  function originalLanguageFor(base, pageText) {
+    const country = String(base?.isrc || '').trim().slice(0, 2).toUpperCase();
+    if (country === 'JP') return 'ja-JP';
+    if (country === 'KR') return 'ko-KR';
+    if (['CN', 'HK', 'MO', 'TW'].includes(country)) return 'zh-Hans-CN';
+    const genres = (base?.genreNames || []).join(' ').toLowerCase();
+    if (JAPANESE_METADATA.test(genres)) return 'ja-JP';
+    if (KOREAN_METADATA.test(genres)) return 'ko-KR';
+    if (CHINESE_METADATA.test(genres)) return 'zh-Hans-CN';
+    // With neither signal, only a song the page itself shows in CJK is retried.
+    return hasCjkText(pageText) ? 'unknown-cjk' : null;
+  }
+
+  function pickOriginalMetadata(results, pageText) {
+    const base = results.get('us') || results.get('jp') || results.get('cn') || results.get('hk') || results.get('tw');
+    const language = originalLanguageFor(base, pageText);
+    if (!language) return null;
+    if (language === 'ja-JP') return results.get('jp') || null;
+    if (language === 'ko-KR') {
+      const korean = results.get('kr');
+      return korean && hasHangulText(korean.name) ? korean : null;
+    }
+    if (language === 'unknown-cjk') {
+      const japanese = results.get('jp');
+      if (japanese && hasCjkText(japanese.name)) return japanese;
+    }
     // Simplified first (cn, then the zh-Hans localization other storefronts carry),
     // then the traditional Hong Kong/Taiwan spelling.
     for (const storefront of ['cn', 'us', 'hk', 'tw']) {
       const candidate = results.get(storefront);
       if (candidate && hasCjkText(candidate.name)) return candidate;
     }
-    if (jp && hasCjkText(jp.name)) return jp;
     return null;
   }
 
@@ -179,7 +204,13 @@
     const response = await fetch(url, { headers, credentials: 'include', signal });
     if (!response.ok) return null;
     const attributes = (await response.json())?.data?.[0]?.attributes;
-    return attributes ? { name: attributes.name || '', artistName: attributes.artistName || '', albumName: attributes.albumName || '' } : null;
+    return attributes ? {
+      name: attributes.name || '',
+      artistName: attributes.artistName || '',
+      albumName: attributes.albumName || '',
+      isrc: attributes.isrc || '',
+      genreNames: attributes.genreNames || [],
+    } : null;
   }
 
   // Title correction for the AMLL player only: fetch the song resource with the
@@ -207,7 +238,7 @@
       // storefront while another storefront still serves their zh-Hans name, and
       // Hong Kong/Taiwan carry the traditional one. Every probe runs at once.
       const targets = mode === 'original'
-        ? [['jp', 'ja-JP'], ['cn', 'zh-Hans-CN'], ['us', 'zh-Hans-CN'], ['hk', 'zh-Hant-HK'], ['tw', 'zh-Hant-TW']]
+        ? [['jp', 'ja-JP'], ['cn', 'zh-Hans-CN'], ['us', 'zh-Hans-CN'], ['hk', 'zh-Hant-HK'], ['tw', 'zh-Hant-TW'], ['kr', 'ko-KR']]
         : [[mode, language], [fallback, language]];
       const uniqueTargets = [...new Map(targets.map(target => [target[0], target])).values()];
       const results = new Map();
@@ -218,7 +249,7 @@
       }));
       if (controller.signal.aborted) return null;
       const picked = mode === 'original'
-        ? pickOriginalMetadata(results)
+        ? pickOriginalMetadata(results, `${songInfo?.title || ''} ${songInfo?.artist || ''}`)
         : (results.get(mode) || results.get(fallback) || null);
       const value = picked && (picked.name || picked.artistName) ? picked : null;
       metadataCache.set(cacheKey, { value, expires: Date.now() + (value ? METADATA_TTL : METADATA_MISS_TTL) });
