@@ -164,14 +164,17 @@
   // genre covers what the ISRC does not. Scripts only corroborate a found entry, so
   // the JP storefront rewriting a foreign song in katakana can no longer win.
   function originalLanguageFor(base, pageText) {
+    // Genres first, then the ISRC country prefix: the same order the module uses.
+    for (const genreName of base?.genreNames || []) {
+      const genre = String(genreName).toLowerCase();
+      if (JAPANESE_METADATA.test(genre)) return 'ja-JP';
+      if (KOREAN_METADATA.test(genre)) return 'ko-KR';
+      if (CHINESE_METADATA.test(genre)) return 'zh-Hans-CN';
+    }
     const country = String(base?.isrc || '').trim().slice(0, 2).toUpperCase();
     if (country === 'JP') return 'ja-JP';
     if (country === 'KR') return 'ko-KR';
     if (['CN', 'HK', 'MO', 'TW'].includes(country)) return 'zh-Hans-CN';
-    const genres = (base?.genreNames || []).join(' ').toLowerCase();
-    if (JAPANESE_METADATA.test(genres)) return 'ja-JP';
-    if (KOREAN_METADATA.test(genres)) return 'ko-KR';
-    if (CHINESE_METADATA.test(genres)) return 'zh-Hans-CN';
     // With neither signal, only a song the page itself shows in CJK is retried.
     return hasCjkText(pageText) ? 'unknown-cjk' : null;
   }
