@@ -13,6 +13,7 @@
   let nativeLyricsRequest;
   let accountStorefront;
   let pendingStorefront;
+  let pendingMetadata;
   const subscriptions = [];
   const lyricsLanguage = document.currentScript?.dataset?.lyricsLanguage;
   const emit = (type, payload) => window.postMessage({ type, ...payload }, window.location.origin);
@@ -148,6 +149,85 @@
     finally { clearTimeout(timeout); if (pendingLyrics === controller) pendingLyrics = null; }
   }
 
+  const metadataCache = new Map();
+  const METADATA_TTL = 6 * 60 * 60 * 1000;
+  const METADATA_MISS_TTL = 30 * 60 * 1000;
+
+  const hasKanaText = value => /[\u3041-\u30ff\uff66-\uff9d]/.test(value || '');
+  const hasCjkText = value => /[\u3041-\u30ff\u3400-\u4dbf\u4e00-\u9fff\uac00-\ud7af\uff66-\uff9d]/.test(value || '');
+
+  // Original-region pick over the probed storefronts: kana marks a Japanese
+  // title, CJK marks a Chinese one. Artist names decide nothing, because Apple
+  // localizes those too (the JP storefront lists The Score as ザ・スコア) and
+  // that must not move a song to a region.
+  function pickOriginalMetadata(results) {
+    const jp = results.get('jp');
+    if (jp && hasKanaText(jp.name)) return jp;
+    // Simplified first (cn, then the zh-Hans localization other storefronts carry),
+    // then the traditional Hong Kong/Taiwan spelling.
+    for (const storefront of ['cn', 'us', 'hk', 'tw']) {
+      const candidate = results.get(storefront);
+      if (candidate && hasCjkText(candidate.name)) return candidate;
+    }
+    if (jp && hasCjkText(jp.name)) return jp;
+    return null;
+  }
+
+  async function fetchCatalogSongAttributes(storefront, language, id, headers, signal) {
+    const query = new URLSearchParams({ l: language });
+    const url = 'https://amp-api.music.apple.com/v1/catalog/' + storefront + '/songs/' + encodeURIComponent(id) + '?' + query.toString();
+    const response = await fetch(url, { headers, credentials: 'include', signal });
+    if (!response.ok) return null;
+    const attributes = (await response.json())?.data?.[0]?.attributes;
+    return attributes ? { name: attributes.name || '', artistName: attributes.artistName || '', albumName: attributes.albumName || '' } : null;
+  }
+
+  // Title correction for the AMLL player only: fetch the song resource with the
+  // storefront/language of the selected region and return its title/artist/album.
+  // The page keeps its own Apple Music metadata; only the extension player shows this.
+  async function requestCatalogMetadata(id, mode) {
+    if (!id || !music || !['original', 'cn', 'jp'].includes(mode)) return null;
+    const cacheKey = mode + ':' + id;
+    const cached = metadataCache.get(cacheKey);
+    if (cached && cached.expires > Date.now()) return cached.value;
+    const developerToken = music.developerToken || music.configuration?.app?.developerToken;
+    if (!developerToken) return null;
+    pendingMetadata?.abort();
+    const controller = new AbortController();
+    pendingMetadata = controller;
+    const timeout = setTimeout(() => controller.abort(), 8000);
+    try {
+      const headers = { Authorization: 'Bearer ' + developerToken, Accept: 'application/json' };
+      if (music.musicUserToken) headers['Music-User-Token'] = music.musicUserToken;
+      const account = await getAccountStorefront(headers);
+      const fallback = account || validStorefront(music.storefrontId) || 'us';
+      const language = mode === 'jp' ? 'ja-JP' : 'zh-CN';
+      // The storefront decides whether a track exists there, the language decides
+      // the script it comes back in: mainland titles are often missing from the cn
+      // storefront while another storefront still serves their zh-Hans name, and
+      // Hong Kong/Taiwan carry the traditional one. Every probe runs at once.
+      const targets = mode === 'original'
+        ? [['jp', 'ja-JP'], ['cn', 'zh-Hans-CN'], ['us', 'zh-Hans-CN'], ['hk', 'zh-Hant-HK'], ['tw', 'zh-Hant-TW']]
+        : [[mode, language], [fallback, language]];
+      const uniqueTargets = [...new Map(targets.map(target => [target[0], target])).values()];
+      const results = new Map();
+      // Probe in parallel: this runs while the player is already on screen.
+      await Promise.all(uniqueTargets.map(async target => {
+        try { results.set(target[0], await fetchCatalogSongAttributes(target[0], target[1], id, headers, controller.signal)); }
+        catch (_) { results.set(target[0], null); }
+      }));
+      if (controller.signal.aborted) return null;
+      const picked = mode === 'original'
+        ? pickOriginalMetadata(results)
+        : (results.get(mode) || results.get(fallback) || null);
+      const value = picked && (picked.name || picked.artistName) ? picked : null;
+      metadataCache.set(cacheKey, { value, expires: Date.now() + (value ? METADATA_TTL : METADATA_MISS_TTL) });
+      if (metadataCache.size > 80) metadataCache.delete(metadataCache.keys().next().value);
+      return value;
+    } catch (_) { return null; }
+    finally { clearTimeout(timeout); if (pendingMetadata === controller) pendingMetadata = null; }
+  }
+
   function syncSong(force = false) {
     const item = read('nowPlayingItem', null);
     const key = item?.id || null;
@@ -193,6 +273,12 @@
       if (typeof ttml !== 'string' || !/<(?:\w+:)?tt[\s>]/.test(ttml)) throw new Error('nativeTTMLUnavailable');
       songInfo = { ...songInfo, appleMusicTTML: ttml };
       return { ttml, appleId: current.appleId, title: current.title, artist: current.artist };
+    }
+    if (command === 'catalogMetadata') {
+      const id = String(value?.appleId || '');
+      const mode = value?.mode;
+      if (!/^\d+$/.test(id) || !['original', 'cn', 'jp'].includes(mode)) throw new Error('Invalid metadata request');
+      return requestCatalogMetadata(id, mode);
     }
     if (command === 'queue') {
       const queue = read('queue', null);
@@ -270,6 +356,7 @@
     if (frame) cancelAnimationFrame(frame);
     pendingLyrics?.abort();
     pendingStorefront?.abort();
+    pendingMetadata?.abort();
     for (const [name, listener] of subscriptions) music?.removeEventListener?.(name, listener);
   }, { once: true });
   waitForMusicKit();

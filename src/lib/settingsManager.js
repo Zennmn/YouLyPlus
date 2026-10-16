@@ -12,6 +12,7 @@ export const defaultSettings = {
     appleMusicAMLL: true,
     appleMusicAMLLBackground: true,
     appleMusicDisplayMode: 'none',
+    appleMusicTitleCorrection: 'off',
     appleMusicPlayerFont: '',
     appleMusicPlayerFontFile: null,
     customLLMBaseUrl: '',
@@ -431,7 +432,7 @@ if (pBrowser && pBrowser.storage) {
         if (area === 'local') {
             const newSettings = {};
             for (let key in changes) {
-                if (key.startsWith('lyplusAppleLyricsIndex_') || key.startsWith('lyplusApplePlayer')) continue;
+                if (key.startsWith('lyplusAppleLyricsIndex_') || key.startsWith('lyplusApplePlayer') || key.startsWith('lyplusAppleTitleFix:')) continue;
                 newSettings[key] = changes[key].newValue;
             }
             if (!Object.keys(newSettings).length) return;

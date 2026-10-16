@@ -174,6 +174,7 @@ const autoSaveControls = [
     { id: 'ytsonginfo-disableseekbar', key: 'YTSongInfoDisableSeekbar', type: 'checkbox' },
     { id: 'sponsor-block', key: 'useSponsorBlock', type: 'checkbox' },
     { id: 'bypass-apple', key: 'appleMusicTTMLBypass', type: 'checkbox' },
+    { id: 'apple-title-correction', key: 'appleMusicTitleCorrection', type: 'value' },
     { id: 'prefer-unison-video', key: 'preferUnisonVideo', type: 'checkbox' },
 
     // Sources
@@ -240,6 +241,8 @@ function updateUI(settings) {
     setCheck('ytsonginfo-disableseekbar', currentSettings.YTSongInfoDisableSeekbar);
     setCheck('sponsor-block', currentSettings.useSponsorBlock);
     setCheck('bypass-apple', currentSettings.appleMusicTTMLBypass);
+    setVal('apple-title-correction', ['off', 'original', 'cn', 'jp'].includes(currentSettings.appleMusicTitleCorrection) ? currentSettings.appleMusicTitleCorrection : 'off');
+    updateCustomSelectDisplay('apple-title-correction');
     setCheck('prefer-unison-video', currentSettings.preferUnisonVideo);
 
     // Sources

@@ -44,6 +44,7 @@ const defaultSettings = {
     appleMusicAMLL: true,
     appleMusicAMLLBackground: true,
     appleMusicDisplayMode: 'none',
+    appleMusicTitleCorrection: 'off',
     appleMusicPlayerFont: '',
     appleMusicPlayerFontFile: null,
     YTSongInfo: false,
@@ -93,7 +94,7 @@ if (pBrowser && pBrowser.storage) {
             for (let key in changes) {
                 // Downloading a provider index is cache I/O, not a user setting.
                 // Re-rendering here can restart the previous track while the new one loads.
-                if (key.startsWith('lyplusAppleLyricsIndex_') || key.startsWith('lyplusApplePlayer')) continue;
+                if (key.startsWith('lyplusAppleLyricsIndex_') || key.startsWith('lyplusApplePlayer') || key.startsWith('lyplusAppleTitleFix:')) continue;
                 changedSettings[key] = changes[key].newValue;
             }
             if (!Object.keys(changedSettings).length) return;

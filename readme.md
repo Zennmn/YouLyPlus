@@ -6,7 +6,7 @@ A web extension to elevate your **YouTube Music, Tidal & Apple Music** Experienc
 
 This fork adds the AMLL full-screen Apple Music player, additional TTML lyric
 sources, custom LLM translation, saved player preferences, browser fullscreen,
-and player font-file imports. The original project is
+player font-file imports, and an optional song title correction (original region / mainland China / Japan) shown inside the AMLL player only. The original project is
 [ibratabian17/YouLyPlus](https://github.com/ibratabian17/YouLyPlus).
 
 This fork is licensed under the **GNU Affero General Public License, version 3

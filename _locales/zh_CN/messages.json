@@ -229,6 +229,30 @@
     "message": "启用后，如果 Apple Music 仅提供逐行同步而非逐字同步，则使用外部歌词源。",
     "description": "Description for Apple Music bypass toggle"
   },
+"settingTitleCorrection": {
+"message": "歌名修正",
+"description": "Label for the Apple Music song title correction setting"
+},
+"descTitleCorrection": {
+"message": "启用后，AMLL 播放器会按所选地区显示歌曲的标题、歌手与专辑名。",
+"description": "Description for the Apple Music song title correction setting"
+},
+"titleCorrectionOff": {
+"message": "关闭",
+"description": "Title correction option: disabled"
+},
+"titleCorrectionOriginal": {
+"message": "按歌曲原地区修正",
+"description": "Title correction option: original region"
+},
+"titleCorrectionChina": {
+"message": "固定中国大陆",
+"description": "Title correction option: mainland China"
+},
+"titleCorrectionJapan": {
+"message": "固定日本",
+"description": "Title correction option: Japan"
+},
   "sectionSources": {
     "message": "来源",
     "description": "Sources section title"

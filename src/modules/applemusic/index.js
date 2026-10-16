@@ -15,6 +15,15 @@ let cachedOffset = 0;
 let manualProviderSelected = false;
 let commandSequence = 0;
 const pendingCommands = new Map();
+const TITLE_FIX_TTL = 6 * 60 * 60 * 1000;
+const TITLE_FIX_MISS_TTL = 30 * 60 * 1000;
+const TITLE_FIX_MEMORY_LIMIT = 80;
+const TITLE_FIX_BUCKET_LIMIT = 150;
+// Bump when the original-region pick rule changes so cached picks are dropped.
+const TITLE_FIX_RULE = 4;
+const titleFixMemory = new Map();
+let titleFix = null;
+let titleFixRequest = 0;
 const songIdentity = (song) => song?.appleId || `${song?.title || ''}-${song?.artist || ''}-${song?.album || ''}`;
 
 function getAppleMusicLyricsLanguage() {
@@ -28,6 +37,96 @@ function getAppleMusicLyricsLanguage() {
         } catch (_) { }
     }
     return 'en-US';
+}
+
+function rememberTitleFix(key, entry) {
+    titleFixMemory.set(key, entry);
+    if (titleFixMemory.size > TITLE_FIX_MEMORY_LIMIT) titleFixMemory.delete(titleFixMemory.keys().next().value);
+}
+
+function titleFixStorageKey(mode) {
+    return 'lyplusAppleTitleFix:' + mode;
+}
+
+function frameSongInfo(song) {
+    if (!titleFix || !song || String(song.appleId) !== String(titleFix.appleId)) return song;
+    return {
+        ...song,
+        title: titleFix.name || song.title,
+        artist: titleFix.artistName || song.artist,
+        album: titleFix.albumName || song.album,
+    };
+}
+
+function applyTitleFix() {
+    amllPlayer?.updateSong(frameSongInfo(currentSongInfo));
+    if (cachedLyricsArguments) cachedLyricsArguments[1] = frameSongInfo(cachedLyricsArguments[1]);
+}
+
+// Restore the page-provided metadata as soon as the correction stops applying.
+function clearTitleFix() {
+    if (!titleFix) return;
+    titleFix = null;
+    applyTitleFix();
+}
+
+async function readStoredTitleFix(mode, appleId) {
+    if (!pBrowser?.storage?.local) return undefined;
+    const key = titleFixStorageKey(mode);
+    try {
+        const bucket = (await storageLocalGet({ [key]: null }))?.[key];
+        const entry = bucket?.[appleId];
+        if (entry?.value && entry.rule === TITLE_FIX_RULE && entry.expires > Date.now()) return entry.value;
+    } catch (_) { }
+    return undefined;
+}
+
+function storeTitleFix(mode, appleId, value) {
+    if (!value || !pBrowser?.storage?.local) return;
+    const key = titleFixStorageKey(mode);
+    const now = Date.now();
+    (async () => {
+        let bucket = {};
+        try { bucket = (await storageLocalGet({ [key]: null }))?.[key] || {}; } catch (_) { }
+        const entries = Object.entries(bucket).filter(entry => entry[1]?.expires > now && entry[1]?.rule === TITLE_FIX_RULE);
+        entries.push([appleId, { value, rule: TITLE_FIX_RULE, expires: now + TITLE_FIX_TTL }]);
+        entries.sort((first, second) => first[1].expires - second[1].expires);
+        try { await storageLocalSet({ [key]: Object.fromEntries(entries.slice(-TITLE_FIX_BUCKET_LIMIT)) }); } catch (_) { }
+    })();
+}
+
+// Title correction feeds only the AMLL player: the page keeps its own metadata.
+async function refreshTitleFix() {
+    const request = ++titleFixRequest;
+    const mode = currentSettings.appleMusicTitleCorrection;
+    if (!currentSettings.isEnabled || !mode || mode === 'off' || !amllHost?.isConnected || nativeMode) { clearTitleFix(); return; }
+    const song = currentSongInfo;
+    if (!song?.appleId || song.isVideo) { clearTitleFix(); return; }
+    const appleId = String(song.appleId);
+    const key = mode + ':' + appleId;
+    let entry = titleFixMemory.get(key);
+    if (entry && entry.expires <= Date.now()) entry = undefined;
+    if (!entry) {
+        const stored = await readStoredTitleFix(mode, appleId);
+        if (request !== titleFixRequest) return;
+        entry = typeof stored === 'undefined' ? undefined : { value: stored, expires: Date.now() + TITLE_FIX_TTL };
+        if (entry) rememberTitleFix(key, entry);
+    }
+    let value = entry ? entry.value : undefined;
+    if (value === undefined) {
+        let failed = false;
+        try { value = await sendPlayerCommand('catalogMetadata', { appleId, mode }); } catch (_) { failed = true; }
+        if (request !== titleFixRequest) return;
+        // A failed request proves nothing about the song: keep the current display and retry later.
+        if (failed) { if (titleFix && titleFix.mode !== mode) clearTitleFix(); return; }
+        rememberTitleFix(key, { value: value || null, expires: Date.now() + (value ? TITLE_FIX_TTL : TITLE_FIX_MISS_TTL) });
+        if (value) storeTitleFix(mode, appleId, value);
+    }
+    if (request !== titleFixRequest) return;
+    if (!value) { clearTitleFix(); return; }
+    if (!amllHost?.isConnected || nativeMode || songIdentity(currentSongInfo) !== songIdentity(song)) return;
+    titleFix = { mode, appleId, name: value.name || '', artistName: value.artistName || '', albumName: value.albumName || '' };
+    applyTitleFix();
 }
 
 function injectDOMScript() {
@@ -66,7 +165,7 @@ injectPlatformCSS = function () {
 function sendPlayerCommand(command, value) {
     return new Promise((resolve, reject) => {
         const requestId = `lyplus-${Date.now()}-${++commandSequence}`;
-        const timer = setTimeout(() => { pendingCommands.delete(requestId); reject(new Error('Apple Music did not respond. Try the native player.')); }, command === 'nativeTTML' ? 16000 : 6000);
+        const timer = setTimeout(() => { pendingCommands.delete(requestId); reject(new Error('Apple Music did not respond. Try the native player.')); }, command === 'nativeTTML' ? 16000 : command === 'catalogMetadata' ? 10000 : 6000);
         pendingCommands.set(requestId, { resolve, reject, timer });
         window.postMessage({ type: 'LYPLUS_PLAYER_COMMAND', command, value, requestId }, window.location.origin);
     });
@@ -138,7 +237,7 @@ function mountAMLL() {
             }).catch(() => { if (amllHost === host) showNativePlayer(); }),
         });
         amllPlayer.updateSettings(currentSettings);
-        amllPlayer.updateSong(currentSongInfo);
+        amllPlayer.updateSong(frameSongInfo(currentSongInfo));
         if (cachedPlaybackState) amllPlayer.updatePlayback(cachedPlaybackState);
         if (cachedLyricsArguments) amllPlayer.displayLyrics(...cachedLyricsArguments);
         else if (cachedLyricStatus === 'empty') amllPlayer.displaySongNotFound();
@@ -146,6 +245,7 @@ function mountAMLL() {
         amllPlayer.setAvailableProviders(cachedProviders);
         amllPlayer.setUserOffset(cachedOffset);
         amllPlayer.setVisible(!document.hidden);
+        refreshTitleFix();
         sendPlayerCommand('snapshot').catch(error => amllPlayer?.showToast(error.message));
     } catch (error) { console.error('YouLy+: could not mount AMLL', error); showNativePlayer(); }
 }
@@ -153,6 +253,7 @@ function mountAMLL() {
 const LyricsPlusAPI = {
     displayLyrics: (...args) => {
         if (songIdentity(args[1]) !== songIdentity(currentSongInfo)) return;
+        args[1] = frameSongInfo(args[1]);
         const switchProvider = args[8];
         const saveOffset = args[9];
         manualProviderSelected = !!args[0]?.playerProviderPreference && args[0].playerProviderPreference !== 'auto';
@@ -208,6 +309,7 @@ window.addEventListener('YOUPLUS_SETTINGS_UPDATED', (event) => {
     if (!currentSettings.isEnabled) { unmountAMLL(); return; }
     injectDOMScript();
     window.initializeLyricsPlusPlatform();
+    if (event.detail.changedKeys?.includes('appleMusicTitleCorrection')) refreshTitleFix();
     // Frame messages clone their arguments; keep replay state current explicitly.
     if (cachedLyricsArguments) {
         cachedLyricsArguments[3] = event.detail.settings;
@@ -229,7 +331,8 @@ window.addEventListener('message', (event) => {
         const changed = songIdentity(nextSong) !== songIdentity(currentSongInfo);
         if (changed) { cachedLyricsArguments = null; cachedProviders = []; cachedOffset = 0; cachedLyricStatus = 'loading'; manualProviderSelected = false; cachedPlaybackState = null; }
         currentSongInfo = nextSong;
-        amllPlayer?.updateSong(currentSongInfo);
+        amllPlayer?.updateSong(frameSongInfo(currentSongInfo));
+        if (changed) refreshTitleFix();
         if (message.type === 'LYPLUS_SONG_SNAPSHOT' && !cachedLyricsArguments && nextSong.title && currentSettings.isEnabled) fetchAndDisplayLyrics(nextSong, false);
     } else if (message.type === 'LYPLUS_NATIVE_LYRICS') {
         if (songIdentity(message.songInfo) !== songIdentity(currentSongInfo)) return;

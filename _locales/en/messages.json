@@ -229,6 +229,30 @@
     "message": "When enabled, the app will use an external lyrics source if Apple Music only provides line-by-line synchronization instead of word-by-word.",
     "description": "Description for Apple Music bypass toggle"
   },
+"settingTitleCorrection": {
+"message": "Song Title Correction",
+"description": "Label for the Apple Music song title correction setting"
+},
+"descTitleCorrection": {
+"message": "When enabled, the AMLL player shows the song title, artist, and album as they appear in the selected region.",
+"description": "Description for the Apple Music song title correction setting"
+},
+"titleCorrectionOff": {
+"message": "Off",
+"description": "Title correction option: disabled"
+},
+"titleCorrectionOriginal": {
+"message": "Use the song's original region",
+"description": "Title correction option: original region"
+},
+"titleCorrectionChina": {
+"message": "Use mainland China",
+"description": "Title correction option: mainland China"
+},
+"titleCorrectionJapan": {
+"message": "Use Japan",
+"description": "Title correction option: Japan"
+},
   "sectionSources": {
     "message": "Sources",
     "description": "Sources section title"
