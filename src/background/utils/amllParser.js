@@ -39,6 +39,7 @@ export function parseAMLLLyrics(ttml) {
       const main = line.isBG ? sources[index - 1] : source;
       return {
         text: line.words.map(w => w.word).join(''),
+        ...(source.language || main.language ? { language: source.language || main.language } : {}),
         startTime: line.startTime / 1000,
         endTime: line.endTime / 1000,
         duration: (line.endTime - line.startTime) / 1000,

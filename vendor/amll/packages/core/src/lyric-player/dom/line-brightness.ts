@@ -359,8 +359,9 @@ export class LineBrightness implements Disposable {
 	 * - 若在同一帧内恢复 `transition`，样式变更会被浏览器合并处理，依然会按恢复后的规则建立过渡动画。
 	 * - 若通过读取计算样式强制触发重排以使样式变更立即生效，会导致整页在构建帧中重复执行样式解析。
 	 *
-	 * 因此，过渡抑制的恢复推迟至下一帧（通过 `requestAnimationFrame`）执行。此时目标样式已在本帧常规渲染流程中
-	 * 完成提交，恢复 `transition` 属性不会变更任何已渲染的样式，从而避免触发非预期的过渡动画。
+	 * 若在消息任务或挂载阶段切换，第一次 rAF 仍早于该次变更的首次样式提交，不能立即恢复。
+	 * 因此使用两次 rAF，保证至少跨过一次渲染机会后再恢复过渡，避免暗副本与尚未淡出的亮层叠加。
+	 * 此处仅压制亮度层形态切换，不改变演唱时的高亮过渡和逐词动画。
 	 * @param enabled 是否开启亮层形态
 	 */
 	private setMainBright(enabled: boolean): void {
@@ -379,13 +380,15 @@ export class LineBrightness implements Disposable {
 
 		this.main.style.transition = "none";
 		this.transitionRestore = requestAnimationFrame(() => {
-			this.transitionRestore = undefined;
-			// 异步回调执行时进行守卫：若对象已销毁或节点已脱离 DOM，则不继续执行抑制解除
-			if (this.isDisposed || !this.main.isConnected) {
-				this.main.style.transition = "";
-				return;
-			}
-			this.releaseTransitionSuppression();
+			this.transitionRestore = requestAnimationFrame(() => {
+				this.transitionRestore = undefined;
+				// 异步回调执行时进行守卫：若对象已销毁或节点已脱离 DOM，则不继续执行抑制解除
+				if (this.isDisposed || !this.main.isConnected) {
+					this.main.style.transition = "";
+					return;
+				}
+				this.releaseTransitionSuppression();
+			});
 		});
 	}
 

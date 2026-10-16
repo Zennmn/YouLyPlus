@@ -42,7 +42,7 @@ Apple Music 原生源的逐字和普通歌词均参考 AMDL 的获取方法：�
 
 源说明：[AMLL TTML DB](https://github.com/amll-dev/amll-ttml-db)、[LunaBeat 接入文档](https://github.com/2755337087/ttml-hub/blob/main/docs/integration.md)、[AmLyrics](https://github.com/Zennmn/am-lyrics)。
 
-机器翻译仅对外文歌词生效。优先使用源歌词语言标签；无标签时按歌词文字判断，以中文为主的歌曲缺少翻译时不发起机翻，也不读旧机翻缓存，源自带译文仍保留。日文假名、韩文与明确标注为日文的汉字歌词继续支持翻译，音译功能不受此限制。
+Apple Music 的机器/AI翻译仅在使用原生歌词源、完全没有自带翻译轴且歌曲判定为外文时允许；只要存在翻译轴，无论语言是否匹配、是否翻译完整，都只显示自带译文，不补译，也不读取旧机翻缓存。AMLL、LunaBeat、AmLyrics只显示自带译文，不调用机翻服务，也不读取旧机翻缓存。翻译到中文时逐句跳过中文原句和无文字行，无待翻译句子时不请求服务。语言识别和音译功能沿用现有逻辑；歌词源顺序仍为AMLL → LunaBeat → AmLyrics → Apple Music原生（第三方顺序可按设置调整）。
 
 在扩展设置的“来源”页，音乐平台默认选中 Apple Music，展示 AMLL / LunaBeat / AmLyrics / Apple Music。前三个源可拖动排序、移除或添加，Apple Music 固定在最后回退；修改会保存并用于实际取词。YouTube Music / Tidal 的来源可通过平台下拉框单独查看。
 

@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import vm from 'node:vm';
-import { shouldMachineTranslateLyrics, sourceTranslationData } from '../src/background/utils/lyricsLanguage.js';
+import { shouldMachineTranslateLyrics, canMachineTranslateLyrics, sourceTranslationData, isChineseLanguage, getLyricsLanguageContext, isChineseLyricLine } from '../src/background/utils/lyricsLanguage.js';
 
 const lyrics = (text, language) => ({ metadata: { language }, data: [{ text }] });
 const source = readFileSync(new URL('../src/background/core/translationService.js', import.meta.url), 'utf8');
@@ -35,7 +35,7 @@ test('Chinese lyrics bypass old machine caches and never construct a translation
     static getProvider() { throw new Error('Provider must not be used'); }
     ${getMethod} ${translateMethod}
   })`, {
-    shouldMachineTranslateLyrics, sourceTranslationData,
+    canMachineTranslateLyrics, sourceTranslationData,
     SettingsManager: { getTranslationSettings: async () => ({}) },
     LyricsService: { getOrFetch: async () => ({ lyrics: original }) },
     Utilities: { isEmptyLyrics: () => false },
@@ -50,7 +50,7 @@ test('foreign lyrics use the selected provider and preserve matching source tran
   const service = vm.runInNewContext(`(class {
     static getProvider() { return { translate: async lines => { calls.push(lines); return ['晚安']; } }; }
     ${translateMethod}
-  })`, { shouldMachineTranslateLyrics, sourceTranslationData, calls });
+  })`, { canMachineTranslateLyrics, sourceTranslationData, isChineseLanguage, getLyricsLanguageContext, isChineseLyricLine, calls });
   const result = await service.translate(original, 'zh-CN', {});
   assert.equal(calls.length, 1);
   assert.equal(calls[0].join(','), 'Good night');

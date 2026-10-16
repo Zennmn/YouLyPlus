@@ -7,7 +7,7 @@ import { translationsDB } from '../storage/database.js';
 import { SettingsManager } from '../storage/settings.js';
 import { PROVIDERS } from '../constants.js';
 import { Utilities } from '../utils/utilities.js';
-import { shouldMachineTranslateLyrics, sourceTranslationData } from '../utils/lyricsLanguage.js';
+import { canMachineTranslateLyrics, sourceTranslationData, isChineseLanguage, getLyricsLanguageContext, isChineseLyricLine } from '../utils/lyricsLanguage.js';
 import { LyricsService } from './lyricsService.js';
 
 import { GoogleProvider } from '../services/translation/providers/GoogleProvider.js';
@@ -21,7 +21,8 @@ import { CustomLLMProvider } from '../services/translation/providers/CustomLLMPr
 export class TranslationService {
   static createCacheKey(songInfo, action, targetLang, targetScript) {
     const baseLyricsCacheKey = LyricsService.createCacheKey(songInfo);
-    return `${baseLyricsCacheKey} - ${action} - ${targetLang} - ${targetScript}`;
+    const translationVersion = action === 'translate' ? ' - language-v3-native-only' : '';
+    return `${baseLyricsCacheKey} - ${action} - ${targetLang} - ${targetScript}${translationVersion}`;
   }
 
   static async getOrFetch(songInfo, action, targetLang, forceReload = false) {
@@ -43,8 +44,8 @@ export class TranslationService {
       throw new Error('Original lyrics not found or empty');
     }
 
-    // Run this before cached machine translations so old Chinese results cannot reappear.
-    if (action === 'translate' && !shouldMachineTranslateLyrics(originalLyrics, songInfo)) {
+    // Enforce source/language restrictions before old machine translations can be read.
+    if (action === 'translate' && !canMachineTranslateLyrics(originalLyrics, songInfo)) {
       return { ...originalLyrics, data: sourceTranslationData(originalLyrics) };
     }
 
@@ -136,11 +137,12 @@ export class TranslationService {
   }
 
   static async translate(originalLyrics, targetLang, settings, songInfo = {}) {
-    if (!shouldMachineTranslateLyrics(originalLyrics, songInfo)) return sourceTranslationData(originalLyrics);
-    const provider = this.getProvider(settings.translationProvider, settings);
+    if (!canMachineTranslateLyrics(originalLyrics, songInfo)) return sourceTranslationData(originalLyrics);
 
-    const normalizeLang = (l) => l ? l.toLowerCase().split('-')[0].trim() : '';
+    const normalizeLang = (l) => l ? l.trim().toLowerCase().split(/[-_]/)[0] : '';
     const targetBase = normalizeLang(targetLang);
+    const chineseTarget = isChineseLanguage(targetLang);
+    const languageContext = getLyricsLanguageContext(originalLyrics, songInfo);
 
     const linesToTranslate = [];
     const indicesToTranslate = [];
@@ -150,13 +152,14 @@ export class TranslationService {
       const embedded = line.translation;
       if (embedded && embedded.text && normalizeLang(embedded.lang) === targetBase) {
         finalTranslations[index] = embedded.text;
-      } else {
+      } else if (/\p{L}/u.test(line.text || '') && !(chineseTarget && isChineseLyricLine(line, languageContext))) {
         linesToTranslate.push(line.text);
         indicesToTranslate.push(index);
       }
     });
 
     if (linesToTranslate.length > 0) {
+      const provider = this.getProvider(settings.translationProvider, settings);
       let fetchedTranslations;
 
       try {
@@ -181,7 +184,7 @@ export class TranslationService {
 
     return originalLyrics.data.map((line, index) => ({
       ...line,
-      translatedText: finalTranslations[index] || line.text
+      translatedText: finalTranslations[index] || undefined
     }));
   }
 

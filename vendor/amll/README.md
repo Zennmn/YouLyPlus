@@ -40,3 +40,10 @@ AMLL core without a React render for each media frame. Line event callbacks are
 stable, and memoized time labels subscribe to their formatted text. The core's
 animation loop and spring/word-mask implementation are unchanged.
 
+Local brightness-layer fix: suppress opacity transitions across two animation
+frames when switching between a single resting layer and the bright/dim pair.
+A single rAF can run before the first style commit after a message or mount,
+causing an unsung line to briefly brighten as the new dim copy overlaps the
+still-visible main layer. Both pending frames are canceled on disposal or a
+superseding switch. Singing transitions and word/glow animations are unchanged.
+

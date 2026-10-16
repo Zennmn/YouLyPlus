@@ -43,17 +43,20 @@ export function normalizeChineseLyrics(lyrics) {
     }
     const language = line.translation?.lang || '';
     const normalizeTranslation = value => isChineseText(value, language) ? simplify(value) : value;
-    const duplicate = value => chineseSong && hasHan(result.text) && typeof value === 'string' && comparable(value) === comparable(result.text);
+    const duplicate = (value, originalValue) => typeof value === 'string' && (
+      originalValue === line.text || value === result.text ||
+      (chineseSong && hasHan(result.text) && comparable(value) === comparable(result.text))
+    );
     if (typeof line.translatedText === 'string') {
       result.translatedText = normalizeTranslation(line.translatedText);
-      if (duplicate(result.translatedText)) delete result.translatedText;
+      if (duplicate(result.translatedText, line.translatedText)) delete result.translatedText;
     }
     if (typeof line.translation === 'string') {
       result.translation = normalizeTranslation(line.translation);
-      if (duplicate(result.translation)) delete result.translation;
+      if (duplicate(result.translation, line.translation)) delete result.translation;
     } else if (line.translation?.text) {
       result.translation = { ...line.translation, text: normalizeTranslation(line.translation.text) };
-      if (duplicate(result.translation.text)) delete result.translation;
+      if (duplicate(result.translation.text, line.translation.text)) delete result.translation;
     }
     return result;
   }) };
