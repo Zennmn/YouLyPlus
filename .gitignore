@@ -39,3 +39,7 @@
 /coverage/
 /playwright-report/
 /test-results/
+
+# Python bytecode from the optional TTML translation script
+__pycache__/
+*.py[cod]

@@ -3,13 +3,19 @@
 // ==================================================================================================
 
 import { PROVIDERS } from '../constants.js';
+import '../../lib/defaultSettings.js';
+
+const defaults = globalThis.LYPLUS_DEFAULT_SETTINGS;
 
 export class SettingsManager {
   static async get(keys) {
     if (typeof browser !== 'undefined' && browser.storage?.local) {
       return browser.storage.local.get(keys);
     }
-    return new Promise(resolve => chrome.storage.local.get(keys, resolve));
+    return new Promise((resolve, reject) => chrome.storage.local.get(keys, result => {
+      if (chrome.runtime?.lastError) reject(new Error(chrome.runtime.lastError.message));
+      else resolve(result);
+    }));
   }
 
   static async set(values) {
@@ -22,35 +28,32 @@ export class SettingsManager {
 
   static async getLyricsSettings() {
     return this.get({
-      'lyricsProviderOrder': 'kpoe,lrcred,unison,lrclib',
-      'appleMusicLyricsProviderOrder': 'amll,lunabeat,amlyrics,applemusic',
-      'lyricsSourceOrder': 'apple,lyricsplus,qq,musixmatch,musixmatch-word',
-      'customKpoeUrl': '',
-      'cacheStrategy': 'aggressive',
-      'preferUnisonVideo': false
+      'appleMusicLyricsProviderOrder': defaults.appleMusicLyricsProviderOrder,
+      'cacheStrategy': defaults.cacheStrategy
     });
   }
 
   static async getTranslationSettings() {
     return this.get({
-      'translationProvider': PROVIDERS.GOOGLE,
-      'romanizationProvider': PROVIDERS.OFFLINE,
-      'transliterationTargetScript': 'latin',
-      'geminiApiKey': '',
-      'geminiModel': 'gemini-pro',
-      'geminiRomanizationModel': 'gemini-pro',
-      'overrideTranslateTarget': false,
-      'customTranslateTarget': '',
-      'overrideGeminiPrompt': false,
-      'customGeminiPrompt': '',
-      'overrideGeminiRomanizePrompt': false,
-      'customGeminiRomanizePrompt': '',
-      'openRouterApiKey': '',
-      'customLLMBaseUrl': '',
-      'customLLMApiKey': '',
-      'customLLMModel': '',
-      'openRouterModel': 'google/gemini-2.0-flash-001',
-      'deeplApiKey': ''
+      'cacheStrategy': defaults.cacheStrategy,
+      'translationProvider': defaults.translationProvider || PROVIDERS.GOOGLE,
+      'romanizationProvider': defaults.romanizationProvider || PROVIDERS.OFFLINE,
+      'transliterationTargetScript': defaults.transliterationTargetScript,
+      'geminiApiKey': defaults.geminiApiKey,
+      'geminiModel': defaults.geminiModel,
+      'geminiRomanizationModel': defaults.geminiRomanizationModel,
+      'overrideTranslateTarget': defaults.overrideTranslateTarget,
+      'customTranslateTarget': defaults.customTranslateTarget,
+      'overrideGeminiPrompt': defaults.overrideGeminiPrompt,
+      'customGeminiPrompt': defaults.customGeminiPrompt,
+      'overrideGeminiRomanizePrompt': defaults.overrideGeminiRomanizePrompt,
+      'customGeminiRomanizePrompt': defaults.customGeminiRomanizePrompt,
+      'openRouterApiKey': defaults.openRouterApiKey,
+      'customLLMBaseUrl': defaults.customLLMBaseUrl,
+      'customLLMApiKey': defaults.customLLMApiKey,
+      'customLLMModel': defaults.customLLMModel,
+      'openRouterModel': defaults.openRouterModel,
+      'deeplApiKey': defaults.deeplApiKey
     });
   }
 }

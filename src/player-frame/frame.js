@@ -65,6 +65,9 @@
                 onSettingsChange: values => action('settings', values),
                 saveOffset: (...args) => notify('offset', ...args), reloadLyrics: (...args) => notify('reload', ...args),
                 setDisplayMode: (...args) => notify('mode', ...args),
+                switchProvider: (...args) => notify('provider', ...args),
+                importTTML: (...args) => action('importTTML', ...args),
+                removeLocalTTML: (...args) => action('removeLocalTTML', ...args),
                 onReady: () => send({ kind: 'ready' }),
             });
             player.updateSettings(message.settings || {});
@@ -77,10 +80,13 @@
             const item = pending.get(message.id);
             if (!item) return;
             clearTimeout(item.timer); pending.delete(message.id);
-            if (message.ok) item.resolve(message.result); else item.reject(new Error(message.error || 'Player action failed'));
+            if (message.ok) item.resolve(message.result); else item.reject(Object.assign(new Error(message.error || 'Player action failed'), { code: message.code }));
         } else if (message.kind === 'dispose') dispose();
     }
-    function onKeyDown(event) { if (event.key === 'Escape') { event.preventDefault(); notify('close'); } }
+    function onKeyDown(event) {
+        if (event.isComposing || event.keyCode === 229) return;
+        if (event.key === 'Escape') { event.preventDefault(); notify('close'); }
+    }
     window.addEventListener('message', onMessage);
     document.addEventListener('keydown', onKeyDown);
     window.addEventListener('pagehide', dispose, { once: true });

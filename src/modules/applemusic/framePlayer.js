@@ -4,7 +4,23 @@
     const visualKeys = ['lightweight', 'appleMusicAMLLBackground', 'appleMusicDisplayMode', 'appleMusicPlayerFont', 'appleMusicPlayerFontFile', 'largerTextMode', 'wordByWord', 'hidePhoneticDup', 'displayMode'];
     const visualSettings = settings => Object.fromEntries(visualKeys.filter(key => settings && key in settings).map(key => [key, settings[key]]));
     const songView = song => Object.fromEntries(['appleId', 'title', 'artist', 'album', 'duration', 'artwork'].filter(key => song && key in song).map(key => [key, song[key]]));
-    const labelKeys = ['close', 'settings', 'nativePlayer', 'connecting', 'loadingLyrics', 'songNotFound', 'translation', 'original', 'romanization', 'both', 'lyricsSource', 'automatic', 'lyricsOffset', 'animatedBackground', 'reset', 'reloadLyrics', 'translating', 'notFoundError', 'diagnose', 'diagnosing', 'exportDiagnostics', 'diagnosticReady', 'diagnosticStopped', 'diagnosticNeedsPlayback', 'diagnosticRate', 'diagnosticSlow'];
+    const labelKeys = [
+        'playerClose', 'playerSettings', 'playerDisplay', 'playerOriginal', 'playerTranslation', 'playerRomanization',
+        'playerTranslationAndRomanization', 'playerTranslationLoading', 'playerTranslationUnavailable', 'playerTranslationError',
+        'playerRomanizationLoading', 'playerRomanizationUnavailable', 'playerRomanizationError', 'playerLyricsSource',
+        'playerAutomatic', 'playerSourcePreference', 'playerCurrentSource', 'playerSourceUnavailable', 'playerLyricsOffset',
+        'playerAnimatedBackground', 'playerResetOffset', 'playerReloadLyrics', 'playerNativePlayer', 'playerConnecting',
+        'playerLoadingLyrics', 'playerSongNotFound', 'playerNotFoundError', 'playerPlaybackCommandFailed', 'playerSettingsSaveFailed',
+        'playerFontLoadFailed', 'playerFullscreen', 'playerExitFullscreen', 'playerFullscreenChangeFailed', 'playerExportFailed',
+        'playerDownloadNativeTTML', 'playerDownloadingNativeTTML', 'playerNativeTTMLUnavailable', 'playerNativeTTMLSongChanged',
+        'playerNativeTTMLFailed', 'playerImportTTML', 'playerImportingTTML', 'playerImportTTMLHint', 'playerImportTTMLSuccess',
+        'playerImportTTMLInvalid', 'playerImportTTMLTooLarge', 'playerLocalTTMLSongChanged', 'playerImportTTMLFailed',
+        'playerRemoveLocalTTML', 'playerRemovingLocalTTML', 'playerRemoveLocalTTMLSuccess', 'playerRemoveLocalTTMLFailed',
+        'playerAdvanced', 'playerDiagnose', 'playerDiagnosing', 'playerDiagnosticReady', 'playerDiagnosticStopped',
+        'playerDiagnosticNeedsPlayback', 'playerDiagnosticRate', 'playerDiagnosticSlow', 'playerExportDiagnostics',
+        'playerQueue', 'playerQueueLoading', 'playerQueueEmpty', 'playerQueueLoadFailed', 'playerQueueRetry',
+        'playerExportNativeTTML', 'playerQueueCurrent', 'playerQueuePlaying', 'playerQueueChanged', 'playerQueuePlayFailed', 'playerQueueControlUnavailable',
+    ];
 
     function createPlayer(frame, options = {}) {
         const channel = crypto.randomUUID();
@@ -62,20 +78,22 @@
                 },
                 reload: () => (lastLyricsArgs?.[4] || options.reloadLyrics)?.(...args),
                 mode: () => (lastLyricsArgs?.[5] || options.setDisplayMode)?.(...args),
-                provider: () => lastLyricsArgs?.[8]?.(...args),
+                provider: () => (lastLyricsArgs?.[8] || options.switchProvider)?.(...args),
                 offset: () => (lastLyricsArgs?.[9] || options.saveOffset)?.(...args),
+                importTTML: () => options.importTTML?.(...args),
+                removeLocalTTML: () => options.removeLocalTTML?.(...args),
             };
             if (!Object.hasOwn(handlers, message.action)) return;
             try {
                 const result = await handlers[message.action]();
                 send({ kind: 'result', id: message.id, ok: true, result });
             } catch (error) {
-                send({ kind: 'result', id: message.id, ok: false, error: error?.message || 'Player action failed' });
+                send({ kind: 'result', id: message.id, ok: false, error: error?.message || 'Player action failed', code: error?.code });
             }
         }
         function onLoad() {
             if (ready) { fail(); return; } // A reloaded child cannot reuse stale state.
-            send({ kind: 'init', language: document.documentElement.lang || navigator.language,
+            send({ kind: 'init', language: options.getLanguage?.() || options.language || pBrowser.i18n?.getUILanguage?.() || document.documentElement.lang || navigator.language,
                 labels: Object.fromEntries(labelKeys.map(key => [key, options.translate?.(key) || ''])), settings: visualSettings(options.settings) });
         }
         window.addEventListener('message', onMessage);

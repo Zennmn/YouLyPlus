@@ -1,11 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
-import vm from 'node:vm';
-import { normalizeAppleLyricsOrder } from '../src/lib/appleLyricsSources.js';
+import { lyricsHarness, memory } from './appleLyricsServiceHarness.mjs';
 globalThis.self = globalThis;
 const { AppleMusicLyricsService } = await import('../src/background/services/appleMusicLyricsService.js');
-const { parseAppleTTML } = await import('../src/lib/parser.js');
+const { parseAMLLLyrics } = await import('../src/background/utils/amllParser.js');
 const HUB = 'https://2755337087.github.io/ttml-hub/';
 const AM = 'https://raw.githubusercontent.com/Zennmn/am-lyrics/main/';
 const amllURL = id => `https://raw.githubusercontent.com/amll-dev/amll-ttml-db/main/am-lyrics/${id}.ttml`;
@@ -78,24 +76,27 @@ test('LunaBeat uses a stored index if refresh fails and rejects out-of-repositor
   assert.throws(() => service.pathURL(HUB, 'lyrics/../../evil', 'lyrics/'));
   assert.throws(() => service.pathURL(HUB, 'https://elsewhere/lyrics/test', 'lyrics/'));
 });
-test('native TTML and nested AMLL paragraphs retain lyrics once and keep inline translation separate', () => {
-  const parsed = parseAppleTTML(ttml.replace('<div>', '<div><div>').replace('</div>', '</div></div>'));
-  assert.equal(parsed.lyrics.length, 1);
-  assert.equal(parsed.lyrics[0].translation.text, '你好世界');
-  const native = parseAppleTTML('<tt xmlns="http://www.w3.org/ns/ttml"><body><div><p begin="1s" end="2s">Native line</p></div></body></tt>');
-  assert.equal(native.lyrics[0].text, 'Native line');
+test('AMLL parsing retains nested lyrics once and keeps inline translation and word timing separate', () => {
+  const nested = ttml.replace('<div>', '<div><div>').replace('</div>', '</div></div>');
+  const parsed = parseAMLLLyrics(nested);
+  assert.equal(parsed.metadata.ttmlParser, 'amll-1');
+  assert.equal(parsed.data.length, 1);
+  assert.equal(parsed.data[0].text, 'Hello world');
+  assert.equal(parsed.data[0].translation.text, '你好世界');
+  assert.equal(parsed.data[0].romanizedText, 'hello roman');
+  assert.deepEqual(parsed.data[0].syllabus.map(word => [word.text, word.time]), [['Hello', 1000], ['world', 2000]]);
+  const native = parseAMLLLyrics('<tt xmlns="http://www.w3.org/ns/ttml"><body><div><p begin="1s" end="2s">Native line</p></div></body></tt>');
+  assert.equal(native.data[0].text, 'Native line');
+  assert.deepEqual([native.data[0].startTime, native.data[0].endTime], [1, 2]);
 });
-test('Apple Music requests bypass old native-first and cross-provider caches', async () => {
-  const source = readFileSync(new URL('../src/background/core/lyricsService.js', import.meta.url), 'utf8');
-  const get = source.slice(source.indexOf('  static async getOrFetch('), source.indexOf('  static async getAppleMusicLyrics('));
-  const apple = source.slice(source.indexOf('  static async getAppleMusicLyrics('), source.indexOf('  static async getFromDB('));
-  const winner = { provider: 'amll', data: [{}] }, cache = new Map();
-  const service = vm.runInNewContext(`(class { static createCacheKey(s) { return s.appleId; } static cacheProviderLyrics() {} ${get} ${apple} })`, {
-    normalizeAppleLyricsOrder, SettingsManager: { get: async () => ({}), getLyricsSettings: async () => ({}) },
-    appleMusicLyrics: { rememberNative() {}, resolve: async () => winner }, state: { getCached: key => cache.get(key), setCached: (key, value) => cache.set(key, value) },
-  });
-  assert.equal((await service.getOrFetch(song)).lyrics.provider, winner.provider);
-  assert.equal(cache.get('123').lyrics.provider, 'amll');
+test('Apple Music requests use the Apple cache without a legacy native-first short circuit', async t => {
+  const winner = { provider: 'amll', data: [{ text: 'Winner' }] };
+  const backend = lyricsHarness({ resolver: async () => winner });
+  t.after(backend.restore);
+  const first = await backend.service.getOrFetch(song);
+  assert.equal(first.lyrics.provider, winner.provider);
+  assert.equal(backend.getCached('apple-sources-v2-amll:123').lyrics.provider, 'amll');
+  assert.equal((await backend.service.getOrFetch(song)).lyrics, first.lyrics);
 });
 
 test('late native lyrics remain available for a manual switch using the initial song snapshot', async () => {
@@ -106,19 +107,18 @@ test('late native lyrics remain available for a manual switch using the initial 
   assert.equal((await service.provider('applemusic', initialSong)).provider, 'applemusic');
 });
 
-test('changing the settings order invalidates the winning source cache', async () => {
-  const source = readFileSync(new URL('../src/background/core/lyricsService.js', import.meta.url), 'utf8');
-  const method = source.slice(source.indexOf('  static async getAppleMusicLyrics('), source.indexOf('  static async getFromDB('));
-  let order = 'amll,lunabeat,amlyrics,applemusic', cached;
+test('changing the settings order invalidates the winning source cache', async t => {
   const calls = [];
-  const service = vm.runInNewContext(`(class { static createCacheKey() { return 'song'; } static cacheProviderLyrics() {} ${method} })`, {
-    normalizeAppleLyricsOrder,
-    SettingsManager: { get: async () => ({}), getLyricsSettings: async () => ({ appleMusicLyricsProviderOrder: order }) },
-    state: { getCached: () => cached, setCached: (_, value) => { cached = value; } },
-    appleMusicLyrics: { rememberNative() {}, resolve: async (_, __, configured) => { calls.push(configured.join(',')); return { provider: configured[0] }; } },
+  const backend = lyricsHarness({
+    storage: memory(),
+    resolver: async (provider, order) => {
+      calls.push(provider || order.join(','));
+      return { provider: provider || order[0], data: [{ text: 'Winner' }] };
+    },
   });
-  assert.equal((await service.getAppleMusicLyrics(song)).lyrics.provider, 'amll');
-  order = 'amlyrics,amll,applemusic';
-  assert.equal((await service.getAppleMusicLyrics(song)).lyrics.provider, 'amlyrics');
+  t.after(backend.restore);
+  assert.equal((await backend.service.getAppleMusicLyrics(song)).lyrics.provider, 'amll');
+  backend.setProviderOrder('amlyrics,amll,applemusic');
+  assert.equal((await backend.service.getAppleMusicLyrics(song)).lyrics.provider, 'amlyrics');
   assert.equal(calls.length, 2);
 });

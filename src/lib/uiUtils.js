@@ -166,20 +166,22 @@ export function bindAutoSave(controls, onSaveCallback) {
         const element = document.getElementById(control.id);
         if (element) {
             const eventType = (control.type === 'checkbox' || element.tagName === 'SELECT') ? 'change' : 'input';
-            const saveHandler = (e) => {
-                const value = control.type === 'checkbox' ? e.target.checked : e.target.value;
-                updateSettings({ [control.key]: value });
-                saveSettings();
-                if (onSaveCallback) {
-                    onSaveCallback(control.key, value);
+            const saveHandler = async () => {
+                try {
+                    await saveSettings();
+                    if (onSaveCallback) onSaveCallback(control.key);
+                } catch (error) {
+                    console.warn('YouLy+: could not save setting', error);
+                    window.dispatchEvent(new CustomEvent('YOUPLUS_SETTINGS_SAVE_FAILED', { detail: { key: control.key } }));
                 }
             };
-
-            if (control.debounce) {
-                element.addEventListener(eventType, debounce(saveHandler, control.debounce));
-            } else {
-                element.addEventListener(eventType, saveHandler);
-            }
+            const persist = control.debounce ? debounce(saveHandler, control.debounce) : saveHandler;
+            element.addEventListener(eventType, event => {
+                const value = control.type === 'checkbox' ? event.target.checked : event.target.value;
+                // Stage every edit now so saving an adjacent control never writes an older value.
+                updateSettings({ [control.key]: value });
+                persist();
+            });
         }
     });
 }

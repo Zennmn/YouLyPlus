@@ -879,3 +879,206 @@ div#local-lyrics-list .draggable-source-item:only-of-type {
 .player-font-preview { padding: 16px; border-radius: 12px; background: var(--md-sys-color-surface-container-high); font-size: 22px; line-height: 1.6; overflow-wrap: anywhere; }
 .player-font-preview small { font-size: 14px; }
 @media (max-width: 768px) { .player-font-setting { flex-direction: column; gap: 16px; } .player-font-control { width: 100%; } }
+
+[hidden] {
+    display: none !important;
+}
+
+.section-intro {
+    margin: -16px 0 28px;
+    max-width: 760px;
+    color: var(--md-sys-color-on-surface-variant);
+    font-size: 0.925rem;
+    line-height: 1.55;
+}
+
+.native-select,
+.native-input {
+    min-height: 40px;
+    box-sizing: border-box;
+    padding: 8px 12px;
+    border: 1px solid var(--md-sys-color-outline);
+    border-radius: var(--border-radius-medium);
+    background: var(--md-sys-color-surface-container-high);
+    color: var(--md-sys-color-on-surface);
+    font: inherit;
+    outline: none;
+}
+
+.native-select:focus,
+.native-input:focus {
+    border-color: var(--md-sys-color-primary);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--md-sys-color-primary) 22%, transparent);
+}
+
+.native-select:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+.wide-input {
+    width: min(52vw, 520px);
+}
+
+textarea.native-input {
+    width: 100%;
+    min-height: 96px;
+    resize: vertical;
+}
+
+.input-with-button {
+    width: min(52vw, 520px);
+}
+
+.input-with-button .native-input {
+    flex: 1;
+    min-width: 0;
+}
+
+.target-language-select {
+    width: min(100%, 620px) !important;
+}
+
+.target-language-select .native-select {
+    width: 100%;
+}
+
+.status-message.error,
+.setting-description.error {
+    color: var(--md-sys-color-error);
+}
+
+.info-panel {
+    margin-bottom: 28px;
+    padding: 20px 22px;
+    border-radius: var(--border-radius-large);
+    background: var(--md-sys-color-primary-container);
+    color: var(--md-sys-color-on-primary-container);
+    line-height: 1.5;
+}
+
+.info-panel strong {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 1rem;
+}
+
+.info-panel p {
+    margin: 8px 0 0;
+    font-size: 0.85rem;
+}
+
+.cache-explanation {
+    margin: 10px 4px 0;
+    color: var(--md-sys-color-on-surface-variant);
+    font-size: 0.82rem;
+    line-height: 1.5;
+}
+
+.guide-list {
+    margin: 8px 0 0 20px;
+    padding: 0;
+    font-size: 0.9rem;
+}
+
+.guide-list li + li {
+    margin-top: 5px;
+}
+
+.inline-link {
+    display: inline-block;
+    margin-top: 10px;
+    color: inherit;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+.add-source-container .native-select {
+    flex: 1;
+    min-width: 0;
+}
+
+.source-meta {
+    color: var(--md-sys-color-on-surface-variant);
+    font-size: 0.76rem;
+    line-height: 1.35;
+    white-space: nowrap;
+}
+
+.local-lyrics-item {
+    cursor: default;
+    gap: 10px;
+}
+
+.local-lyrics-icon {
+    width: 20px;
+    height: 20px;
+    color: var(--md-sys-color-primary);
+}
+
+.local-lyrics-copy {
+    display: flex;
+    flex: 1;
+    min-width: 0;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.local-lyrics-copy .source-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.dict-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.setting-status-badge {
+    font-size: 0.8rem;
+    opacity: 0.8;
+}
+
+.setting-status-badge.installed {
+    color: var(--md-sys-color-primary);
+    opacity: 1;
+}
+
+.error-text {
+    color: var(--md-sys-color-error) !important;
+}
+
+.about-apple-card .version {
+    margin-left: 8px;
+    color: var(--md-sys-color-on-surface-variant);
+    font-size: 0.8rem;
+    font-weight: 400;
+}
+
+.about-apple-card .links-container {
+    margin-top: 4px;
+}
+
+@media (max-width: 768px) {
+    .wide-input,
+    .input-with-button {
+        width: 100%;
+    }
+
+    .setting-item {
+        align-items: stretch;
+    }
+
+    .setting-item:not(.full-width) {
+        flex-wrap: wrap;
+    }
+
+    .setting-control {
+        max-width: 100%;
+    }
+}

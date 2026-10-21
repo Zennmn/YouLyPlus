@@ -4,52 +4,19 @@
     "description": "Extension name"
   },
   "extensionDescription": {
-    "message": "針對 YouTube Music、Apple Music 及 Tidal 的進階歌詞功能，支援逐行及逐字同步。",
-    "description": "Extension description"
+    "message": "面向 Apple Music 的 AMLL 歌詞播放器，支援 Apple 內建翻譯、本機 TTML 與可選機器翻譯"
   },
   "popupTitle": {
     "message": "YouLy+ 設定",
     "description": "Title shown in the popup header and page title"
   },
-  "tabGeneral": {
-    "message": "一般",
-    "description": "General tab label"
-  },
-  "tabAppearance": {
-    "message": "外觀",
-    "description": "Appearance tab label"
-  },
-  "tabAdvanced": {
-    "message": "進階",
-    "description": "Advanced tab label"
-  },
-  "sectionCoreFeatures": {
-    "message": "核心功能",
-    "description": "Section title in popup General tab"
-  },
   "settingEnableExtension": {
     "message": "啟用 YouLy+",
     "description": "Label for the master enable toggle"
   },
-  "sectionDataSources": {
-    "message": "資料來源",
-    "description": "Section title in popup General tab"
-  },
   "settingPrimaryProvider": {
     "message": "主要歌詞提供者",
     "description": "Label for lyrics provider dropdown"
-  },
-  "settingIntegrateSponsorBlock": {
-    "message": "整合 SponsorBlock",
-    "description": "Label for SponsorBlock toggle in popup"
-  },
-  "sectionReadability": {
-    "message": "可讀性",
-    "description": "Section title in popup Appearance tab"
-  },
-  "sectionDisplaySettings": {
-    "message": "顯示設定",
-    "description": "Section title in popup Appearance tab"
   },
   "settingLightweightMode": {
     "message": "輕量模式",
@@ -58,10 +25,6 @@
   "settingWordByWord": {
     "message": "逐字高亮",
     "description": "Label for word-by-word highlighting toggle"
-  },
-  "sectionPerformance": {
-    "message": "效能",
-    "description": "Section title in popup Advanced tab"
   },
   "sectionDataManagement": {
     "message": "資料管理",
@@ -88,8 +51,7 @@
     "description": "Link to full settings page"
   },
   "msgSettingsSaved": {
-    "message": "設定已儲存！請重新整理 YouTube 頁面以套用變更。",
-    "description": "Snackbar message after saving settings in popup"
+    "message": "設定已儲存，Apple Music 歌詞會自動重新整理。"
   },
   "msgErrorSavingSettings": {
     "message": "儲存設定時發生錯誤。",
@@ -119,59 +81,9 @@
     "message": "YouLy+ 設定",
     "description": "Title shown in full settings page header and nav drawer"
   },
-  "navGeneral": {
-    "message": "一般",
-    "description": "Navigation drawer label"
-  },
-  "navSources": {
-    "message": "來源",
-    "description": "Navigation drawer label"
-  },
-  "navAppearance": {
-    "message": "外觀",
-    "description": "Navigation drawer label"
-  },
-  "navTranslation": {
-    "message": "翻譯",
-    "description": "Navigation drawer label"
-  },
-  "navCache": {
-    "message": "快取",
-    "description": "Navigation drawer label"
-  },
   "navLocalLyrics": {
     "message": "本機歌詞",
     "description": "Navigation drawer label"
-  },
-  "navAbout": {
-    "message": "關於",
-    "description": "Navigation drawer label"
-  },
-  "msgSettingsSavedRestart": {
-    "message": "設定已儲存。請重新啟動音樂分頁以套用變更。",
-    "description": "Notification text when no platform tabs are found"
-  },
-  "msgSettingsSavedRestartPlatform": {
-    "message": "設定已儲存。請重新啟動 $PLATFORMS$ 以套用變更。",
-    "description": "Notification text with platform names",
-    "placeholders": {
-      "PLATFORMS": {
-        "content": "$1",
-        "example": "YouTube Music & Apple Music"
-      }
-    }
-  },
-  "buttonRestart": {
-    "message": "重新啟動",
-    "description": "Restart button text"
-  },
-  "buttonRestartTabs": {
-    "message": "重新啟動分頁",
-    "description": "Restart button text for multiple tabs"
-  },
-  "categoryCoreFunc": {
-    "message": "核心功能",
-    "description": "Settings category title"
   },
   "descEnableExtension": {
     "message": "全域啟用或停用擴充功能。",
@@ -181,125 +93,41 @@
     "message": "啟用卡拉 OK 風格的逐字高亮（如果可用）。",
     "description": "Description for word-by-word toggle"
   },
-  "categoryYouTubeMusic": {
-    "message": "YouTube Music 設定",
-    "description": "Settings category title"
-  },
-  "settingFullscreenSongInfo": {
-    "message": "啟用全螢幕曲目資訊",
-    "description": "Label for fullscreen song info toggle"
-  },
-  "descFullscreenSongInfo": {
-    "message": "在全螢幕模式下顯示曲目詳情，包括進度條、發行日期、標題和演出者。",
-    "description": "Description for fullscreen song info"
-  },
-  "settingDisableSongInfoSeekbar": {
-    "message": "停用歌曲資訊進度條",
-    "description": "Label for disabling seekbar in fullscreen song info"
-  },
-  "descDisableSongInfoSeekbar": {
-    "message": "從全螢幕歌曲資訊顯示中隱藏進度條。",
-    "description": "Description for disabling seekbar in fullscreen song info"
-  },
-  "settingUseSponsorBlock": {
-    "message": "使用 SponsorBlock API",
-    "description": "Label for SponsorBlock toggle in settings"
-  },
-  "descUseSponsorBlock": {
-    "message": "跳過非音樂部分，如片頭、片尾或贊助片段。",
-    "description": "Description for SponsorBlock toggle"
-  },
-  "settingPreferUnisonVideo": {
-    "description": "Label for prefer Unison video toggle in settings",
-    "message": "影片優先使用 Unison"
-  },
-  "descPreferUnisonVideo": {
-    "description": "Description for prefer Unison video toggle",
-    "message": "啟用後，影片內容將優先使用 Unison 服務，並在 Unison 提供歌詞時忽略 SponsorBlock 片段。"
-  },
   "categoryAppleMusic": {
     "message": "Apple Music 設定",
     "description": "Settings category title"
   },
-  "settingPreferExternal": {
-    "message": "針對逐行同步曲目優先使用外部歌詞",
-    "description": "Label for Apple Music bypass toggle"
+  "settingTitleCorrection": {
+    "message": "歌名修正",
+    "description": "Label for the Apple Music song title correction setting"
   },
-  "descPreferExternal": {
-    "message": "啟用後，如果 Apple Music 僅提供逐行同步而非逐字同步，應用程式將使用外部歌詞來源。",
-    "description": "Description for Apple Music bypass toggle"
+  "descTitleCorrection": {
+    "message": "啟用後，AMLL 播放器會依所選地區顯示歌曲的標題、歌手與專輯名稱。",
+    "description": "Description for the Apple Music song title correction setting"
   },
-"settingTitleCorrection": {
-"message": "歌名修正",
-"description": "Label for the Apple Music song title correction setting"
-},
-"descTitleCorrection": {
-"message": "啟用後，AMLL 播放器會依所選地區顯示歌曲的標題、歌手與專輯名稱。",
-"description": "Description for the Apple Music song title correction setting"
-},
-"titleCorrectionOff": {
-"message": "關閉",
-"description": "Title correction option: disabled"
-},
-"titleCorrectionOriginal": {
-"message": "依歌曲原始地區修正",
-"description": "Title correction option: original region"
-},
-"titleCorrectionChina": {
-"message": "固定中國大陸",
-"description": "Title correction option: mainland China"
-},
-"titleCorrectionJapan": {
-"message": "固定日本",
-"description": "Title correction option: Japan"
-},
-  "sectionSources": {
-    "message": "來源",
-    "description": "Sources section title"
+  "titleCorrectionOff": {
+    "message": "關閉",
+    "description": "Title correction option: disabled"
   },
-  "categoryLyricsProvider": {
-    "message": "歌詞提供者",
-    "description": "Category title"
+  "titleCorrectionOriginal": {
+    "message": "依歌曲原始地區修正",
+    "description": "Title correction option: original region"
+  },
+  "titleCorrectionChina": {
+    "message": "固定中國大陸",
+    "description": "Title correction option: mainland China"
+  },
+  "titleCorrectionJapan": {
+    "message": "固定日本",
+    "description": "Title correction option: Japan"
   },
   "labelProviderOrder": {
     "message": "歌詞來源優先順序",
     "description": "Label for provider order configuration"
   },
-  "helperProviderOrder": {
-    "message": "拖曳以排列優先順序。排在最上方的來源將作為首選。",
-    "description": "Helper text for provider ordering"
-  },
-  "labelAvailableProviders": {
-    "message": "可用來源",
-    "description": "Label for available providers dropdown"
-  },
   "buttonAddProvider": {
     "message": "新增來源",
     "description": "Add provider button text"
-  },
-  "labelCustomKpoeUrl": {
-    "message": "自訂 KPoe 伺服器 URL",
-    "description": "Label for custom server URL input"
-  },
-  "helperCustomKpoeUrl": {
-    "message": "輸入您自行架設的 KPoe 伺服器基礎 URL。",
-    "description": "Helper text for custom KPoe URL"
-  },
-  "labelSourceOrder": {
-    "message": "Lyrics+ 來源順序",
-    "description": "Label for source order configuration"
-  },
-  "helperSourceOrder": {
-    "message": "拖放以重新排序 Lyrics+ 的來源。",
-    "description": "Helper text for source ordering"
-  },
-  "labelAvailableSources": {
-    "message": "可用來源",
-    "description": "Label for available sources dropdown"
-  },
-  "buttonAddSource": {
-    "message": "新增來源",
-    "description": "Add source button text"
   },
   "msgAllSourcesAdded": {
     "message": "所有來源皆已新增",
@@ -339,10 +167,6 @@
       }
     }
   },
-  "sectionLocalLyrics": {
-    "message": "本機歌詞",
-    "description": "Local lyrics section title"
-  },
   "categoryManageLocalLyrics": {
     "message": "管理已上傳歌詞",
     "description": "Category title"
@@ -354,60 +178,6 @@
   "buttonRefreshList": {
     "message": "重新整理列表",
     "description": "Refresh local lyrics list button"
-  },
-  "titleAddLocalLyrics": {
-    "message": "新增本機歌詞",
-    "description": "FAB tooltip"
-  },
-  "modalUploadTitle": {
-    "message": "上傳新本機歌詞",
-    "description": "Modal dialog title"
-  },
-  "labelSongTitle": {
-    "message": "曲名",
-    "description": "Input label"
-  },
-  "labelArtistName": {
-    "message": "演出者名稱",
-    "description": "Input label"
-  },
-  "labelAlbumName": {
-    "message": "專輯名稱（選填）",
-    "description": "Input label"
-  },
-  "labelLyricsFile": {
-    "message": "歌詞檔案",
-    "description": "File input label"
-  },
-  "helperLyricsFile": {
-    "message": "上傳您的 LRC、ELRC、Apple TTML 或 JSON 檔案。",
-    "description": "Helper text for lyrics file input"
-  },
-  "buttonUploadLyrics": {
-    "message": "上傳歌詞",
-    "description": "Upload button text"
-  },
-  "msgUploadRequired": {
-    "message": "曲名、演出者名稱及歌詞檔案為必填項。",
-    "description": "Error when required fields are missing"
-  },
-  "msgUploading": {
-    "message": "正在上傳歌詞...",
-    "description": "Status during upload"
-  },
-  "msgUploadSuccess": {
-    "message": "歌詞已成功上傳！",
-    "description": "Status after successful upload"
-  },
-  "msgUploadError": {
-    "message": "上傳歌詞時發生錯誤：$ERROR$",
-    "description": "Error during upload",
-    "placeholders": {
-      "ERROR": {
-        "content": "$1",
-        "example": "Invalid format"
-      }
-    }
   },
   "msgFileReadError": {
     "message": "檔案讀取錯誤。",
@@ -446,10 +216,6 @@
         "example": "Storage error"
       }
     }
-  },
-  "sectionTranslation": {
-    "message": "翻譯",
-    "description": "Translation section title"
   },
   "categoryTranslationService": {
     "message": "翻譯服務",
@@ -627,10 +393,6 @@
     "message": "自訂發送到 AI 用於拼音/注音的提示詞。",
     "description": "Helper text"
   },
-  "sectionAppearance": {
-    "message": "外觀",
-    "description": "Appearance section title"
-  },
   "categoryTextDisplay": {
     "message": "文字顯示",
     "description": "Category title"
@@ -655,105 +417,9 @@
     "message": "如果歌詞已是拉丁字母，則自動隱藏注音指南。",
     "description": "Description"
   },
-  "settingDynamicBkgVocal": {
-    "message": "動態背景和聲位置",
-    "description": "Toggle label"
-  },
-  "descDynamicBkgVocal": {
-    "message": "早於主歌詞開始的背景歌詞將顯示在頂部。",
-    "description": "Description"
-  },
-  "categoryPerformance": {
-    "message": "效能與相容性",
-    "description": "Category title"
-  },
   "descLightweightMode": {
     "message": "減少動畫和視覺效果，以提升在舊裝置上的效能。",
     "description": "Description"
-  },
-  "settingHideOffscreen": {
-    "message": "隱藏螢幕外歌詞行",
-    "description": "Toggle label"
-  },
-  "descHideOffscreen": {
-    "message": "隱藏並移除所有目前在螢幕上不可見的動畫歌詞行。建議低階裝置開啟。",
-    "description": "Description"
-  },
-  "categoryVisualEffects": {
-    "message": "視覺效果",
-    "description": "Category title"
-  },
-  "settingBlurInactive": {
-    "message": "模糊非使用中歌詞",
-    "description": "Toggle label"
-  },
-  "descBlurInactive": {
-    "message": "對目前未演唱的歌詞套用模糊效果，類似於 Apple Music。",
-    "description": "Description"
-  },
-  "settingDynamicBackground": {
-    "message": "啟用動態背景（播放器視圖）",
-    "description": "Toggle label"
-  },
-  "descDynamicBackground": {
-    "message": "當播放器展開時套用動畫專輯背景。此設定在全螢幕模式下無效（全螢幕始終啟用動態背景）。",
-    "description": "Description"
-  },
-  "settingAudioBeatSync": {
-    "message": "基於音訊的動態背景節拍脈衝",
-    "description": "Toggle label"
-  },
-  "descAudioBeatSync": {
-    "message": "使動態背景層隨音訊節拍脈衝。如果您使用 Better Lyrics Shaders 或其他視覺化工具，應停用此設定。",
-    "description": "Description"
-  },
-  "settingRelaxScroll": {
-    "message": "平緩滾動",
-    "description": "Label for relax scrolling toggle"
-  },
-  "descRelaxScroll": {
-    "message": "更慢的滾動動畫，並停用歌詞的文字縮放動畫。",
-    "description": "Description for relax scrolling toggle"
-  },
-  "settingSongPaletteFullscreen": {
-    "message": "在影像全螢幕模式下使用曲目調色盤",
-    "description": "Toggle label"
-  },
-  "descSongPaletteFullscreen": {
-    "message": "在音軌影像全螢幕模式下，為歌詞套用曲目的調色盤顏色。",
-    "description": "Description"
-  },
-  "settingSongPaletteAll": {
-    "message": "在所有模式下使用曲目調色盤",
-    "description": "Toggle label"
-  },
-  "descSongPaletteAll": {
-    "message": "在所有顯示模式下為歌詞套用曲目的調色盤顏色。",
-    "description": "Description"
-  },
-  "labelOverridePaletteColor": {
-    "message": "覆蓋調色盤顏色",
-    "description": "Input label"
-  },
-  "helperOverridePaletteColor": {
-    "message": "使用自訂顏色覆蓋曲目調色盤顏色（僅限歌詞顏色，不包括動態背景）（留空則不覆蓋）。",
-    "description": "Helper text"
-  },
-  "categoryCustomStyling": {
-    "message": "自訂樣式",
-    "description": "Category title"
-  },
-  "labelCustomCSS": {
-    "message": "自訂 CSS",
-    "description": "Textarea label"
-  },
-  "helperCustomCSS": {
-    "message": "為歌詞顯示套用您自己的樣式。請謹慎使用。建議使用 UserStyles 進行建立或測試。",
-    "description": "Helper text"
-  },
-  "sectionCache": {
-    "message": "快取",
-    "description": "Cache section title"
   },
   "labelCacheStrategy": {
     "message": "快取策略",
@@ -764,11 +430,11 @@
     "description": "Description"
   },
   "optionAggressive": {
-    "message": "積極（2 小時）",
+    "message": "積極（24 小時）",
     "description": "Cache strategy option"
   },
   "optionModerate": {
-    "message": "中等（1 小時）",
+    "message": "適中（12 小時）",
     "description": "Cache strategy option"
   },
   "optionNone": {
@@ -779,12 +445,8 @@
     "message": "目前快取用量",
     "description": "Label for cache usage display"
   },
-  "sectionAbout": {
-    "message": "關於",
-    "description": "About section"
-  },
   "aboutDescription": {
-    "message": "這個擴充功能誕生於一個簡單的想法：聽音樂應該是一種沉浸式體驗，而不僅僅是背景活動。我們厭倦了 YouTube 靜態歌詞和過時的介面，因此決定打造我們一直想要的播放器。我們的目標是讓您的音樂時光更美麗、更迷人及更有趣。我們希望您會喜歡。youly+ 以前身為傲地以開源形式運作。無論您發現了錯誤、有絕佳創意或想做出貢獻，我們都非常期待收到您的訊息。",
+    "message": "YouLy+ 專注於 Apple Music 的全螢幕 AMLL 歌詞、內建翻譯、本機 TTML 與可選機器翻譯。",
     "description": "About page description text"
   },
   "categoryLinksSupport": {
@@ -854,10 +516,6 @@
         "example": "Invalid JSON"
       }
     }
-  },
-  "msgNoActiveTabs": {
-    "message": "未找到作用中的音樂分頁。請手動重新整理。",
-    "description": "Alert when no music tabs found for restart"
   },
   "titleShowHideApiKey": {
     "message": "顯示/隱藏 API 金鑰",
@@ -991,106 +649,6 @@
     "message": "您的 API 金鑰將儲存在本地。免費方案的金鑰通常以 :fx 結尾。",
     "description": "Helper text"
   },
-  "sourceNameLyricsPlus": {
-    "message": "Lyrics+ (使用者生成)",
-    "description": "Display name for lyricsplus source"
-  },
-  "sourceNameApple": {
-    "message": "Apple Music",
-    "description": "Display name for apple source"
-  },
-  "sourceNameQQ": {
-    "message": "QQ Music",
-    "description": "Display name for qq source"
-  },
-  "sourceNameSpotify": {
-    "message": "Musixmatch (Spotify)",
-    "description": "Display name for spotify source"
-  },
-  "sourceNameMusixmatch": {
-    "message": "Musixmatch (直接)",
-    "description": "Display name for musixmatch source"
-  },
-  "sourceNameMusixmatchWord": {
-    "message": "Musixmatch (單字)",
-    "description": "Display name for musixmatch-word source"
-  },
-  "sourceNameLyricsPlusProvider": {
-    "message": "Lyrics+",
-    "description": "Provider generic name"
-  },
-  "sourceNameCustomKpoe": {
-    "message": "自訂 KPoe 伺服器",
-    "description": "Provider generic name for custom KPoe server"
-  },
-  "sourceNameLRCLib": {
-    "message": "LRCLIB",
-    "description": "LRCLIB provider name"
-  },
-  "sourceNameUnison": {
-    "message": "Unison (BetterLyrics)",
-    "description": "Unison provider name"
-  },
-  "sourceNameLrcred": {
-    "message": "lrc.red",
-    "description": "lrc.red provider name"
-  },
-  "navCatInterface": {
-    "message": "介面",
-    "description": "Navigation category for interface settings"
-  },
-  "navCatLyricsSources": {
-    "message": "歌詞來源",
-    "description": "Navigation category for lyrics sources"
-  },
-  "navCatStorageData": {
-    "message": "儲存與資料",
-    "description": "Navigation category for storage & data"
-  },
-  "navCatApplication": {
-    "message": "應用程式",
-    "description": "Navigation category for application info"
-  },
-  "navSubtitleAppearance": {
-    "message": "視覺效果、主題、排版",
-    "description": "Subtitle for Appearance navigation item"
-  },
-  "navSubtitleGeneral": {
-    "message": "核心功能、YTM 與 Apple Music",
-    "description": "Subtitle for General navigation item"
-  },
-  "navSubtitleSources": {
-    "message": "歌詞來源與優先級",
-    "description": "Subtitle for Sources navigation item"
-  },
-  "navSubtitleTranslation": {
-    "message": "AI 模型、提示詞、羅馬拼音",
-    "description": "Subtitle for Translation navigation item"
-  },
-  "navSubtitleCache": {
-    "message": "儲存佔用與快取策略",
-    "description": "Subtitle for Cache navigation item"
-  },
-  "navSubtitleLocalLyrics": {
-    "message": "管理已上傳的 LRC 與 TTML 檔案",
-    "description": "Subtitle for Local Lyrics navigation item"
-  },
-  "navSubtitleAbout": {
-    "message": "版本、備份、匯出與連結",
-    "description": "Subtitle for About navigation item"
-  },
-  "categoryCustomKpoe": {
-    "message": "自訂 KPoe",
-    "description": "Category title for Custom KPoe settings"
-  },
-  "categoryUnison": {
-    "message": "Unison",
-    "description": "Category title for Unison settings"
-  },
-  "categoryLyricsPlus": {
-    "message": "Lyrics+",
-    "description": "Category title for Lyrics+ settings"
-  },
   "categoryCacheConfig": {
     "message": "快取配置與儲存",
     "description": "Category title for cache settings"
@@ -1098,10 +656,6 @@
   "labelFastPath": {
     "message": "快速路徑",
     "description": "Label indicator for primary fast path provider"
-  },
-  "placeholderCustomKpoeUrl": {
-    "message": "https://example.com/api",
-    "description": "Placeholder for custom KPoe server URL input"
   },
   "placeholderOpenRouterModel": {
     "message": "google/gemini-2.0-flash-001",
@@ -1118,14 +672,6 @@
   "placeholderCustomRomanizationPrompt": {
     "message": "自訂羅馬拼音提示詞...",
     "description": "Placeholder for custom romanization prompt textarea"
-  },
-  "placeholderCustomCSS": {
-    "message": "/* Custom CSS */",
-    "description": "Placeholder for custom CSS textarea"
-  },
-  "placeholderPaletteColor": {
-    "message": "#ffb5a0",
-    "description": "Placeholder for override palette color"
   },
   "labelCacheUsageFormat": {
     "message": "已使用 $SIZE$ MB（已快取 $COUNT$ 首歌曲）",
@@ -1147,17 +693,9 @@
     "message": "快取資訊無法使用。",
     "description": "Message when cache info is unavailable"
   },
-  "placeholderSelectProvider": {
-    "message": "選取提供商...",
-    "description": "Select a Provider on settings menu"
-  },
   "placeholderSelectSource": {
     "message": "選取來源...",
     "description": "Select a Source on settings menu"
-  },
-  "msgAllProvidersAdded": {
-    "message": "已新增所有提供商",
-    "description": "User added All providers on settings menu"
   },
   "noteDeepLSupportedLangs": {
     "message": "DeepL 官方支援 33 種語言。如果請求不支援的語言，翻譯將自動退回至 Google 翻譯。",
@@ -1247,12 +785,6 @@
       }
     }
   },
-  "labelSourcePlatform": {
-    "message": "音樂平台"
-  },
-  "helperAppleProviderOrder": {
-    "message": "按下列順序取得歌詞，可拖動排序或移除來源。Apple Music 始終作為最後的備援來源。"
-  },
   "optionCustomLLM": {
     "message": "第三方 LLM（相容 Chat Completions）"
   },
@@ -1295,13 +827,463 @@
   "msgCustomLLMTestFailed": {
     "message": "連線失敗："
   },
-  "labelPlayerFont": { "message": "播放器字體檔案" },
-  "descPlayerFont": { "message": "匯入 TTF、OTF、WOFF 或 WOFF2 字體檔案，統一替換播放器全部文字。字體儲存在擴充功能本機，無需安裝到系統，單檔最大 64 MB。" },
-  "buttonDefaultPlayerFont": { "message": "恢復預設字體" },
-  "buttonImportPlayerFont": { "message": "匯入字體檔案" },
-  "msgPlayerFontDefault": { "message": "目前使用預設字體" },
-  "msgPlayerFontImporting": { "message": "正在匯入字體…" },
-  "msgPlayerFontImportFailed": { "message": "字體匯入失敗，請選擇有效的字體檔案；原字體已保留。" },
-  "msgPlayerFontSize": { "message": "請選擇非空且不超過 64 MB 的字體檔案。" },
-  "msgPlayerFontLoadFailed": { "message": "字體載入失敗，請重新匯入字體檔案。" }
+  "labelPlayerFont": {
+    "message": "播放器字體檔案"
+  },
+  "descPlayerFont": {
+    "message": "匯入 TTF、OTF、WOFF 或 WOFF2 字體檔案，統一替換播放器全部文字。字體儲存在擴充功能本機，無需安裝到系統，單檔最大 64 MB。"
+  },
+  "buttonDefaultPlayerFont": {
+    "message": "恢復預設字體"
+  },
+  "buttonImportPlayerFont": {
+    "message": "匯入字體檔案"
+  },
+  "msgPlayerFontDefault": {
+    "message": "目前使用預設字體"
+  },
+  "msgPlayerFontImporting": {
+    "message": "正在匯入字體…"
+  },
+  "msgPlayerFontImportFailed": {
+    "message": "字體匯入失敗，請選擇有效的字體檔案；原字體已保留。"
+  },
+  "msgPlayerFontSize": {
+    "message": "請選擇非空且不超過 64 MB 的字體檔案。"
+  },
+  "msgPlayerFontLoadFailed": {
+    "message": "字體載入失敗，請重新匯入字體檔案。"
+  },
+  "navPlaybackAppearance": {
+    "message": "播放與外觀"
+  },
+  "navSubtitlePlaybackAppearance": {
+    "message": "播放器、文字、歌名修正與字型"
+  },
+  "navLyricsSourcesApple": {
+    "message": "歌詞來源"
+  },
+  "navSubtitleLyricsSourcesApple": {
+    "message": "AMLL、LunaBeat、AmLyrics、Apple 原生"
+  },
+  "navCatLibrary": {
+    "message": "歌詞庫"
+  },
+  "navSubtitleLocalLyricsApple": {
+    "message": "管理本機匯入的 TTML"
+  },
+  "navCatConfiguration": {
+    "message": "設定"
+  },
+  "navTranslationTransliteration": {
+    "message": "翻譯與音譯"
+  },
+  "navSubtitleTranslationTransliteration": {
+    "message": "服務、提示詞與字典"
+  },
+  "navStorageAdvanced": {
+    "message": "儲存與進階"
+  },
+  "navSubtitleStorageAdvanced": {
+    "message": "快取、備份、說明與授權"
+  },
+  "navCatAppleMusicService": {
+    "message": "Apple Music"
+  },
+  "msgAppleRestart": {
+    "message": "這項變更需要重新載入 Apple Music 才會生效。"
+  },
+  "buttonReloadAppleMusic": {
+    "message": "重新載入 Apple Music"
+  },
+  "categoryApplePlayer": {
+    "message": "Apple Music 播放器"
+  },
+  "settingUseAMLLPlayer": {
+    "message": "使用 AMLL 歌詞播放器"
+  },
+  "descUseAMLLPlayer": {
+    "message": "在原始 AMLL 播放器中顯示 Apple Music 歌詞。關閉後可改用 Apple 原生歌詞檢視。"
+  },
+  "settingAnimatedLyricsBackground": {
+    "message": "動態歌詞背景"
+  },
+  "descAnimatedLyricsBackground": {
+    "message": "保留 AMLL 的專輯背景及原有動畫。"
+  },
+  "labelLyricsDisplayMode": {
+    "message": "歌詞顯示模式"
+  },
+  "descLyricsDisplayMode": {
+    "message": "設定翻譯與音譯的預設顯示方式，播放器選單也提供相同選項。"
+  },
+  "optionDisplayOriginal": {
+    "message": "原文歌詞"
+  },
+  "optionDisplayTranslation": {
+    "message": "翻譯"
+  },
+  "optionDisplayTransliteration": {
+    "message": "音譯"
+  },
+  "optionDisplayBoth": {
+    "message": "翻譯 + 音譯"
+  },
+  "categoryPlayerFont": {
+    "message": "播放器字型"
+  },
+  "sourcesAppleOnlyNote": {
+    "message": "YouLy+ 現在僅支援 Apple Music。以下來源順序適用於所有歌曲。"
+  },
+  "categoryAppleSourceOrder": {
+    "message": "Apple Music 歌詞來源順序"
+  },
+  "descAppleSourceOrder": {
+    "message": "預設依 AMLL、LunaBeat、AmLyrics、Apple Music 原生歌詞的順序尋找。Apple Music 始終保留在最後。"
+  },
+  "sourceNativePinned": {
+    "message": "始終作為最後的備援來源"
+  },
+  "msgSourceOrderSaved": {
+    "message": "歌詞來源順序已儲存。"
+  },
+  "msgSourceOrderSaveFailed": {
+    "message": "無法儲存歌詞來源順序。"
+  },
+  "localLyricsImportGuideTitle": {
+    "message": "請從歌曲播放器匯入 TTML"
+  },
+  "localLyricsImportStep1": {
+    "message": "在目前 Apple Music 歌曲中開啟全螢幕歌詞播放器。"
+  },
+  "localLyricsImportStep2": {
+    "message": "開啟播放器選單並選擇「匯入 TTML」。"
+  },
+  "localLyricsImportStep3": {
+    "message": "檔案會儲存到該歌曲，之後載入時會自動使用。"
+  },
+  "localLyricsOverrideNote": {
+    "message": "符合歌曲的本機 TTML 會優先使用。在此刪除後會恢復自動來源。"
+  },
+  "categoryLocalLyricsLibrary": {
+    "message": "本機 TTML 歌詞庫"
+  },
+  "translationApplePolicyNote": {
+    "message": "只有當 Apple Music 提供原文歌詞，但歌曲沒有內建翻譯時，才會執行機器翻譯。Apple 提供的翻譯會保留。"
+  },
+  "msgPlaybackSettingsSaved": {
+    "message": "播放設定已儲存並套用到 Apple Music。"
+  },
+  "msgTranslationSettingsSaved": {
+    "message": "翻譯設定已儲存並套用到 Apple Music 播放器。"
+  },
+  "msgAdvancedSettingsSaved": {
+    "message": "設定已儲存。"
+  },
+  "msgSettingsSaveFailed": {
+    "message": "設定儲存失敗，請重試。"
+  },
+  "msgTargetResetForDeepL": {
+    "message": "DeepL 不支援先前選擇的目標語言，已重設為自動。"
+  },
+  "msgPlayerFontImported": {
+    "message": "字型已匯入並套用到 Apple Music 播放器。"
+  },
+  "msgPlayerFontReset": {
+    "message": "已恢復預設播放器字型。"
+  },
+  "buttonShowKey": {
+    "message": "顯示"
+  },
+  "buttonHideKey": {
+    "message": "隱藏"
+  },
+  "msgDictionaryUnavailable": {
+    "message": "無法使用"
+  },
+  "msgDictionaryDownloadFailed": {
+    "message": "下載失敗"
+  },
+  "msgDictionaryDownloadFailedDetail": {
+    "message": "離線字典下載失敗，請重試。"
+  },
+  "msgDictionaryDeleteFailed": {
+    "message": "離線字典刪除失敗，請重試。"
+  },
+  "msgLocalLyricsRefreshed": {
+    "message": "本機 TTML 歌詞庫已重新整理。"
+  },
+  "msgImportNoValidSettings": {
+    "message": "檔案中沒有受支援的 YouLy+ 設定。"
+  },
+  "labelBackupRestore": {
+    "message": "備份與還原設定"
+  },
+  "categoryHelpSources": {
+    "message": "說明與原始碼"
+  },
+  "linkIssues": {
+    "message": "問題與說明"
+  },
+  "aboutAppleDescription": {
+    "message": "在原始 AMLL 播放器中顯示 Apple Music 歌詞，支援 Apple 內建翻譯、本機 TTML 與可選機器翻譯。"
+  },
+  "upstreamAttribution": {
+    "message": "基於 AMLL 與開源歌詞來源建置。上游致謝與 AGPL-3.0-only 授權可在程式碼倉庫中查看。"
+  },
+  "footerAppleOnly": {
+    "message": "YouLy+ · Apple Music 歌詞"
+  },
+  "linkTTMLTranslationGuide": {
+    "message": "TTML 翻譯指南"
+  },
+  "tabPlayback": {
+    "message": "播放"
+  },
+  "tabStorage": {
+    "message": "快取與儲存"
+  },
+  "popupAppleDescription": {
+    "message": "Apple Music 歌詞、外觀與快取。"
+  },
+  "popupFullSettingsHint": {
+    "message": "歌詞來源、本機 TTML、翻譯、字型及進階選項位於完整設定頁。"
+  },
+  "playerClose": {
+    "message": "關閉"
+  },
+  "playerSettings": {
+    "message": "歌詞設定"
+  },
+  "playerDisplay": {
+    "message": "顯示"
+  },
+  "playerOriginal": {
+    "message": "原文"
+  },
+  "playerTranslation": {
+    "message": "翻譯"
+  },
+  "playerRomanization": {
+    "message": "音譯"
+  },
+  "playerTranslationAndRomanization": {
+    "message": "翻譯 + 音譯"
+  },
+  "playerTranslationLoading": {
+    "message": "正在載入翻譯…"
+  },
+  "playerTranslationUnavailable": {
+    "message": "目前歌詞來源不提供翻譯"
+  },
+  "playerTranslationError": {
+    "message": "無法從目前歌詞來源載入翻譯"
+  },
+  "playerRomanizationLoading": {
+    "message": "正在載入音譯…"
+  },
+  "playerRomanizationUnavailable": {
+    "message": "目前歌詞來源不提供音譯"
+  },
+  "playerRomanizationError": {
+    "message": "無法從目前歌詞來源載入音譯"
+  },
+  "playerLyricsSource": {
+    "message": "歌詞來源"
+  },
+  "playerAutomatic": {
+    "message": "自動"
+  },
+  "playerSourcePreference": {
+    "message": "偏好來源"
+  },
+  "playerCurrentSource": {
+    "message": "目前來源"
+  },
+  "playerSourceUnavailable": {
+    "message": "目前無法使用"
+  },
+  "playerLyricsOffset": {
+    "message": "歌詞偏移（毫秒）"
+  },
+  "playerAnimatedBackground": {
+    "message": "動態背景"
+  },
+  "playerResetOffset": {
+    "message": "重設偏移"
+  },
+  "playerReloadLyrics": {
+    "message": "重新載入歌詞"
+  },
+  "playerNativePlayer": {
+    "message": "Apple 原生播放器"
+  },
+  "playerConnecting": {
+    "message": "正在連接 Apple Music…"
+  },
+  "playerLoadingLyrics": {
+    "message": "正在載入歌詞…"
+  },
+  "playerSongNotFound": {
+    "message": "暫無可用歌詞"
+  },
+  "playerNotFoundError": {
+    "message": "無法載入歌詞"
+  },
+  "playerPlaybackCommandFailed": {
+    "message": "播放控制失敗"
+  },
+  "playerSettingsSaveFailed": {
+    "message": "無法儲存播放器設定"
+  },
+  "playerFontLoadFailed": {
+    "message": "無法載入字型，請在設定中重新匯入"
+  },
+  "playerFullscreen": {
+    "message": "全螢幕"
+  },
+  "playerExitFullscreen": {
+    "message": "結束全螢幕"
+  },
+  "playerFullscreenChangeFailed": {
+    "message": "無法切換全螢幕"
+  },
+  "playerExportFailed": {
+    "message": "無法匯出診斷資訊"
+  },
+  "playerDownloadNativeTTML": {
+    "message": "下載 Apple Music 原生 TTML"
+  },
+  "playerDownloadingNativeTTML": {
+    "message": "正在取得原生 TTML…"
+  },
+  "playerNativeTTMLUnavailable": {
+    "message": "未能取得這首歌的原生 TTML，請稍後再試"
+  },
+  "playerNativeTTMLSongChanged": {
+    "message": "歌曲已切換，請重新下載"
+  },
+  "playerNativeTTMLFailed": {
+    "message": "無法下載原生 TTML，請重試"
+  },
+  "playerImportTTML": {
+    "message": "匯入 TTML"
+  },
+  "playerImportingTTML": {
+    "message": "正在匯入 TTML…"
+  },
+  "playerImportTTMLHint": {
+    "message": "目前歌曲專用 · 最大 2 MB · 重新整理後保留"
+  },
+  "playerImportTTMLSuccess": {
+    "message": "TTML 已匯入並儲存到目前歌曲"
+  },
+  "playerImportTTMLInvalid": {
+    "message": "TTML 檔案無效，或其中沒有可顯示的歌詞"
+  },
+  "playerImportTTMLTooLarge": {
+    "message": "TTML 檔案不能超過 2 MB"
+  },
+  "playerLocalTTMLSongChanged": {
+    "message": "歌曲已切換，請為目前歌曲重試"
+  },
+  "playerImportTTMLFailed": {
+    "message": "無法匯入 TTML，請重試"
+  },
+  "playerRemoveLocalTTML": {
+    "message": "移除已匯入的 TTML"
+  },
+  "playerRemovingLocalTTML": {
+    "message": "正在移除…"
+  },
+  "playerRemoveLocalTTMLSuccess": {
+    "message": "本機歌詞已移除，已恢復自動取得"
+  },
+  "playerRemoveLocalTTMLFailed": {
+    "message": "無法移除本機歌詞，請重試"
+  },
+  "playerAdvanced": {
+    "message": "進階"
+  },
+  "playerDiagnose": {
+    "message": "診斷卡頓（20 秒）"
+  },
+  "playerDiagnosing": {
+    "message": "正在記錄卡頓資料，請保持播放…"
+  },
+  "playerDiagnosticReady": {
+    "message": "錄製完成，可匯出報告"
+  },
+  "playerDiagnosticStopped": {
+    "message": "錄製已結束，可匯出報告"
+  },
+  "playerDiagnosticNeedsPlayback": {
+    "message": "請先播放歌曲並等待歌詞載入"
+  },
+  "playerDiagnosticRate": {
+    "message": "頁面回呼頻率"
+  },
+  "playerDiagnosticSlow": {
+    "message": "長間隔（>50ms）"
+  },
+  "playerExportDiagnostics": {
+    "message": "匯出診斷報告"
+  },
+  "playerQueue": {
+    "message": "接著播放"
+  },
+  "playerQueueLoading": {
+    "message": "正在重新整理佇列…"
+  },
+  "playerQueueEmpty": {
+    "message": "目前播放佇列為空"
+  },
+  "playerQueueLoadFailed": {
+    "message": "無法載入播放佇列"
+  },
+  "playerQueueRetry": {
+    "message": "重試"
+  },
+  "playerOffsetSaveFailed": {
+    "message": "歌詞偏移儲存失敗，請重試"
+  },
+  "playerModeSaveFailed": {
+    "message": "歌詞顯示模式儲存失敗，請重試"
+  },
+  "playerSourceSwitched": {
+    "message": "已切換至 $NAME$",
+    "placeholders": {
+      "NAME": {
+        "content": "$1",
+        "example": "AMLL TTML DB"
+      }
+    }
+  },
+  "playerSourceSwitchFailed": {
+    "message": "切換歌詞來源失敗"
+  },
+  "playerLocalLyrics": {
+    "message": "本機 TTML"
+  },
+  "cacheScopeExplanation": {
+    "message": "積極快取保留歌詞與翻譯結果 24 小時，適中快取保留 12 小時。關閉快取後不會儲存結果，但線上時來源索引仍可能重新整理。清除快取只會刪除結果：本機 TTML、歌詞偏移、來源偏好與字型都會保留。來源索引不會被清除，也不計入上方大小。"
+  },
+  "playerExportNativeTTML": {
+    "message": "匯出原生 TTML"
+  },
+  "playerQueueCurrent": {
+    "message": "目前歌曲"
+  },
+  "playerQueuePlaying": {
+    "message": "正在切換歌曲…"
+  },
+  "playerQueueChanged": {
+    "message": "播放佇列已變更，請重新選擇歌曲。"
+  },
+  "playerQueuePlayFailed": {
+    "message": "無法播放這首歌，請重試。"
+  },
+  "playerQueueControlUnavailable": {
+    "message": "Apple Music 目前暫不支援切換佇列項目。"
+  }
 }

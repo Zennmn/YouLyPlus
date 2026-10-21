@@ -4,52 +4,20 @@
     "description": "Extension name"
   },
   "extensionDescription": {
-    "message": "Các tính năng lời bài hát nâng cao cho YouTube Music, Apple Music & Tidal với tính năng đồng bộ hóa từng dòng và từng từ.",
+    "message": "AMLL lyrics player for Apple Music with Apple-provided translations, local TTML and optional machine translation",
     "description": "Extension description"
   },
   "popupTitle": {
     "message": "Cài đặt YouLy+",
     "description": "Title shown in the popup header and page title"
   },
-  "tabGeneral": {
-    "message": "Chung",
-    "description": "General tab label"
-  },
-  "tabAppearance": {
-    "message": "Giao diện",
-    "description": "Appearance tab label"
-  },
-  "tabAdvanced": {
-    "message": "Nâng cao",
-    "description": "Advanced tab label"
-  },
-  "sectionCoreFeatures": {
-    "message": "Tính năng chính",
-    "description": "Section title in popup General tab"
-  },
   "settingEnableExtension": {
     "message": "Bật YouLy+",
     "description": "Label for the master enable toggle"
   },
-  "sectionDataSources": {
-    "message": "Nguồn dữ liệu",
-    "description": "Section title in popup General tab"
-  },
   "settingPrimaryProvider": {
     "message": "Nhà cung cấp lời bài hát chính",
     "description": "Label for lyrics provider dropdown"
-  },
-  "settingIntegrateSponsorBlock": {
-    "message": "Tích hợp SponsorBlock",
-    "description": "Label for SponsorBlock toggle in popup"
-  },
-  "sectionReadability": {
-    "message": "Khả năng đọc",
-    "description": "Section title in popup Appearance tab"
-  },
-  "sectionDisplaySettings": {
-    "message": "Cài đặt hiển thị",
-    "description": "Section title in popup Appearance tab"
   },
   "settingLightweightMode": {
     "message": "Chế độ nhẹ",
@@ -58,10 +26,6 @@
   "settingWordByWord": {
     "message": "Làm nổi bật từng từ",
     "description": "Label for word-by-word highlighting toggle"
-  },
-  "sectionPerformance": {
-    "message": "Hiệu năng",
-    "description": "Section title in popup Advanced tab"
   },
   "sectionDataManagement": {
     "message": "Quản lý dữ liệu",
@@ -88,7 +52,7 @@
     "description": "Link to full settings page"
   },
   "msgSettingsSaved": {
-    "message": "Đã lưu cài đặt! Vui lòng tải lại trang YouTube để áp dụng thay đổi.",
+    "message": "Settings saved. Apple Music lyrics will refresh automatically.",
     "description": "Snackbar message after saving settings in popup"
   },
   "msgErrorSavingSettings": {
@@ -119,59 +83,9 @@
     "message": "Cài đặt YouLy+",
     "description": "Title shown in full settings page header and nav drawer"
   },
-  "navGeneral": {
-    "message": "Chung",
-    "description": "Navigation drawer label"
-  },
-  "navSources": {
-    "message": "Nguồn",
-    "description": "Navigation drawer label"
-  },
-  "navAppearance": {
-    "message": "Giao diện",
-    "description": "Navigation drawer label"
-  },
-  "navTranslation": {
-    "message": "Dịch",
-    "description": "Navigation drawer label"
-  },
-  "navCache": {
-    "message": "Bộ nhớ đệm",
-    "description": "Navigation drawer label"
-  },
   "navLocalLyrics": {
     "message": "Lời bài hát địa phương",
     "description": "Navigation drawer label"
-  },
-  "navAbout": {
-    "message": "Giới thiệu",
-    "description": "Navigation drawer label"
-  },
-  "msgSettingsSavedRestart": {
-    "message": "Đã lưu cài đặt. Vui lòng khởi động lại tab nhạc để áp dụng thay đổi.",
-    "description": "Notification text when no platform tabs are found"
-  },
-  "msgSettingsSavedRestartPlatform": {
-    "message": "Đã lưu cài đặt. Vui lòng khởi động lại $PLATFORMS$ để áp dụng thay đổi.",
-    "description": "Notification text with platform names",
-    "placeholders": {
-      "PLATFORMS": {
-        "content": "$1",
-        "example": "YouTube Music & Apple Music"
-      }
-    }
-  },
-  "buttonRestart": {
-    "message": "Khởi động lại",
-    "description": "Restart button text"
-  },
-  "buttonRestartTabs": {
-    "message": "Khởi động lại các tab",
-    "description": "Restart button text for multiple tabs"
-  },
-  "categoryCoreFunc": {
-    "message": "Chức năng cốt lõi",
-    "description": "Settings category title"
   },
   "descEnableExtension": {
     "message": "Bật hoặc tắt tiện ích trên toàn cầu.",
@@ -181,101 +95,17 @@
     "message": "Bật làm nổi bật từ theo phong cách karaoke khi có sẵn.",
     "description": "Description for word-by-word toggle"
   },
-  "categoryYouTubeMusic": {
-    "message": "Cài đặt YouTube Music",
-    "description": "Settings category title"
-  },
-  "settingFullscreenSongInfo": {
-    "message": "Bật Thông tin bài hát Toàn màn hình",
-    "description": "Label for fullscreen song info toggle"
-  },
-  "descFullscreenSongInfo": {
-    "message": "Hiển thị chi tiết bài hát ở chế độ toàn màn hình, bao gồm thanh tiến trình, ngày phát hành, tiêu đề và nghệ sĩ.",
-    "description": "Description for fullscreen song info"
-  },
-  "settingDisableSongInfoSeekbar": {
-    "message": "Tắt thanh tua thông tin bài hát",
-    "description": "Label for disabling seekbar in fullscreen song info"
-  },
-  "descDisableSongInfoSeekbar": {
-    "message": "Ẩn thanh tiến trình khỏi màn hình thông tin bài hát toàn màn hình.",
-    "description": "Description for disabling seekbar in fullscreen song info"
-  },
-  "settingUseSponsorBlock": {
-    "message": "Sử dụng API SponsorBlock",
-    "description": "Label for SponsorBlock toggle in settings"
-  },
-  "descUseSponsorBlock": {
-    "message": "Bỏ qua các đoạn không phải âm nhạc như phần giới thiệu, phần kết thúc hoặc các đoạn được tài trợ.",
-    "description": "Description for SponsorBlock toggle"
-  },
-  "settingPreferUnisonVideo": {
-    "description": "Label for prefer Unison video toggle in settings",
-    "message": "Ưu tiên Unison cho Video"
-  },
-  "descPreferUnisonVideo": {
-    "description": "Description for prefer Unison video toggle",
-    "message": "Khi được bật, hãy ưu tiên dịch vụ Unison cho nội dung video và bỏ qua các đoạn SponsorBlock khi Unison cung cấp lời bài hát."
-  },
   "categoryAppleMusic": {
     "message": "Cài đặt Apple Music",
     "description": "Settings category title"
-  },
-  "settingPreferExternal": {
-    "message": "Ưu tiên lời bài hát bên ngoài cho các bài hát được đồng bộ theo dòng",
-    "description": "Label for Apple Music bypass toggle"
-  },
-  "descPreferExternal": {
-    "message": "Nếu được bật, ứng dụng sẽ sử dụng các nguồn lời bài hát bên ngoài nếu Apple Music chỉ cung cấp tính năng đồng bộ hóa từng dòng thay vì từng từ.",
-    "description": "Description for Apple Music bypass toggle"
-  },
-  "sectionSources": {
-    "message": "Nguồn",
-    "description": "Sources section title"
-  },
-  "categoryLyricsProvider": {
-    "message": "Nhà cung cấp lời bài hát",
-    "description": "Category title"
   },
   "labelProviderOrder": {
     "message": "Thứ tự nguồn lời bài hát",
     "description": "Label for provider order configuration"
   },
-  "helperProviderOrder": {
-    "message": "Kéo và thả để ưu tiên nguồn nào được kiểm tra trước. Nguồn ở trên cùng sẽ là lựa chọn ưu tiên nhanh.",
-    "description": "Helper text for provider ordering"
-  },
-  "labelAvailableProviders": {
-    "message": "Các nguồn hiện có",
-    "description": "Label for available providers dropdown"
-  },
   "buttonAddProvider": {
     "message": "Thêm nguồn",
     "description": "Add provider button text"
-  },
-  "labelCustomKpoeUrl": {
-    "message": "URL máy chủ KPoe tùy chỉnh",
-    "description": "Label for custom server URL input"
-  },
-  "helperCustomKpoeUrl": {
-    "message": "Nhập URL cơ sở cho máy chủ KPoe tự lưu trữ của bạn.",
-    "description": "Helper text for custom KPoe URL"
-  },
-  "labelSourceOrder": {
-    "message": "Thứ tự nguồn Lyrics+",
-    "description": "Label for configuration"
-  },
-  "helperSourceOrder": {
-    "message": "Kéo và thả để sắp xếp lại thứ tự nguồn cho Lyrics+.",
-    "description": "Helper text for source ordering"
-  },
-  "labelAvailableSources": {
-    "message": "Nguồn có sẵn",
-    "description": "Label for available sources dropdown"
-  },
-  "buttonAddSource": {
-    "message": "Thêm nguồn",
-    "description": "Add source button text"
   },
   "msgAllSourcesAdded": {
     "message": "Tất cả các nguồn đã được thêm",
@@ -315,10 +145,6 @@
       }
     }
   },
-  "sectionLocalLyrics": {
-    "message": "Lời bài hát địa phương",
-    "description": "Local lyrics section title"
-  },
   "categoryManageLocalLyrics": {
     "message": "Quản lý lời bài hát đã tải lên",
     "description": "Category title"
@@ -330,60 +156,6 @@
   "buttonRefreshList": {
     "message": "Làm mới danh sách",
     "description": "Refresh local lyrics list button"
-  },
-  "titleAddLocalLyrics": {
-    "message": "Thêm lời bài hát địa phương mới",
-    "description": "FAB tooltip"
-  },
-  "modalUploadTitle": {
-    "message": "Tải lên lời bài hát địa phương mới",
-    "description": "Modal dialog title"
-  },
-  "labelSongTitle": {
-    "message": "Tiêu đề bài hát",
-    "description": "Input label"
-  },
-  "labelArtistName": {
-    "message": "Tên nghệ sĩ",
-    "description": "Input label"
-  },
-  "labelAlbumName": {
-    "message": "Tên album (Tùy chọn)",
-    "description": "Input label"
-  },
-  "labelLyricsFile": {
-    "message": "Tập tin lời bài hát",
-    "description": "File input label"
-  },
-  "helperLyricsFile": {
-    "message": "Vui lòng tải lên tập tin LRC, ELRC, Apple TTML hoặc JSON của bạn.",
-    "description": "Helper text for lyrics file input"
-  },
-  "buttonUploadLyrics": {
-    "message": "Tải lên lời bài hát",
-    "description": "Upload button text"
-  },
-  "msgUploadRequired": {
-    "message": "Tiêu đề bài hát, Tên nghệ sĩ và Tập tin lời bài hát là bắt buộc.",
-    "description": "Error when required fields are missing"
-  },
-  "msgUploading": {
-    "message": "Đang tải lời bài hát lên...",
-    "description": "Status during upload"
-  },
-  "msgUploadSuccess": {
-    "message": "Lời bài hát đã được tải lên thành công!",
-    "description": "Status after successful upload"
-  },
-  "msgUploadError": {
-    "message": "Đã xảy ra lỗi khi tải lời bài hát lên: $ERROR$",
-    "description": "Error during upload",
-    "placeholders": {
-      "ERROR": {
-        "content": "$1",
-        "example": "Invalid format"
-      }
-    }
   },
   "msgFileReadError": {
     "message": "Lỗi đọc tập tin.",
@@ -422,10 +194,6 @@
         "example": "Storage error"
       }
     }
-  },
-  "sectionTranslation": {
-    "message": "Dịch",
-    "description": "Translation section title"
   },
   "categoryTranslationService": {
     "message": "Dịch vụ dịch thuật",
@@ -603,10 +371,6 @@
     "message": "Tùy chỉnh prompt được gửi đến AI để phiên âm.",
     "description": "Helper text"
   },
-  "sectionAppearance": {
-    "message": "Giao diện",
-    "description": "Appearance section title"
-  },
   "categoryTextDisplay": {
     "message": "Hiển thị văn bản",
     "description": "Category title"
@@ -631,105 +395,9 @@
     "message": "Tự động ẩn hướng dẫn ngữ âm nếu lời bài hát đã được viết bằng bảng chữ cái Latinh.",
     "description": "Description"
   },
-  "settingDynamicBkgVocal": {
-    "message": "Vị trí giọng hát nâng động",
-    "description": "Toggle label"
-  },
-  "descDynamicBkgVocal": {
-    "message": "Lời bài hát nền bắt đầu trước lời bài hát chính sẽ được hiển thị ở phía trên.",
-    "description": "Description"
-  },
-  "categoryPerformance": {
-    "message": "Hiệu suất & Khả năng tương thích",
-    "description": "Category title"
-  },
   "descLightweightMode": {
     "message": "Giảm hoạt ảnh và hiệu ứng hình ảnh để có hiệu suất tốt hơn trên các thiết bị cũ.",
     "description": "Description"
-  },
-  "settingHideOffscreen": {
-    "message": "Ẩn các dòng lời bài hát ngoài màn hình",
-    "description": "Toggle label"
-  },
-  "descHideOffscreen": {
-    "message": "Ẩn và xóa tất cả các dòng lời bài hát hoạt ảnh hiện không hiển thị trên màn hình. Được khuyến nghị cho các thiết bị cấp thấp.",
-    "description": "Description"
-  },
-  "categoryVisualEffects": {
-    "message": "Hiệu ứng hình ảnh",
-    "description": "Category title"
-  },
-  "settingBlurInactive": {
-    "message": "Làm mờ lời bài hát không hoạt động",
-    "description": "Toggle label"
-  },
-  "descBlurInactive": {
-    "message": "Áp dụng hiệu ứng mờ cho lời bài hát hiện không được hát, tương tự như Apple Music.",
-    "description": "Description"
-  },
-  "settingDynamicBackground": {
-    "message": "Bật Nền động (Chế độ xem trình phát)",
-    "description": "Toggle label"
-  },
-  "descDynamicBackground": {
-    "message": "Mô phỏng nền album chuyển động khi trình phát được mở rộng. Cài đặt này không ảnh hưởng trong chế độ toàn màn hình.",
-    "description": "Description"
-  },
-  "settingAudioBeatSync": {
-    "message": "Xung nhịp dựa trên âm thanh (Nền động)",
-    "description": "Toggle label"
-  },
-  "descAudioBeatSync": {
-    "message": "Làm cho các lớp nền động đập theo nhịp âm thanh. Nếu bạn đang sử dụng Better Lyrics Shaders hoặc Visualizer khác, bạn nên tắt tính năng này.",
-    "description": "Description"
-  },
-  "settingRelaxScroll": {
-    "message": "Cuộn nhẹ nhàng",
-    "description": "Label for relax scrolling toggle"
-  },
-  "descRelaxScroll": {
-    "message": "Hoạt ảnh cuộn chậm hơn & tắt hiệu ứng thu phóng kích thước chữ cho lời bài hát.",
-    "description": "Description for relax scrolling toggle"
-  },
-  "settingSongPaletteFullscreen": {
-    "message": "Sử dụng bảng màu bài hát cho màu lời bài hát trong chế độ video toàn màn hình",
-    "description": "Toggle label"
-  },
-  "descSongPaletteFullscreen": {
-    "message": "Sử dụng bảng màu của bài hát cho lời bài hát khi ở chế độ video toàn màn hình.",
-    "description": "Description"
-  },
-  "settingSongPaletteAll": {
-    "message": "Sử dụng bảng màu bài hát cho màu lời bài hát trong tất cả các chế độ",
-    "description": "Toggle label"
-  },
-  "descSongPaletteAll": {
-    "message": "Sử dụng bảng màu của bài hát cho lời bài hát trong tất cả các chế độ hiển thị.",
-    "description": "Description"
-  },
-  "labelOverridePaletteColor": {
-    "message": "Ghi đè màu bảng màu",
-    "description": "Input label"
-  },
-  "helperOverridePaletteColor": {
-    "message": "Ghi đè màu sắc của bài hát bằng màu tùy chỉnh (Chỉ dành cho màu lời bài hát, không bao gồm nền động) (để trống nếu không muốn ghi đè).",
-    "description": "Helper text"
-  },
-  "categoryCustomStyling": {
-    "message": "Tùy chỉnh kiểu dáng",
-    "description": "Category title"
-  },
-  "labelCustomCSS": {
-    "message": "CSS tùy chỉnh",
-    "description": "Textarea label"
-  },
-  "helperCustomCSS": {
-    "message": "Áp dụng phong cách riêng của bạn cho màn hình lời bài hát. Sử dụng một cách thận trọng. Bạn nên sử dụng UserStyles để tạo hoặc thử nghiệm.",
-    "description": "Helper text"
-  },
-  "sectionCache": {
-    "message": "Bộ nhớ đệm",
-    "description": "Cache section title"
   },
   "labelCacheStrategy": {
     "message": "Chiến lược lưu trữ",
@@ -740,11 +408,11 @@
     "description": "Description"
   },
   "optionAggressive": {
-    "message": "Mạnh mẽ (2 giờ)",
+    "message": "Aggressive (24 hours)",
     "description": "Cache strategy option"
   },
   "optionModerate": {
-    "message": "Vừa phải (1 giờ)",
+    "message": "Moderate (12 hours)",
     "description": "Cache strategy option"
   },
   "optionNone": {
@@ -755,12 +423,8 @@
     "message": "Mức sử dụng bộ nhớ đệm hiện tại",
     "description": "Label for cache usage display"
   },
-  "sectionAbout": {
-    "message": "Giới thiệu",
-    "description": "About section"
-  },
   "aboutDescription": {
-    "message": "Tiện ích này ra đời từ một ý tưởng đơn giản: nghe nhạc phải là một trải nghiệm đắm chìm chứ không chỉ là hoạt động nền. Chúng tôi đã quá mệt mỏi với lời bài hát tĩnh và giao diện lỗi thời của YouTube, vì vậy chúng tôi quyết định xây dựng trình phát mà mình hằng mong muốn. Mục tiêu của chúng tôi là làm cho các phiên âm nhạc của bạn trở nên đẹp hơn, lôi cuốn hơn và vui vẻ hơn. youly+ tự hào vận hành dưới dạng mã nguồn mở. Cho dù bạn tìm thấy lỗi, có một ý tưởng tuyệt vời hay muốn đóng góp, chúng tôi đều mong nhận được tin từ bạn.",
+    "message": "YouLy+ brings AMLL lyrics and Apple-provided translations to Apple Music, with local TTML and optional machine translation.",
     "description": "About page description text"
   },
   "categoryLinksSupport": {
@@ -830,10 +494,6 @@
         "example": "Invalid JSON"
       }
     }
-  },
-  "msgNoActiveTabs": {
-    "message": "Không tìm thấy tab nhạc nào đang hoạt động. Vui lòng làm mới thủ công.",
-    "description": "Alert when no music tabs found for restart"
   },
   "titleShowHideApiKey": {
     "message": "Hiển thị/Ẩn khóa API",
@@ -967,106 +627,6 @@
     "message": "Khóa API của bạn được lưu trữ cục bộ. Khóa của gói miễn phí thường kết thúc bằng :fx",
     "description": "Helper text"
   },
-  "sourceNameLyricsPlus": {
-    "message": "Lyrics+ (Người dùng đóng góp)",
-    "description": "Display name for lyricsplus source"
-  },
-  "sourceNameApple": {
-    "message": "Apple Music",
-    "description": "Display name for apple source"
-  },
-  "sourceNameQQ": {
-    "message": "QQ Music",
-    "description": "Display name for qq source"
-  },
-  "sourceNameSpotify": {
-    "message": "Musixmatch (Spotify)",
-    "description": "Display name for spotify source"
-  },
-  "sourceNameMusixmatch": {
-    "message": "Musixmatch (Trực tiếp)",
-    "description": "Display name for musixmatch source"
-  },
-  "sourceNameMusixmatchWord": {
-    "message": "Musixmatch (Từ)",
-    "description": "Display name for musixmatch-word source"
-  },
-  "sourceNameLyricsPlusProvider": {
-    "message": "Lyrics+",
-    "description": "Provider generic name"
-  },
-  "sourceNameCustomKpoe": {
-    "message": "Máy chủ KPoe tùy chỉnh",
-    "description": "Provider generic name for custom KPoe server"
-  },
-  "sourceNameLRCLib": {
-    "message": "LRCLIB",
-    "description": "LRCLIB provider name"
-  },
-  "sourceNameUnison": {
-    "message": "Unison (BetterLyrics)",
-    "description": "Unison provider name"
-  },
-  "sourceNameLrcred": {
-    "message": "lrc.red",
-    "description": "lrc.red provider name"
-  },
-  "navCatInterface": {
-    "message": "Interface",
-    "description": "Navigation category for interface settings"
-  },
-  "navCatLyricsSources": {
-    "message": "Lyrics Sources",
-    "description": "Navigation category for lyrics sources"
-  },
-  "navCatStorageData": {
-    "message": "Storage & Data",
-    "description": "Navigation category for storage & data"
-  },
-  "navCatApplication": {
-    "message": "Application",
-    "description": "Navigation category for application info"
-  },
-  "navSubtitleAppearance": {
-    "message": "Visual effects, theme, typography",
-    "description": "Subtitle for Appearance navigation item"
-  },
-  "navSubtitleGeneral": {
-    "message": "Core features, YTM & Apple Music",
-    "description": "Subtitle for General navigation item"
-  },
-  "navSubtitleSources": {
-    "message": "Lyrics providers & order",
-    "description": "Subtitle for Sources navigation item"
-  },
-  "navSubtitleTranslation": {
-    "message": "AI models, prompts, romanization",
-    "description": "Subtitle for Translation navigation item"
-  },
-  "navSubtitleCache": {
-    "message": "Storage usage & caching policy",
-    "description": "Subtitle for Cache navigation item"
-  },
-  "navSubtitleLocalLyrics": {
-    "message": "Manage uploaded LRC & TTML files",
-    "description": "Subtitle for Local Lyrics navigation item"
-  },
-  "navSubtitleAbout": {
-    "message": "Version, backup, export & links",
-    "description": "Subtitle for About navigation item"
-  },
-  "categoryCustomKpoe": {
-    "message": "Custom KPoe",
-    "description": "Category title for Custom KPoe settings"
-  },
-  "categoryUnison": {
-    "message": "Unison",
-    "description": "Category title for Unison settings"
-  },
-  "categoryLyricsPlus": {
-    "message": "Lyrics+",
-    "description": "Category title for Lyrics+ settings"
-  },
   "categoryCacheConfig": {
     "message": "Cache Configuration & Storage",
     "description": "Category title for cache settings"
@@ -1074,10 +634,6 @@
   "labelFastPath": {
     "message": "Fast Path",
     "description": "Label indicator for primary fast path provider"
-  },
-  "placeholderCustomKpoeUrl": {
-    "message": "https://example.com/api",
-    "description": "Placeholder for custom KPoe server URL input"
   },
   "placeholderOpenRouterModel": {
     "message": "google/gemini-2.0-flash-001",
@@ -1094,14 +650,6 @@
   "placeholderCustomRomanizationPrompt": {
     "message": "Custom romanization prompt...",
     "description": "Placeholder for custom romanization prompt textarea"
-  },
-  "placeholderCustomCSS": {
-    "message": "/* Custom CSS */",
-    "description": "Placeholder for custom CSS textarea"
-  },
-  "placeholderPaletteColor": {
-    "message": "#ffb5a0",
-    "description": "Placeholder for override palette color"
   },
   "labelCacheUsageFormat": {
     "message": "$SIZE$ MB used ($COUNT$ songs cached)",
@@ -1123,17 +671,9 @@
     "message": "Cache info unavailable.",
     "description": "Message when cache info is unavailable"
   },
-  "placeholderSelectProvider": {
-    "message": "Chọn nhà cung cấp...",
-    "description": "Select a Provider on settings menu"
-  },
   "placeholderSelectSource": {
     "message": "Chọn nguồn...",
     "description": "Select a Source on settings menu"
-  },
-  "msgAllProvidersAdded": {
-    "message": "Đã thêm tất cả nhà cung cấp",
-    "description": "User added All providers on settings menu"
   },
   "noteDeepLSupportedLangs": {
     "message": "DeepL chính thức hỗ trợ 33 ngôn ngữ. Nếu yêu cầu ngôn ngữ không được hỗ trợ, bản dịch sẽ tự động chuyển sang Google Dịch.",
@@ -1222,5 +762,512 @@
         "content": "$2"
       }
     }
+  },
+  "navPlaybackAppearance": {
+    "message": "Playback & appearance"
+  },
+  "navSubtitlePlaybackAppearance": {
+    "message": "Player, text, title correction, font"
+  },
+  "navLyricsSourcesApple": {
+    "message": "Lyrics sources"
+  },
+  "navSubtitleLyricsSourcesApple": {
+    "message": "AMLL, LunaBeat, AmLyrics, Apple native"
+  },
+  "navCatLibrary": {
+    "message": "Library"
+  },
+  "navSubtitleLocalLyricsApple": {
+    "message": "Manage locally imported TTML"
+  },
+  "navCatConfiguration": {
+    "message": "Configuration"
+  },
+  "navTranslationTransliteration": {
+    "message": "Translation & transliteration"
+  },
+  "navSubtitleTranslationTransliteration": {
+    "message": "Providers, prompts, dictionaries"
+  },
+  "navStorageAdvanced": {
+    "message": "Storage & advanced"
+  },
+  "navSubtitleStorageAdvanced": {
+    "message": "Cache, backup, help and license"
+  },
+  "navCatAppleMusicService": {
+    "message": "Apple Music"
+  },
+  "msgAppleRestart": {
+    "message": "Apple Music needs a reload to apply this change."
+  },
+  "buttonReloadAppleMusic": {
+    "message": "Reload Apple Music"
+  },
+  "categoryApplePlayer": {
+    "message": "Apple Music player"
+  },
+  "settingUseAMLLPlayer": {
+    "message": "Use AMLL lyrics player"
+  },
+  "descUseAMLLPlayer": {
+    "message": "Show Apple Music lyrics in the original AMLL player. Turn this off to use Apple's native lyrics view."
+  },
+  "settingAnimatedLyricsBackground": {
+    "message": "Animated lyrics background"
+  },
+  "descAnimatedLyricsBackground": {
+    "message": "Keep the AMLL album background and its original animation."
+  },
+  "labelLyricsDisplayMode": {
+    "message": "Lyrics display mode"
+  },
+  "descLyricsDisplayMode": {
+    "message": "Defaults for translation and transliteration; the player menu offers the same choices."
+  },
+  "optionDisplayOriginal": {
+    "message": "Original lyrics"
+  },
+  "optionDisplayTranslation": {
+    "message": "Translation"
+  },
+  "optionDisplayTransliteration": {
+    "message": "Transliteration"
+  },
+  "optionDisplayBoth": {
+    "message": "Translation + transliteration"
+  },
+  "categoryPlayerFont": {
+    "message": "Player font"
+  },
+  "sourcesAppleOnlyNote": {
+    "message": "YouLy+ now supports Apple Music only. This source order applies to every song."
+  },
+  "categoryAppleSourceOrder": {
+    "message": "Apple Music lyrics source order"
+  },
+  "descAppleSourceOrder": {
+    "message": "AMLL is tried first by default, then LunaBeat, AmLyrics, and Apple Music's native lyrics. Apple Music always stays last."
+  },
+  "sourceNativePinned": {
+    "message": "Always used as the final fallback"
+  },
+  "msgSourceOrderSaved": {
+    "message": "Lyrics source order saved."
+  },
+  "msgSourceOrderSaveFailed": {
+    "message": "Could not save the lyrics source order."
+  },
+  "localLyricsImportGuideTitle": {
+    "message": "Import TTML from the song player"
+  },
+  "localLyricsImportStep1": {
+    "message": "Open the current Apple Music song in the fullscreen lyrics player."
+  },
+  "localLyricsImportStep2": {
+    "message": "Open the player menu and choose Import TTML."
+  },
+  "localLyricsImportStep3": {
+    "message": "The file is saved for that song and filled in automatically on later loads."
+  },
+  "localLyricsOverrideNote": {
+    "message": "Local TTML takes priority for the matching song. Delete it here to return to automatic sources."
+  },
+  "categoryLocalLyricsLibrary": {
+    "message": "Local TTML library"
+  },
+  "translationApplePolicyNote": {
+    "message": "Machine translation runs only for Apple Music's original lyrics when a track has no built-in translation. Apple-provided translations are preserved."
+  },
+  "msgPlaybackSettingsSaved": {
+    "message": "Playback settings saved and applied to Apple Music."
+  },
+  "msgTranslationSettingsSaved": {
+    "message": "Translation settings saved and applied to the Apple Music player."
+  },
+  "msgAdvancedSettingsSaved": {
+    "message": "Settings saved."
+  },
+  "msgSettingsSaveFailed": {
+    "message": "Could not save settings. Try again."
+  },
+  "msgTargetResetForDeepL": {
+    "message": "Target language reset to Auto because DeepL does not support the previous selection."
+  },
+  "msgPlayerFontImported": {
+    "message": "Font imported and applied to the Apple Music player."
+  },
+  "msgPlayerFontReset": {
+    "message": "Default player font restored."
+  },
+  "buttonShowKey": {
+    "message": "Show"
+  },
+  "buttonHideKey": {
+    "message": "Hide"
+  },
+  "msgDictionaryUnavailable": {
+    "message": "Unavailable"
+  },
+  "msgDictionaryDownloadFailed": {
+    "message": "Download failed"
+  },
+  "msgDictionaryDownloadFailedDetail": {
+    "message": "Could not download the offline dictionary. Try again."
+  },
+  "msgDictionaryDeleteFailed": {
+    "message": "Could not delete the offline dictionary. Try again."
+  },
+  "msgLocalLyricsRefreshed": {
+    "message": "Local TTML library refreshed."
+  },
+  "msgImportNoValidSettings": {
+    "message": "This file contains no supported YouLy+ settings."
+  },
+  "labelBackupRestore": {
+    "message": "Backup and restore settings"
+  },
+  "categoryHelpSources": {
+    "message": "Help & source"
+  },
+  "linkIssues": {
+    "message": "Issues & help"
+  },
+  "aboutAppleDescription": {
+    "message": "Apple Music lyrics with the original AMLL player, Apple-provided translations, local TTML, and optional machine translation."
+  },
+  "upstreamAttribution": {
+    "message": "Built on AMLL and open-source lyric sources. Upstream acknowledgements and the AGPL-3.0-only license are available in the repository."
+  },
+  "footerAppleOnly": {
+    "message": "YouLy+ · Apple Music lyrics"
+  },
+  "linkTTMLTranslationGuide": {
+    "message": "TTML translation guide"
+  },
+  "tabPlayback": {
+    "message": "Playback"
+  },
+  "tabStorage": {
+    "message": "Cache & storage"
+  },
+  "popupAppleDescription": {
+    "message": "Apple Music lyrics, appearance and cache."
+  },
+  "popupFullSettingsHint": {
+    "message": "Sources, local TTML, translation, fonts and advanced options are in the full settings page."
+  },
+  "playerClose": {
+    "message": "Close"
+  },
+  "playerSettings": {
+    "message": "Lyrics settings"
+  },
+  "playerDisplay": {
+    "message": "Display"
+  },
+  "playerOriginal": {
+    "message": "Original"
+  },
+  "playerTranslation": {
+    "message": "Translation"
+  },
+  "playerRomanization": {
+    "message": "Romanization"
+  },
+  "playerTranslationAndRomanization": {
+    "message": "Translation + romanization"
+  },
+  "playerTranslationLoading": {
+    "message": "Loading translation…"
+  },
+  "playerTranslationUnavailable": {
+    "message": "Translation is unavailable from the current lyrics source"
+  },
+  "playerTranslationError": {
+    "message": "Unable to load translation from the current lyrics source"
+  },
+  "playerRomanizationLoading": {
+    "message": "Loading romanization…"
+  },
+  "playerRomanizationUnavailable": {
+    "message": "Romanization is unavailable from the current lyrics source"
+  },
+  "playerRomanizationError": {
+    "message": "Unable to load romanization from the current lyrics source"
+  },
+  "playerLyricsSource": {
+    "message": "Lyrics source"
+  },
+  "playerAutomatic": {
+    "message": "Automatic"
+  },
+  "playerSourcePreference": {
+    "message": "Preferred source"
+  },
+  "playerCurrentSource": {
+    "message": "Current source"
+  },
+  "playerSourceUnavailable": {
+    "message": "currently unavailable"
+  },
+  "playerLyricsOffset": {
+    "message": "Lyrics offset (ms)"
+  },
+  "playerAnimatedBackground": {
+    "message": "Animated background"
+  },
+  "playerResetOffset": {
+    "message": "Reset offset"
+  },
+  "playerReloadLyrics": {
+    "message": "Reload lyrics"
+  },
+  "playerNativePlayer": {
+    "message": "Native player"
+  },
+  "playerConnecting": {
+    "message": "Connecting to Apple Music…"
+  },
+  "playerLoadingLyrics": {
+    "message": "Loading lyrics…"
+  },
+  "playerSongNotFound": {
+    "message": "No lyrics available"
+  },
+  "playerNotFoundError": {
+    "message": "Unable to load lyrics"
+  },
+  "playerPlaybackCommandFailed": {
+    "message": "Playback command failed"
+  },
+  "playerSettingsSaveFailed": {
+    "message": "Unable to save player settings"
+  },
+  "playerFontLoadFailed": {
+    "message": "Unable to load font; import it again in Settings"
+  },
+  "playerFullscreen": {
+    "message": "Fullscreen"
+  },
+  "playerExitFullscreen": {
+    "message": "Exit fullscreen"
+  },
+  "playerFullscreenChangeFailed": {
+    "message": "Unable to change fullscreen"
+  },
+  "playerExportFailed": {
+    "message": "Unable to export diagnostics"
+  },
+  "playerDownloadNativeTTML": {
+    "message": "Download AM native TTML"
+  },
+  "playerDownloadingNativeTTML": {
+    "message": "Fetching native TTML…"
+  },
+  "playerNativeTTMLUnavailable": {
+    "message": "No native TTML was retrieved for this song; try again later"
+  },
+  "playerNativeTTMLSongChanged": {
+    "message": "The song changed; download again"
+  },
+  "playerNativeTTMLFailed": {
+    "message": "Unable to download native TTML; try again"
+  },
+  "playerImportTTML": {
+    "message": "Import TTML"
+  },
+  "playerImportingTTML": {
+    "message": "Importing TTML…"
+  },
+  "playerImportTTMLHint": {
+    "message": "Saved for the current song across reloads (up to 2 MB)"
+  },
+  "playerImportTTMLSuccess": {
+    "message": "TTML imported and saved for this song"
+  },
+  "playerImportTTMLInvalid": {
+    "message": "Invalid TTML file or no lyrics to display"
+  },
+  "playerImportTTMLTooLarge": {
+    "message": "TTML files must be 2 MB or smaller"
+  },
+  "playerLocalTTMLSongChanged": {
+    "message": "The song changed; try again for the current song"
+  },
+  "playerImportTTMLFailed": {
+    "message": "Unable to import TTML; try again"
+  },
+  "playerRemoveLocalTTML": {
+    "message": "Remove imported TTML"
+  },
+  "playerRemovingLocalTTML": {
+    "message": "Removing…"
+  },
+  "playerRemoveLocalTTMLSuccess": {
+    "message": "Local lyrics removed; automatic fetching restored"
+  },
+  "playerRemoveLocalTTMLFailed": {
+    "message": "Unable to remove local lyrics; try again"
+  },
+  "playerAdvanced": {
+    "message": "Advanced"
+  },
+  "playerDiagnose": {
+    "message": "Diagnose stutter (20 seconds)"
+  },
+  "playerDiagnosing": {
+    "message": "Recording stutter data; keep playing…"
+  },
+  "playerDiagnosticReady": {
+    "message": "Recording finished; export the report"
+  },
+  "playerDiagnosticStopped": {
+    "message": "Recording stopped; export the report"
+  },
+  "playerDiagnosticNeedsPlayback": {
+    "message": "Play a song and wait for lyrics first"
+  },
+  "playerDiagnosticRate": {
+    "message": "Page callback rate"
+  },
+  "playerDiagnosticSlow": {
+    "message": "Long intervals (>50ms)"
+  },
+  "playerExportDiagnostics": {
+    "message": "Export diagnostic report"
+  },
+  "playerQueue": {
+    "message": "Up next"
+  },
+  "playerQueueLoading": {
+    "message": "Refreshing queue…"
+  },
+  "playerQueueEmpty": {
+    "message": "The queue is empty"
+  },
+  "playerQueueLoadFailed": {
+    "message": "Unable to load the queue"
+  },
+  "playerQueueRetry": {
+    "message": "Retry"
+  },
+  "playerOffsetSaveFailed": {
+    "message": "Could not save lyrics offset. Try again."
+  },
+  "playerModeSaveFailed": {
+    "message": "Could not save display mode. Try again."
+  },
+  "playerSourceSwitched": {
+    "message": "Switched lyrics source to $NAME$",
+    "placeholders": {
+      "NAME": {
+        "content": "$1",
+        "example": "AMLL TTML DB"
+      }
+    }
+  },
+  "playerSourceSwitchFailed": {
+    "message": "Could not switch lyrics source"
+  },
+  "playerLocalLyrics": {
+    "message": "Local TTML"
+  },
+  "settingTitleCorrection": {
+    "message": "Song Title Correction",
+    "description": "Label for the Apple Music song title correction setting"
+  },
+  "descTitleCorrection": {
+    "message": "When enabled, the AMLL player shows the song title, artist, and album as they appear in the selected region.",
+    "description": "Description for the Apple Music song title correction setting"
+  },
+  "titleCorrectionOff": {
+    "message": "Off",
+    "description": "Title correction option: disabled"
+  },
+  "titleCorrectionOriginal": {
+    "message": "Use the song's original region",
+    "description": "Title correction option: original region"
+  },
+  "titleCorrectionChina": {
+    "message": "Use mainland China",
+    "description": "Title correction option: mainland China"
+  },
+  "titleCorrectionJapan": {
+    "message": "Use Japan",
+    "description": "Title correction option: Japan"
+  },
+  "optionCustomLLM": {
+    "message": "Third-party LLM (Chat Completions)"
+  },
+  "categoryCustomLLM": {
+    "message": "Third-party LLM"
+  },
+  "labelCustomLLMUrl": {
+    "message": "API address"
+  },
+  "descCustomLLMUrl": {
+    "message": "Use a Chat Completions compatible base URL or full endpoint."
+  },
+  "descCustomLLMKey": {
+    "message": "Stored locally and sent only to your configured API address. Leave blank if no key is needed."
+  },
+  "labelCustomLLMModel": {
+    "message": "Model name"
+  },
+  "descCustomLLMModel": {
+    "message": "Enter the model ID provided by your service."
+  },
+  "buttonTestCustomLLM": {
+    "message": "Authorize address and test connection"
+  },
+  "msgCustomLLMModelRequired": {
+    "message": "Enter a model name first."
+  },
+  "msgCustomLLMExtensionRequired": {
+    "message": "Open the installed extension settings to authorize an API address."
+  },
+  "msgCustomLLMPermissionDenied": {
+    "message": "Access to this API address was not authorized."
+  },
+  "msgCustomLLMTesting": {
+    "message": "Testing connection..."
+  },
+  "msgCustomLLMTestSuccess": {
+    "message": "Connection successful:"
+  },
+  "msgCustomLLMTestFailed": {
+    "message": "Connection failed:"
+  },
+  "labelPlayerFont": {
+    "message": "Player font file"
+  },
+  "descPlayerFont": {
+    "message": "Import a TTF, OTF, WOFF or WOFF2 file to replace all player text. Stored locally in the extension; no system installation needed. Maximum 64 MB."
+  },
+  "buttonDefaultPlayerFont": {
+    "message": "Use default font"
+  },
+  "buttonImportPlayerFont": {
+    "message": "Import font file"
+  },
+  "msgPlayerFontDefault": {
+    "message": "Using default font"
+  },
+  "msgPlayerFontImporting": {
+    "message": "Importing font…"
+  },
+  "msgPlayerFontImportFailed": {
+    "message": "Unable to import this font. Choose a valid font file; the previous font is kept."
+  },
+  "msgPlayerFontSize": {
+    "message": "Choose a non-empty font file up to 64 MB."
+  },
+  "msgPlayerFontLoadFailed": {
+    "message": "Unable to load the font. Please import the file again."
+  },
+  "cacheScopeExplanation": {
+    "message": "Aggressive keeps lyric and translation results for 24 hours; Moderate keeps them for 12 hours. With caching off, results are not stored, while provider indexes may still refresh when online. Clearing caches removes results only: local TTML, lyric offsets, source preferences and fonts are kept. Provider indexes are not cleared or included in the sizes above."
   }
 }

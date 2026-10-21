@@ -5,7 +5,7 @@
 import { state } from '../storage/state.js';
 import { translationsDB } from '../storage/database.js';
 import { SettingsManager } from '../storage/settings.js';
-import { PROVIDERS } from '../constants.js';
+import { CONFIG, PROVIDERS } from '../constants.js';
 import { Utilities } from '../utils/utilities.js';
 import { canMachineTranslateLyrics, sourceTranslationData, isChineseLanguage, getLyricsLanguageContext, isChineseLyricLine } from '../utils/lyricsLanguage.js';
 import { LyricsService } from './lyricsService.js';
@@ -19,23 +19,91 @@ import { OfflineRomanizationProvider } from '../services/translation/providers/O
 import { CustomLLMProvider } from '../services/translation/providers/CustomLLMProvider.js';
 
 export class TranslationService {
-  static createCacheKey(songInfo, action, targetLang, targetScript) {
+  static cacheSchemaVersion = 4;
+  static cacheEpoch = 0;
+  static cacheMutationQueue = Promise.resolve();
+
+  static queueCacheMutation(operation) {
+    const run = this.cacheMutationQueue.then(operation, operation);
+    this.cacheMutationQueue = run.catch(() => {});
+    return run;
+  }
+
+  static async resetCache(target, operation) {
+    this.cacheEpoch++;
+    await this.queueCacheMutation(async () => {
+      try {
+        await operation();
+      } finally {
+        state.clear(target);
+      }
+    });
+  }
+
+  static cacheDimensions(settings = {}, action) {
+    const translation = action === 'translate';
+    return {
+      schema: this.cacheSchemaVersion,
+      action,
+      provider: translation ? settings.translationProvider : settings.romanizationProvider,
+      translationModel: settings.geminiModel,
+      romanizationModel: settings.geminiRomanizationModel,
+      openRouterModel: settings.openRouterModel,
+      customLLMBaseUrl: translation ? settings.customLLMBaseUrl : '',
+      customLLMModel: translation ? settings.customLLMModel : '',
+      translatePrompt: translation && settings.overrideGeminiPrompt ? settings.customGeminiPrompt || '' : '',
+      romanizePrompt: !translation && settings.overrideGeminiRomanizePrompt
+        ? settings.customGeminiRomanizePrompt || ''
+        : '',
+      geminiCredential: !!settings.geminiApiKey,
+      openRouterCredential: !!settings.openRouterApiKey,
+      deeplCredential: !!settings.deeplApiKey,
+      customCredential: !!(translation && settings.customLLMApiKey)
+    };
+  }
+
+  static configurationFingerprint(settings, action) {
+    const value = JSON.stringify(this.cacheDimensions(settings, action));
+    let first = 0x811c9dc5;
+    let second = 0x9e3779b9;
+    for (let index = 0; index < value.length; index++) {
+      const code = value.charCodeAt(index);
+      first = Math.imul(first ^ code, 0x01000193);
+      second = Math.imul(second ^ code, 0x85ebca6b);
+    }
+    return `cfg-${(first >>> 0).toString(16).padStart(8, '0')}${(second >>> 0).toString(16).padStart(8, '0')}`;
+  }
+
+  static createCacheKey(songInfo, action, targetLang, targetScript, settings = {}) {
     const baseLyricsCacheKey = LyricsService.createCacheKey(songInfo);
-    const translationVersion = action === 'translate' ? ' - language-v3-native-only' : '';
-    return `${baseLyricsCacheKey} - ${action} - ${targetLang} - ${targetScript}${translationVersion}`;
+    const config = this.configurationFingerprint(settings, action);
+    const translationVersion = action === 'translate' ? ' - language-v4-native-only' : ' - language-v4';
+    return `${baseLyricsCacheKey} - ${action} - ${targetLang} - ${targetScript} - ${config}${translationVersion}`;
   }
 
   static async getOrFetch(songInfo, action, targetLang, forceReload = false) {
+    const cacheEpoch = this.cacheEpoch;
     const settings = await SettingsManager.getTranslationSettings();
+    const cacheEnabled = settings.cacheStrategy !== 'none';
     const actualTargetLang = (settings.customTranslateTarget && settings.customTranslateTarget !== 'auto')
       ? settings.customTranslateTarget
       : (targetLang || 'en');
 
     const targetScript = settings.transliterationTargetScript || 'latin';
 
-    const customCache = action === 'translate' && settings.translationProvider === 'customllm'
-      ? ` - customllm:${settings.customLLMBaseUrl}:${settings.customLLMModel}` : '';
-    const translatedKey = this.createCacheKey(songInfo, action, actualTargetLang, targetScript) + customCache;
+    const translatedKey = this.createCacheKey(
+      songInfo,
+      action,
+      actualTargetLang,
+      targetScript,
+      settings
+    );
+
+    if (!cacheEnabled) {
+      this.cacheEpoch++;
+      state.deleteCached(translatedKey);
+      await this.queueCacheMutation(() => translationsDB.delete(translatedKey));
+    }
 
     const { lyrics: originalLyrics, version: originalVersion } =
       await LyricsService.getOrFetch(songInfo, forceReload);
@@ -49,8 +117,8 @@ export class TranslationService {
       return { ...originalLyrics, data: sourceTranslationData(originalLyrics) };
     }
 
-    if (!forceReload) {
-      const cached = await this.getCached(translatedKey, originalVersion);
+    if (cacheEnabled && !forceReload) {
+      const cached = await this.getCached(translatedKey, originalVersion, cacheEpoch, settings.cacheStrategy);
       if (cached) return cached;
     }
 
@@ -65,25 +133,41 @@ export class TranslationService {
 
     const finalTranslatedLyrics = { ...originalLyrics, data: translatedData };
 
-    state.setCached(translatedKey, {
-      translatedLyrics: finalTranslatedLyrics,
-      originalVersion
-    });
+    if (cacheEnabled) {
+      await this.queueCacheMutation(async () => {
+        if (cacheEpoch !== this.cacheEpoch) return;
+        const current = await SettingsManager.getTranslationSettings();
+        if (current.cacheStrategy === 'none') return;
+        const timestamp = Date.now();
+        state.setCached(translatedKey, {
+          translatedLyrics: finalTranslatedLyrics,
+          originalVersion,
+          timestamp
+        });
 
-    await translationsDB.set({
-      key: translatedKey,
-      translatedLyrics: finalTranslatedLyrics,
-      originalVersion
-    });
+        await translationsDB.set({
+          key: translatedKey,
+          translatedLyrics: finalTranslatedLyrics,
+          originalVersion,
+          timestamp
+        });
+      });
+    }
 
     return finalTranslatedLyrics;
   }
 
-  static async getCached(key, originalVersion) {
+  static async getCached(key, originalVersion, expectedEpoch = this.cacheEpoch, cacheStrategy = 'aggressive') {
+    if (expectedEpoch !== this.cacheEpoch) return null;
+    const expirationTime = CONFIG.CACHE_EXPIRY[cacheStrategy];
+    if (!expirationTime) return null;
+    const isFresh = record => Number.isFinite(Number(record?.timestamp))
+      && Date.now() - Number(record.timestamp) < expirationTime;
+
     // Check memory
     if (state.hasCached(key)) {
       const cached = state.getCached(key);
-      if (cached && cached.originalVersion === originalVersion) {
+      if (cached && cached.originalVersion === originalVersion && isFresh(cached)) {
         return cached.translatedLyrics;
       } else {
         state.deleteCached(key);
@@ -92,14 +176,14 @@ export class TranslationService {
 
     const dbCached = await translationsDB.get(key);
     if (dbCached) {
-      if (dbCached.originalVersion === originalVersion) {
+      if (dbCached.originalVersion === originalVersion && isFresh(dbCached)) {
+        if (expectedEpoch !== this.cacheEpoch) return null;
         state.setCached(key, {
           translatedLyrics: dbCached.translatedLyrics,
-          originalVersion: dbCached.originalVersion
+          originalVersion: dbCached.originalVersion,
+          timestamp: dbCached.timestamp
         });
         return dbCached.translatedLyrics;
-      } else {
-        await translationsDB.delete(key);
       }
     }
 

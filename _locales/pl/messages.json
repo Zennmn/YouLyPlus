@@ -4,52 +4,20 @@
     "description": "Extension name"
   },
   "extensionDescription": {
-    "message": "Zaawansowane funkcje tekstów piosenek dla YouTube Music, Apple Music i Tidal z synchronizacją linia po linii i słowo po słowie.",
+    "message": "AMLL lyrics player for Apple Music with Apple-provided translations, local TTML and optional machine translation",
     "description": "Extension description"
   },
   "popupTitle": {
     "message": "Ustawienia YouLy+",
     "description": "Title shown in the popup header and page title"
   },
-  "tabGeneral": {
-    "message": "Ogólne",
-    "description": "General tab label"
-  },
-  "tabAppearance": {
-    "message": "Wygląd",
-    "description": "Appearance tab label"
-  },
-  "tabAdvanced": {
-    "message": "Zaawansowane",
-    "description": "Advanced tab label"
-  },
-  "sectionCoreFeatures": {
-    "message": "Podstawowe funkcje",
-    "description": "Section title in popup General tab"
-  },
   "settingEnableExtension": {
     "message": "Włącz YouLy+",
     "description": "Label for the master enable toggle"
   },
-  "sectionDataSources": {
-    "message": "Źródła danych",
-    "description": "Section title in popup General tab"
-  },
   "settingPrimaryProvider": {
     "message": "Główny dostawca tekstów",
     "description": "Label for lyrics provider dropdown"
-  },
-  "settingIntegrateSponsorBlock": {
-    "message": "Integracja ze SponsorBlock",
-    "description": "Label for SponsorBlock toggle in popup"
-  },
-  "sectionReadability": {
-    "message": "Czytelność",
-    "description": "Section title in popup Appearance tab"
-  },
-  "sectionDisplaySettings": {
-    "message": "Ustawienia wyświetlania",
-    "description": "Section title in popup Appearance tab"
   },
   "settingLightweightMode": {
     "message": "Tryb lekki",
@@ -58,10 +26,6 @@
   "settingWordByWord": {
     "message": "Podświetlanie słowo po słowie",
     "description": "Label for word-by-word highlighting toggle"
-  },
-  "sectionPerformance": {
-    "message": "Wydajność",
-    "description": "Section title in popup Advanced tab"
   },
   "sectionDataManagement": {
     "message": "Zarządzanie danymi",
@@ -88,7 +52,7 @@
     "description": "Link to full settings page"
   },
   "msgSettingsSaved": {
-    "message": "Ustawienia zapisane! Odśwież stronę YouTube, aby zastosować zmiany.",
+    "message": "Settings saved. Apple Music lyrics will refresh automatically.",
     "description": "Snackbar message after saving settings in popup"
   },
   "msgErrorSavingSettings": {
@@ -119,59 +83,9 @@
     "message": "Ustawienia YouLy+",
     "description": "Title shown in full settings page header and nav drawer"
   },
-  "navGeneral": {
-    "message": "Ogólne",
-    "description": "Navigation drawer label"
-  },
-  "navSources": {
-    "message": "Źródła",
-    "description": "Navigation drawer label"
-  },
-  "navAppearance": {
-    "message": "Wygląd",
-    "description": "Navigation drawer label"
-  },
-  "navTranslation": {
-    "message": "Tłumaczenie",
-    "description": "Navigation drawer label"
-  },
-  "navCache": {
-    "message": "Pamięć podręczna",
-    "description": "Navigation drawer label"
-  },
   "navLocalLyrics": {
     "message": "Lokalne teksty",
     "description": "Navigation drawer label"
-  },
-  "navAbout": {
-    "message": "O rozszerzeniu",
-    "description": "Navigation drawer label"
-  },
-  "msgSettingsSavedRestart": {
-    "message": "Ustawienia zapisane. Uruchom ponownie kartę z muzyką, aby zastosować zmiany.",
-    "description": "Notification text when no platform tabs are found"
-  },
-  "msgSettingsSavedRestartPlatform": {
-    "message": "Ustawienia zapisane. Uruchom ponownie $PLATFORMS$, aby zastosować zmiany.",
-    "description": "Notification text with platform names",
-    "placeholders": {
-      "PLATFORMS": {
-        "content": "$1",
-        "example": "YouTube Music & Apple Music"
-      }
-    }
-  },
-  "buttonRestart": {
-    "message": "Uruchom ponownie",
-    "description": "Restart button text"
-  },
-  "buttonRestartTabs": {
-    "message": "Uruchom ponownie karty",
-    "description": "Restart button text for multiple tabs"
-  },
-  "categoryCoreFunc": {
-    "message": "Podstawowa funkcjonalność",
-    "description": "Settings category title"
   },
   "descEnableExtension": {
     "message": "Włącz lub wyłącz rozszerzenie globalnie.",
@@ -181,101 +95,17 @@
     "message": "Włącz podświetlanie karaoke słowo po słowie, jeśli jest dostępne.",
     "description": "Description for word-by-word toggle"
   },
-  "categoryYouTubeMusic": {
-    "message": "Ustawienia YouTube Music",
-    "description": "Settings category title"
-  },
-  "settingFullscreenSongInfo": {
-    "message": "Włącz informacje o utworze w trybie pełnoekranowym",
-    "description": "Label for fullscreen song info toggle"
-  },
-  "descFullscreenSongInfo": {
-    "message": "Pokazuje szczegóły utworu w trybie pełnoekranowym, w tym pasek postępu, datę wydania, tytuł i wykonawcę.",
-    "description": "Description for fullscreen song info"
-  },
-  "settingDisableSongInfoSeekbar": {
-    "message": "Wyłącz pasek postępu informacji o utworze",
-    "description": "Label for disabling seekbar in fullscreen song info"
-  },
-  "descDisableSongInfoSeekbar": {
-    "message": "Ukryj pasek postępu na pełnoekranowym ekranie informacji o utworze.",
-    "description": "Description for disabling seekbar in fullscreen song info"
-  },
-  "settingUseSponsorBlock": {
-    "message": "Używaj API SponsorBlock",
-    "description": "Label for SponsorBlock toggle in settings"
-  },
-  "descUseSponsorBlock": {
-    "message": "Pomijaj części niemuzyczne, takie jak wstępy, zakończenia lub segmenty reklamowe.",
-    "description": "Description for SponsorBlock toggle"
-  },
-  "settingPreferUnisonVideo": {
-    "description": "Label for prefer Unison video toggle in settings",
-    "message": "Preferuj Unison dla wideo"
-  },
-  "descPreferUnisonVideo": {
-    "description": "Description for prefer Unison video toggle",
-    "message": "Po włączeniu priorytetowo traktuj usługę Unison dla treści wideo i ignoruj segmenty SponsorBlock, gdy Unison dostarcza teksty piosenek."
-  },
   "categoryAppleMusic": {
     "message": "Ustawienia Apple Music",
     "description": "Settings category title"
-  },
-  "settingPreferExternal": {
-    "message": "Preferuj zewnętrzne teksty dla synchronizacji linia po linii",
-    "description": "Label for Apple Music bypass toggle"
-  },
-  "descPreferExternal": {
-    "message": "Jeśli włączone, aplikacja będzie używać zewnętrznych źródeł tekstów, gdy Apple Music oferuje tylko synchronizację linia po linii.",
-    "description": "Description for Apple Music bypass toggle"
-  },
-  "sectionSources": {
-    "message": "Źródła",
-    "description": "Sources section title"
-  },
-  "categoryLyricsProvider": {
-    "message": "Dostawca tekstów",
-    "description": "Category title"
   },
   "labelProviderOrder": {
     "message": "Kolejność dostawców tekstów",
     "description": "Label for provider order configuration"
   },
-  "helperProviderOrder": {
-    "message": "Przeciągnij i upuść, aby ustalić priorytet sprawdzania dostawców. Pierwszy dostawca na liście jest wybierany jako pierwszy.",
-    "description": "Helper text for provider ordering"
-  },
-  "labelAvailableProviders": {
-    "message": "Dostępni dostawcy",
-    "description": "Label for available providers dropdown"
-  },
   "buttonAddProvider": {
     "message": "Dodaj dostawcę",
     "description": "Add provider button text"
-  },
-  "labelCustomKpoeUrl": {
-    "message": "Własny adres URL serwera KPoe",
-    "description": "Label for custom server URL input"
-  },
-  "helperCustomKpoeUrl": {
-    "message": "Wprowadź podstawowy adres URL własnego serwera KPoe.",
-    "description": "Helper text for custom KPoe URL"
-  },
-  "labelSourceOrder": {
-    "message": "Kolejność źródeł Lyrics+",
-    "description": "Label for configuration"
-  },
-  "helperSourceOrder": {
-    "message": "Przeciągnij i upuść, aby zmienić kolejność źródeł dla Lyrics+.",
-    "description": "Helper text for source ordering"
-  },
-  "labelAvailableSources": {
-    "message": "Dostępne źródła",
-    "description": "Label for available sources dropdown"
-  },
-  "buttonAddSource": {
-    "message": "Dodaj źródło",
-    "description": "Add source button text"
   },
   "msgAllSourcesAdded": {
     "message": "Wszystkie źródła zostały już dodane",
@@ -315,10 +145,6 @@
       }
     }
   },
-  "sectionLocalLyrics": {
-    "message": "Lokalne teksty",
-    "description": "Local lyrics section title"
-  },
   "categoryManageLocalLyrics": {
     "message": "Zarządzaj przesłanymi tekstami",
     "description": "Category title"
@@ -330,60 +156,6 @@
   "buttonRefreshList": {
     "message": "Odśwież listę",
     "description": "Refresh local lyrics list button"
-  },
-  "titleAddLocalLyrics": {
-    "message": "Dodaj nowe lokalne teksty",
-    "description": "FAB tooltip"
-  },
-  "modalUploadTitle": {
-    "message": "Prześlij nowe lokalne teksty",
-    "description": "Modal dialog title"
-  },
-  "labelSongTitle": {
-    "message": "Tytuł utworu",
-    "description": "Input label"
-  },
-  "labelArtistName": {
-    "message": "Wykonawca",
-    "description": "Input label"
-  },
-  "labelAlbumName": {
-    "message": "Album (opcjonalnie)",
-    "description": "Input label"
-  },
-  "labelLyricsFile": {
-    "message": "Plik tekstowy",
-    "description": "File input label"
-  },
-  "helperLyricsFile": {
-    "message": "Prześlij plik LRC, ELRC, Apple TTML lub JSON.",
-    "description": "Helper text for lyrics file input"
-  },
-  "buttonUploadLyrics": {
-    "message": "Prześlij tekst",
-    "description": "Upload button text"
-  },
-  "msgUploadRequired": {
-    "message": "Tytuł, wykonawca i plik są wymagane.",
-    "description": "Error when required fields are missing"
-  },
-  "msgUploading": {
-    "message": "Przesyłanie tekstu...",
-    "description": "Status during upload"
-  },
-  "msgUploadSuccess": {
-    "message": "Tekst przesłany pomyślnie!",
-    "description": "Status after successful upload"
-  },
-  "msgUploadError": {
-    "message": "Błąd podczas przesyłania: $ERROR$",
-    "description": "Error during upload",
-    "placeholders": {
-      "ERROR": {
-        "content": "$1",
-        "example": "Invalid format"
-      }
-    }
   },
   "msgFileReadError": {
     "message": "Błąd odczytu pliku.",
@@ -422,10 +194,6 @@
         "example": "Storage error"
       }
     }
-  },
-  "sectionTranslation": {
-    "message": "Tłumaczenie",
-    "description": "Translation section title"
   },
   "categoryTranslationService": {
     "message": "Usługa tłumaczeń",
@@ -603,10 +371,6 @@
     "message": "Dostosuj prompt wysyłany do AI w celu romanizacji.",
     "description": "Helper text"
   },
-  "sectionAppearance": {
-    "message": "Wygląd",
-    "description": "Appearance section title"
-  },
   "categoryTextDisplay": {
     "message": "Wyświetlanie tekstu",
     "description": "Category title"
@@ -631,105 +395,9 @@
     "message": "Automatycznie ukrywaj przewodnik fonetyczny, jeśli tekst jest już w alfabecie łacińskim.",
     "description": "Description"
   },
-  "settingDynamicBkgVocal": {
-    "message": "Dynamiczny tryb wokalu w tle",
-    "description": "Toggle label"
-  },
-  "descDynamicBkgVocal": {
-    "message": "Wokale w tle zaczynające się przed głównym tekstem będą wyświetlane u góry.",
-    "description": "Description"
-  },
-  "categoryPerformance": {
-    "message": "Wydajność i kompatybilność",
-    "description": "Category title"
-  },
   "descLightweightMode": {
     "message": "Zmniejsza animacje i efekty wizualne dla lepszej wydajności na starszych urządzeniach.",
     "description": "Description"
-  },
-  "settingHideOffscreen": {
-    "message": "Ukryj linie tekstu poza ekranem",
-    "description": "Toggle label"
-  },
-  "descHideOffscreen": {
-    "message": "Ukrywa i usuwa wszystkie animowane linie tekstu, które nie są obecnie widoczne. Zalecane dla słabszych urządzeń.",
-    "description": "Description"
-  },
-  "categoryVisualEffects": {
-    "message": "Efekty wizualne",
-    "description": "Category title"
-  },
-  "settingBlurInactive": {
-    "message": "Rozmycie nieaktywnego tekstu",
-    "description": "Toggle label"
-  },
-  "descBlurInactive": {
-    "message": "Stosuje efekt rozmycia do linii, które nie są obecnie śpiewane, podobnie jak w Apple Music.",
-    "description": "Description"
-  },
-  "settingDynamicBackground": {
-    "message": "Włącz dynamiczne tło (widok odtwarzacza)",
-    "description": "Toggle label"
-  },
-  "descDynamicBackground": {
-    "message": "Stosuje animowane tło albumu po powiększeniu odtwarzacza. To ustawienie nie działa w trybie pełnoekranowym.",
-    "description": "Description"
-  },
-  "settingAudioBeatSync": {
-    "message": "Synchronizacja z rytmem (dynamiczne tło)",
-    "description": "Toggle label"
-  },
-  "descAudioBeatSync": {
-    "message": "Sprawia, że warstwy dynamicznego tła pulsują w rytm muzyki. Powinno być wyłączone, jeśli używasz Better Lyrics Shaders.",
-    "description": "Description"
-  },
-  "settingRelaxScroll": {
-    "message": "Spokojne przewijanie",
-    "description": "Label for relax scrolling toggle"
-  },
-  "descRelaxScroll": {
-    "message": "Wolniejsza animacja przewijania i wyłączenie animacji zmiany rozmiaru tekstu tekstu piosenki.",
-    "description": "Description for relax scrolling toggle"
-  },
-  "settingSongPaletteFullscreen": {
-    "message": "Używaj palety kolorów utworu dla tekstu na pełnym ekranie",
-    "description": "Toggle label"
-  },
-  "descSongPaletteFullscreen": {
-    "message": "Stosuje kolory albumu do tekstu w trybie wideo na pełnym ekranie.",
-    "description": "Description"
-  },
-  "settingSongPaletteAll": {
-    "message": "Używaj palety kolorów utworu dla tekstu we wszystkich trybach",
-    "description": "Toggle label"
-  },
-  "descSongPaletteAll": {
-    "message": "Stosuje kolory albumu do tekstu we wszystkich trybach widoku.",
-    "description": "Description"
-  },
-  "labelOverridePaletteColor": {
-    "message": "Wymuś kolor palety",
-    "description": "Input label"
-  },
-  "helperOverridePaletteColor": {
-    "message": "Zmień kolor tekstu na niestandardowy (tylko tekst, nie tło) (pozostaw puste dla domyślnego).",
-    "description": "Helper text"
-  },
-  "categoryCustomStyling": {
-    "message": "Własny styl",
-    "description": "Category title"
-  },
-  "labelCustomCSS": {
-    "message": "Własny CSS",
-    "description": "Textarea label"
-  },
-  "helperCustomCSS": {
-    "message": "Zastosuj własne style do wyświetlania tekstów. Używaj ostrożnie.",
-    "description": "Helper text"
-  },
-  "sectionCache": {
-    "message": "Pamięć podręczna",
-    "description": "Cache section title"
   },
   "labelCacheStrategy": {
     "message": "Strategia pamięci podręcznej",
@@ -740,11 +408,11 @@
     "description": "Description"
   },
   "optionAggressive": {
-    "message": "Agresywna (2 godziny)",
+    "message": "Aggressive (24 hours)",
     "description": "Cache strategy option"
   },
   "optionModerate": {
-    "message": "Umiarkowana (1 godzina)",
+    "message": "Moderate (12 hours)",
     "description": "Cache strategy option"
   },
   "optionNone": {
@@ -755,12 +423,8 @@
     "message": "Aktualne użycie pamięci podręcznej",
     "description": "Label for cache usage display"
   },
-  "sectionAbout": {
-    "message": "O rozszerzeniu",
-    "description": "About section"
-  },
   "aboutDescription": {
-    "message": "To rozszerzenie zrodziło się z prostej idei: słuchanie muzyki powinno być wciągającym doświadczeniem, a nie tylko czynnością w tle. Byliśmy zmęczeni statycznymi tekstami na YouTube i przestarzałymi interfejsami, więc postanowiliśmy zbudować odtwarzacz, o jakim zawsze marzyliśmy. Naszym celem jest upiększenie Twoich sesji muzycznych, uczynienie ich bardziej interaktywnymi i zabawniejszymi. youly+ jest dumnie open source. Jeśli znajdziesz błąd lub masz pomysł, chętnie Cię wysłuchamy.",
+    "message": "YouLy+ brings AMLL lyrics and Apple-provided translations to Apple Music, with local TTML and optional machine translation.",
     "description": "About page description text"
   },
   "categoryLinksSupport": {
@@ -830,10 +494,6 @@
         "example": "Invalid JSON"
       }
     }
-  },
-  "msgNoActiveTabs": {
-    "message": "Nie znaleziono aktywnych kart z muzyką. Odśwież ręcznie.",
-    "description": "Alert when no music tabs found for restart"
   },
   "titleShowHideApiKey": {
     "message": "Pokaż/ukryj klucz API",
@@ -967,106 +627,6 @@
     "message": "Twój klucz API jest przechowywany lokalnie. Klucze z darmowego planu zazwyczaj kończą się na :fx",
     "description": "Helper text"
   },
-  "sourceNameLyricsPlus": {
-    "message": "Lyrics+ (Wkład użytkowników)",
-    "description": "Display name for lyricsplus source"
-  },
-  "sourceNameApple": {
-    "message": "Apple Music",
-    "description": "Display name for apple source"
-  },
-  "sourceNameQQ": {
-    "message": "QQ Music",
-    "description": "Display name for qq source"
-  },
-  "sourceNameSpotify": {
-    "message": "Musixmatch (Spotify)",
-    "description": "Display name for spotify source"
-  },
-  "sourceNameMusixmatch": {
-    "message": "Musixmatch (Bezpośrednio)",
-    "description": "Display name for musixmatch source"
-  },
-  "sourceNameMusixmatchWord": {
-    "message": "Musixmatch (Słowo)",
-    "description": "Display name for musixmatch-word source"
-  },
-  "sourceNameLyricsPlusProvider": {
-    "message": "Lyrics+",
-    "description": "Provider generic name"
-  },
-  "sourceNameCustomKpoe": {
-    "message": "Niestandardowy serwer KPoe",
-    "description": "Provider generic name for custom KPoe server"
-  },
-  "sourceNameLRCLib": {
-    "message": "LRCLIB",
-    "description": "LRCLIB provider name"
-  },
-  "sourceNameUnison": {
-    "message": "Unison (BetterLyrics)",
-    "description": "Unison provider name"
-  },
-  "sourceNameLrcred": {
-    "message": "lrc.red",
-    "description": "lrc.red provider name"
-  },
-  "navCatInterface": {
-    "message": "Interface",
-    "description": "Navigation category for interface settings"
-  },
-  "navCatLyricsSources": {
-    "message": "Lyrics Sources",
-    "description": "Navigation category for lyrics sources"
-  },
-  "navCatStorageData": {
-    "message": "Storage & Data",
-    "description": "Navigation category for storage & data"
-  },
-  "navCatApplication": {
-    "message": "Application",
-    "description": "Navigation category for application info"
-  },
-  "navSubtitleAppearance": {
-    "message": "Visual effects, theme, typography",
-    "description": "Subtitle for Appearance navigation item"
-  },
-  "navSubtitleGeneral": {
-    "message": "Core features, YTM & Apple Music",
-    "description": "Subtitle for General navigation item"
-  },
-  "navSubtitleSources": {
-    "message": "Lyrics providers & order",
-    "description": "Subtitle for Sources navigation item"
-  },
-  "navSubtitleTranslation": {
-    "message": "AI models, prompts, romanization",
-    "description": "Subtitle for Translation navigation item"
-  },
-  "navSubtitleCache": {
-    "message": "Storage usage & caching policy",
-    "description": "Subtitle for Cache navigation item"
-  },
-  "navSubtitleLocalLyrics": {
-    "message": "Manage uploaded LRC & TTML files",
-    "description": "Subtitle for Local Lyrics navigation item"
-  },
-  "navSubtitleAbout": {
-    "message": "Version, backup, export & links",
-    "description": "Subtitle for About navigation item"
-  },
-  "categoryCustomKpoe": {
-    "message": "Custom KPoe",
-    "description": "Category title for Custom KPoe settings"
-  },
-  "categoryUnison": {
-    "message": "Unison",
-    "description": "Category title for Unison settings"
-  },
-  "categoryLyricsPlus": {
-    "message": "Lyrics+",
-    "description": "Category title for Lyrics+ settings"
-  },
   "categoryCacheConfig": {
     "message": "Cache Configuration & Storage",
     "description": "Category title for cache settings"
@@ -1074,10 +634,6 @@
   "labelFastPath": {
     "message": "Fast Path",
     "description": "Label indicator for primary fast path provider"
-  },
-  "placeholderCustomKpoeUrl": {
-    "message": "https://example.com/api",
-    "description": "Placeholder for custom KPoe server URL input"
   },
   "placeholderOpenRouterModel": {
     "message": "google/gemini-2.0-flash-001",
@@ -1094,14 +650,6 @@
   "placeholderCustomRomanizationPrompt": {
     "message": "Custom romanization prompt...",
     "description": "Placeholder for custom romanization prompt textarea"
-  },
-  "placeholderCustomCSS": {
-    "message": "/* Custom CSS */",
-    "description": "Placeholder for custom CSS textarea"
-  },
-  "placeholderPaletteColor": {
-    "message": "#ffb5a0",
-    "description": "Placeholder for override palette color"
   },
   "labelCacheUsageFormat": {
     "message": "$SIZE$ MB used ($COUNT$ songs cached)",
@@ -1123,17 +671,9 @@
     "message": "Cache info unavailable.",
     "description": "Message when cache info is unavailable"
   },
-  "placeholderSelectProvider": {
-    "message": "Wybierz dostawcę...",
-    "description": "Select a Provider on settings menu"
-  },
   "placeholderSelectSource": {
     "message": "Wybierz źródło...",
     "description": "Select a Source on settings menu"
-  },
-  "msgAllProvidersAdded": {
-    "message": "Wszyscy dostawcy dodani",
-    "description": "User added All providers on settings menu"
   },
   "noteDeepLSupportedLangs": {
     "message": "DeepL oficjalnie obsługuje 33 języki. W przypadku wybrania nieobsługiwanego języka tłumaczenie automatycznie powróci do Google Translate.",
@@ -1222,5 +762,512 @@
         "content": "$2"
       }
     }
+  },
+  "navPlaybackAppearance": {
+    "message": "Playback & appearance"
+  },
+  "navSubtitlePlaybackAppearance": {
+    "message": "Player, text, title correction, font"
+  },
+  "navLyricsSourcesApple": {
+    "message": "Lyrics sources"
+  },
+  "navSubtitleLyricsSourcesApple": {
+    "message": "AMLL, LunaBeat, AmLyrics, Apple native"
+  },
+  "navCatLibrary": {
+    "message": "Library"
+  },
+  "navSubtitleLocalLyricsApple": {
+    "message": "Manage locally imported TTML"
+  },
+  "navCatConfiguration": {
+    "message": "Configuration"
+  },
+  "navTranslationTransliteration": {
+    "message": "Translation & transliteration"
+  },
+  "navSubtitleTranslationTransliteration": {
+    "message": "Providers, prompts, dictionaries"
+  },
+  "navStorageAdvanced": {
+    "message": "Storage & advanced"
+  },
+  "navSubtitleStorageAdvanced": {
+    "message": "Cache, backup, help and license"
+  },
+  "navCatAppleMusicService": {
+    "message": "Apple Music"
+  },
+  "msgAppleRestart": {
+    "message": "Apple Music needs a reload to apply this change."
+  },
+  "buttonReloadAppleMusic": {
+    "message": "Reload Apple Music"
+  },
+  "categoryApplePlayer": {
+    "message": "Apple Music player"
+  },
+  "settingUseAMLLPlayer": {
+    "message": "Use AMLL lyrics player"
+  },
+  "descUseAMLLPlayer": {
+    "message": "Show Apple Music lyrics in the original AMLL player. Turn this off to use Apple's native lyrics view."
+  },
+  "settingAnimatedLyricsBackground": {
+    "message": "Animated lyrics background"
+  },
+  "descAnimatedLyricsBackground": {
+    "message": "Keep the AMLL album background and its original animation."
+  },
+  "labelLyricsDisplayMode": {
+    "message": "Lyrics display mode"
+  },
+  "descLyricsDisplayMode": {
+    "message": "Defaults for translation and transliteration; the player menu offers the same choices."
+  },
+  "optionDisplayOriginal": {
+    "message": "Original lyrics"
+  },
+  "optionDisplayTranslation": {
+    "message": "Translation"
+  },
+  "optionDisplayTransliteration": {
+    "message": "Transliteration"
+  },
+  "optionDisplayBoth": {
+    "message": "Translation + transliteration"
+  },
+  "categoryPlayerFont": {
+    "message": "Player font"
+  },
+  "sourcesAppleOnlyNote": {
+    "message": "YouLy+ now supports Apple Music only. This source order applies to every song."
+  },
+  "categoryAppleSourceOrder": {
+    "message": "Apple Music lyrics source order"
+  },
+  "descAppleSourceOrder": {
+    "message": "AMLL is tried first by default, then LunaBeat, AmLyrics, and Apple Music's native lyrics. Apple Music always stays last."
+  },
+  "sourceNativePinned": {
+    "message": "Always used as the final fallback"
+  },
+  "msgSourceOrderSaved": {
+    "message": "Lyrics source order saved."
+  },
+  "msgSourceOrderSaveFailed": {
+    "message": "Could not save the lyrics source order."
+  },
+  "localLyricsImportGuideTitle": {
+    "message": "Import TTML from the song player"
+  },
+  "localLyricsImportStep1": {
+    "message": "Open the current Apple Music song in the fullscreen lyrics player."
+  },
+  "localLyricsImportStep2": {
+    "message": "Open the player menu and choose Import TTML."
+  },
+  "localLyricsImportStep3": {
+    "message": "The file is saved for that song and filled in automatically on later loads."
+  },
+  "localLyricsOverrideNote": {
+    "message": "Local TTML takes priority for the matching song. Delete it here to return to automatic sources."
+  },
+  "categoryLocalLyricsLibrary": {
+    "message": "Local TTML library"
+  },
+  "translationApplePolicyNote": {
+    "message": "Machine translation runs only for Apple Music's original lyrics when a track has no built-in translation. Apple-provided translations are preserved."
+  },
+  "msgPlaybackSettingsSaved": {
+    "message": "Playback settings saved and applied to Apple Music."
+  },
+  "msgTranslationSettingsSaved": {
+    "message": "Translation settings saved and applied to the Apple Music player."
+  },
+  "msgAdvancedSettingsSaved": {
+    "message": "Settings saved."
+  },
+  "msgSettingsSaveFailed": {
+    "message": "Could not save settings. Try again."
+  },
+  "msgTargetResetForDeepL": {
+    "message": "Target language reset to Auto because DeepL does not support the previous selection."
+  },
+  "msgPlayerFontImported": {
+    "message": "Font imported and applied to the Apple Music player."
+  },
+  "msgPlayerFontReset": {
+    "message": "Default player font restored."
+  },
+  "buttonShowKey": {
+    "message": "Show"
+  },
+  "buttonHideKey": {
+    "message": "Hide"
+  },
+  "msgDictionaryUnavailable": {
+    "message": "Unavailable"
+  },
+  "msgDictionaryDownloadFailed": {
+    "message": "Download failed"
+  },
+  "msgDictionaryDownloadFailedDetail": {
+    "message": "Could not download the offline dictionary. Try again."
+  },
+  "msgDictionaryDeleteFailed": {
+    "message": "Could not delete the offline dictionary. Try again."
+  },
+  "msgLocalLyricsRefreshed": {
+    "message": "Local TTML library refreshed."
+  },
+  "msgImportNoValidSettings": {
+    "message": "This file contains no supported YouLy+ settings."
+  },
+  "labelBackupRestore": {
+    "message": "Backup and restore settings"
+  },
+  "categoryHelpSources": {
+    "message": "Help & source"
+  },
+  "linkIssues": {
+    "message": "Issues & help"
+  },
+  "aboutAppleDescription": {
+    "message": "Apple Music lyrics with the original AMLL player, Apple-provided translations, local TTML, and optional machine translation."
+  },
+  "upstreamAttribution": {
+    "message": "Built on AMLL and open-source lyric sources. Upstream acknowledgements and the AGPL-3.0-only license are available in the repository."
+  },
+  "footerAppleOnly": {
+    "message": "YouLy+ · Apple Music lyrics"
+  },
+  "linkTTMLTranslationGuide": {
+    "message": "TTML translation guide"
+  },
+  "tabPlayback": {
+    "message": "Playback"
+  },
+  "tabStorage": {
+    "message": "Cache & storage"
+  },
+  "popupAppleDescription": {
+    "message": "Apple Music lyrics, appearance and cache."
+  },
+  "popupFullSettingsHint": {
+    "message": "Sources, local TTML, translation, fonts and advanced options are in the full settings page."
+  },
+  "playerClose": {
+    "message": "Close"
+  },
+  "playerSettings": {
+    "message": "Lyrics settings"
+  },
+  "playerDisplay": {
+    "message": "Display"
+  },
+  "playerOriginal": {
+    "message": "Original"
+  },
+  "playerTranslation": {
+    "message": "Translation"
+  },
+  "playerRomanization": {
+    "message": "Romanization"
+  },
+  "playerTranslationAndRomanization": {
+    "message": "Translation + romanization"
+  },
+  "playerTranslationLoading": {
+    "message": "Loading translation…"
+  },
+  "playerTranslationUnavailable": {
+    "message": "Translation is unavailable from the current lyrics source"
+  },
+  "playerTranslationError": {
+    "message": "Unable to load translation from the current lyrics source"
+  },
+  "playerRomanizationLoading": {
+    "message": "Loading romanization…"
+  },
+  "playerRomanizationUnavailable": {
+    "message": "Romanization is unavailable from the current lyrics source"
+  },
+  "playerRomanizationError": {
+    "message": "Unable to load romanization from the current lyrics source"
+  },
+  "playerLyricsSource": {
+    "message": "Lyrics source"
+  },
+  "playerAutomatic": {
+    "message": "Automatic"
+  },
+  "playerSourcePreference": {
+    "message": "Preferred source"
+  },
+  "playerCurrentSource": {
+    "message": "Current source"
+  },
+  "playerSourceUnavailable": {
+    "message": "currently unavailable"
+  },
+  "playerLyricsOffset": {
+    "message": "Lyrics offset (ms)"
+  },
+  "playerAnimatedBackground": {
+    "message": "Animated background"
+  },
+  "playerResetOffset": {
+    "message": "Reset offset"
+  },
+  "playerReloadLyrics": {
+    "message": "Reload lyrics"
+  },
+  "playerNativePlayer": {
+    "message": "Native player"
+  },
+  "playerConnecting": {
+    "message": "Connecting to Apple Music…"
+  },
+  "playerLoadingLyrics": {
+    "message": "Loading lyrics…"
+  },
+  "playerSongNotFound": {
+    "message": "No lyrics available"
+  },
+  "playerNotFoundError": {
+    "message": "Unable to load lyrics"
+  },
+  "playerPlaybackCommandFailed": {
+    "message": "Playback command failed"
+  },
+  "playerSettingsSaveFailed": {
+    "message": "Unable to save player settings"
+  },
+  "playerFontLoadFailed": {
+    "message": "Unable to load font; import it again in Settings"
+  },
+  "playerFullscreen": {
+    "message": "Fullscreen"
+  },
+  "playerExitFullscreen": {
+    "message": "Exit fullscreen"
+  },
+  "playerFullscreenChangeFailed": {
+    "message": "Unable to change fullscreen"
+  },
+  "playerExportFailed": {
+    "message": "Unable to export diagnostics"
+  },
+  "playerDownloadNativeTTML": {
+    "message": "Download AM native TTML"
+  },
+  "playerDownloadingNativeTTML": {
+    "message": "Fetching native TTML…"
+  },
+  "playerNativeTTMLUnavailable": {
+    "message": "No native TTML was retrieved for this song; try again later"
+  },
+  "playerNativeTTMLSongChanged": {
+    "message": "The song changed; download again"
+  },
+  "playerNativeTTMLFailed": {
+    "message": "Unable to download native TTML; try again"
+  },
+  "playerImportTTML": {
+    "message": "Import TTML"
+  },
+  "playerImportingTTML": {
+    "message": "Importing TTML…"
+  },
+  "playerImportTTMLHint": {
+    "message": "Saved for the current song across reloads (up to 2 MB)"
+  },
+  "playerImportTTMLSuccess": {
+    "message": "TTML imported and saved for this song"
+  },
+  "playerImportTTMLInvalid": {
+    "message": "Invalid TTML file or no lyrics to display"
+  },
+  "playerImportTTMLTooLarge": {
+    "message": "TTML files must be 2 MB or smaller"
+  },
+  "playerLocalTTMLSongChanged": {
+    "message": "The song changed; try again for the current song"
+  },
+  "playerImportTTMLFailed": {
+    "message": "Unable to import TTML; try again"
+  },
+  "playerRemoveLocalTTML": {
+    "message": "Remove imported TTML"
+  },
+  "playerRemovingLocalTTML": {
+    "message": "Removing…"
+  },
+  "playerRemoveLocalTTMLSuccess": {
+    "message": "Local lyrics removed; automatic fetching restored"
+  },
+  "playerRemoveLocalTTMLFailed": {
+    "message": "Unable to remove local lyrics; try again"
+  },
+  "playerAdvanced": {
+    "message": "Advanced"
+  },
+  "playerDiagnose": {
+    "message": "Diagnose stutter (20 seconds)"
+  },
+  "playerDiagnosing": {
+    "message": "Recording stutter data; keep playing…"
+  },
+  "playerDiagnosticReady": {
+    "message": "Recording finished; export the report"
+  },
+  "playerDiagnosticStopped": {
+    "message": "Recording stopped; export the report"
+  },
+  "playerDiagnosticNeedsPlayback": {
+    "message": "Play a song and wait for lyrics first"
+  },
+  "playerDiagnosticRate": {
+    "message": "Page callback rate"
+  },
+  "playerDiagnosticSlow": {
+    "message": "Long intervals (>50ms)"
+  },
+  "playerExportDiagnostics": {
+    "message": "Export diagnostic report"
+  },
+  "playerQueue": {
+    "message": "Up next"
+  },
+  "playerQueueLoading": {
+    "message": "Refreshing queue…"
+  },
+  "playerQueueEmpty": {
+    "message": "The queue is empty"
+  },
+  "playerQueueLoadFailed": {
+    "message": "Unable to load the queue"
+  },
+  "playerQueueRetry": {
+    "message": "Retry"
+  },
+  "playerOffsetSaveFailed": {
+    "message": "Could not save lyrics offset. Try again."
+  },
+  "playerModeSaveFailed": {
+    "message": "Could not save display mode. Try again."
+  },
+  "playerSourceSwitched": {
+    "message": "Switched lyrics source to $NAME$",
+    "placeholders": {
+      "NAME": {
+        "content": "$1",
+        "example": "AMLL TTML DB"
+      }
+    }
+  },
+  "playerSourceSwitchFailed": {
+    "message": "Could not switch lyrics source"
+  },
+  "playerLocalLyrics": {
+    "message": "Local TTML"
+  },
+  "settingTitleCorrection": {
+    "message": "Song Title Correction",
+    "description": "Label for the Apple Music song title correction setting"
+  },
+  "descTitleCorrection": {
+    "message": "When enabled, the AMLL player shows the song title, artist, and album as they appear in the selected region.",
+    "description": "Description for the Apple Music song title correction setting"
+  },
+  "titleCorrectionOff": {
+    "message": "Off",
+    "description": "Title correction option: disabled"
+  },
+  "titleCorrectionOriginal": {
+    "message": "Use the song's original region",
+    "description": "Title correction option: original region"
+  },
+  "titleCorrectionChina": {
+    "message": "Use mainland China",
+    "description": "Title correction option: mainland China"
+  },
+  "titleCorrectionJapan": {
+    "message": "Use Japan",
+    "description": "Title correction option: Japan"
+  },
+  "optionCustomLLM": {
+    "message": "Third-party LLM (Chat Completions)"
+  },
+  "categoryCustomLLM": {
+    "message": "Third-party LLM"
+  },
+  "labelCustomLLMUrl": {
+    "message": "API address"
+  },
+  "descCustomLLMUrl": {
+    "message": "Use a Chat Completions compatible base URL or full endpoint."
+  },
+  "descCustomLLMKey": {
+    "message": "Stored locally and sent only to your configured API address. Leave blank if no key is needed."
+  },
+  "labelCustomLLMModel": {
+    "message": "Model name"
+  },
+  "descCustomLLMModel": {
+    "message": "Enter the model ID provided by your service."
+  },
+  "buttonTestCustomLLM": {
+    "message": "Authorize address and test connection"
+  },
+  "msgCustomLLMModelRequired": {
+    "message": "Enter a model name first."
+  },
+  "msgCustomLLMExtensionRequired": {
+    "message": "Open the installed extension settings to authorize an API address."
+  },
+  "msgCustomLLMPermissionDenied": {
+    "message": "Access to this API address was not authorized."
+  },
+  "msgCustomLLMTesting": {
+    "message": "Testing connection..."
+  },
+  "msgCustomLLMTestSuccess": {
+    "message": "Connection successful:"
+  },
+  "msgCustomLLMTestFailed": {
+    "message": "Connection failed:"
+  },
+  "labelPlayerFont": {
+    "message": "Player font file"
+  },
+  "descPlayerFont": {
+    "message": "Import a TTF, OTF, WOFF or WOFF2 file to replace all player text. Stored locally in the extension; no system installation needed. Maximum 64 MB."
+  },
+  "buttonDefaultPlayerFont": {
+    "message": "Use default font"
+  },
+  "buttonImportPlayerFont": {
+    "message": "Import font file"
+  },
+  "msgPlayerFontDefault": {
+    "message": "Using default font"
+  },
+  "msgPlayerFontImporting": {
+    "message": "Importing font…"
+  },
+  "msgPlayerFontImportFailed": {
+    "message": "Unable to import this font. Choose a valid font file; the previous font is kept."
+  },
+  "msgPlayerFontSize": {
+    "message": "Choose a non-empty font file up to 64 MB."
+  },
+  "msgPlayerFontLoadFailed": {
+    "message": "Unable to load the font. Please import the file again."
+  },
+  "cacheScopeExplanation": {
+    "message": "Aggressive keeps lyric and translation results for 24 hours; Moderate keeps them for 12 hours. With caching off, results are not stored, while provider indexes may still refresh when online. Clearing caches removes results only: local TTML, lyric offsets, source preferences and fonts are kept. Provider indexes are not cleared or included in the sizes above."
   }
 }

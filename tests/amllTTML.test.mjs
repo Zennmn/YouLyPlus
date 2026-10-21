@@ -66,7 +66,7 @@ for (const name of ['complex-test-song', 'ruby-test-song', 'apple-music-duet', '
     assert.ok(actual.length > 0);
     if (name === 'apple-music-other-duet') {
       // This Chinese fixture intentionally goes through the user's simplification
-      // and duplicate-subtitle cleanup. Compare upstream timing/roles here;
+      // and duplicate-translation cleanup. Compare upstream timing/roles here;
       // conversion of both vocals is covered separately below.
       const structure = lines => comparable(lines).map(({ translatedLyric, ...line }) => ({
         ...line, words: line.words.map(({ word, ...w }) => w),
@@ -96,13 +96,13 @@ const functionSource = name => {
   return manager.slice(start, manager.indexOf('\n}', start) + 2);
 };
 
-test('enrichment and line-mode conversion preserve x-bg metadata and built-in subtitles on service failure', async () => {
+test('enrichment and line-mode conversion preserve x-bg metadata and built-in translations on service failure', async () => {
   let rendered;
   const context = vm.createContext({
-    currentFetchMediaId: 'song', lastBaseLyrics: service.parse(backing, 'amll'),
+    currentSongInfo: { appleId: 'test' }, currentFetchMediaId: 'song', lastBaseLyrics: service.parse(backing, 'amll'),
     lastTranslationResponse: { success: false }, lastRomanizationResponse: { success: false },
     currentDisplayMode: 'both', currentSettings: { wordByWord: false },
-    applySubtitleRetiming: async () => null, applySponsorBlock: async value => value.data,
+    getAppleMusicLyricsLanguage: () => 'en',
     renderFinalLyrics: (value, _, mode) => { rendered = { value, mode }; },
     LyricsPlusAPI: {}, lastKnownSongInfo: null, lastProcessedDisplayMode: 'none',
   });

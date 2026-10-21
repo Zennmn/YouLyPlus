@@ -1,1000 +1,49 @@
-import { loadSettings, saveSettings, updateSettings, getSettings, updateCacheSize, clearCache, setupSettingsMessageListener, uploadLocalLyrics, getLocalLyricsList, deleteLocalLyrics, getDictionaryStatus, downloadDictionary, deleteDictionary } from '../lib/settingsManager.js';
-import { initRipple, createSvgIcon, swapSvgIconPath, debounce, bindAutoSave } from '../lib/uiUtils.js';
-import { parseSyncedLyrics, parseAppleTTML, convertToStandardJson, v1Tov2 } from '../lib/parser.js';
+import {
+    loadSettings,
+    saveSettings,
+    updateSettings,
+    getSettings,
+    defaultSettings,
+    pickSettings,
+    updateCacheSize,
+    clearCache,
+    setupSettingsMessageListener,
+    getLocalLyricsList,
+    deleteLocalLyrics,
+    getDictionaryStatus,
+    downloadDictionary,
+    deleteDictionary
+} from '../lib/settingsManager.js';
+import { initRipple, initSwitches, createSvgIcon } from '../lib/uiUtils.js';
 import { APPLE_LYRICS_ORDER, APPLE_LYRICS_NAMES, normalizeAppleLyricsOrder } from '../lib/appleLyricsSources.js';
 import { CustomLLMProvider, customLLMEndpoint } from '../background/services/translation/providers/CustomLLMProvider.js';
 import { playerFontFamily } from '../lib/playerFont.js';
 import { createImportedFontLoader, importPlayerFont, deleteImportedFont } from '../lib/importedPlayerFont.js';
 
-let currentSettings = getSettings();
-const fontInput = document.getElementById('player-font-file');
-const importFontButton = document.getElementById('import-player-font');
-const resetFontButton = document.getElementById('reset-player-font');
-const fontStatus = document.getElementById('player-font-status');
-const fontPreviewLoader = createImportedFontLoader(family => {
-    document.getElementById('player-font-preview').style.fontFamily = family || 'inherit';
-}, () => { fontStatus.textContent = msg('msgPlayerFontLoadFailed'); });
-function previewPlayerFont(value) {
-    const metadata = getSettings().appleMusicPlayerFontFile;
-    fontStatus.textContent = metadata?.name || msg('msgPlayerFontDefault');
-    fontPreviewLoader.update(metadata, playerFontFamily(value));
-}
-importFontButton.addEventListener('click', () => fontInput.click());
-fontInput.addEventListener('change', async () => {
-    const file = fontInput.files?.[0];
-    if (!file) return;
-    importFontButton.disabled = resetFontButton.disabled = true;
-    fontStatus.textContent = msg('msgPlayerFontImporting');
-    const previous = { appleMusicPlayerFont: getSettings().appleMusicPlayerFont, appleMusicPlayerFontFile: getSettings().appleMusicPlayerFontFile };
-    let imported;
+const $ = id => document.getElementById(id);
+const t = (key, fallback = '', substitutions) => {
     try {
-        imported = await importPlayerFont(file);
-        currentSettings = updateSettings({ appleMusicPlayerFont: '', appleMusicPlayerFontFile: imported });
-        await saveSettings();
-        previewPlayerFont('');
-        if (previous.appleMusicPlayerFontFile?.id) deleteImportedFont(previous.appleMusicPlayerFontFile.id).catch(() => {});
-    } catch (error) {
-        if (imported) { currentSettings = updateSettings(previous); deleteImportedFont(imported.id).catch(() => {}); }
-        fontStatus.textContent = msg(error?.message === 'FONT_SIZE' ? 'msgPlayerFontSize' : 'msgPlayerFontImportFailed');
-    } finally { importFontButton.disabled = resetFontButton.disabled = false; fontInput.value = ''; }
-});
-resetFontButton.addEventListener('click', async () => {
-    const previous = { appleMusicPlayerFont: getSettings().appleMusicPlayerFont, appleMusicPlayerFontFile: getSettings().appleMusicPlayerFontFile };
-    try {
-        currentSettings = updateSettings({ appleMusicPlayerFont: '', appleMusicPlayerFontFile: null });
-        await saveSettings();
-        previewPlayerFont('');
-        if (previous.appleMusicPlayerFontFile?.id) deleteImportedFont(previous.appleMusicPlayerFontFile.id).catch(() => {});
-    } catch { currentSettings = updateSettings(previous); fontStatus.textContent = msg('msgPlayerFontImportFailed'); }
-});
-window.addEventListener('pagehide', () => fontPreviewLoader.dispose(), { once: true });
-const saveCustomLLM = debounce(() => saveSettings(), 500);
-for (const [id, key] of [['custom-llm-url', 'customLLMBaseUrl'], ['custom-llm-key', 'customLLMApiKey'], ['custom-llm-model', 'customLLMModel']]) {
-    document.getElementById(id).addEventListener('input', event => {
-        // Stage values immediately so an adjacent field's save cannot restore stale input.
-        currentSettings = updateSettings({ [key]: event.target.value });
-        saveCustomLLM();
-    });
-}
-
-document.getElementById('source-platform').addEventListener('change', () => {
-    populateDraggableProviders();
-    toggleKpoeSourcesVisibility();
-    toggleCustomKpoeUrlVisibility();
-});
-
-document.getElementById('test-custom-llm').addEventListener('click', async () => {
-    const button = document.getElementById('test-custom-llm');
-    const status = document.getElementById('custom-llm-status');
-    try {
-        const values = {
-            customLLMBaseUrl: document.getElementById('custom-llm-url').value.trim(),
-            customLLMApiKey: document.getElementById('custom-llm-key').value.trim(),
-            customLLMModel: document.getElementById('custom-llm-model').value.trim(),
-        };
-        const endpoint = customLLMEndpoint(values.customLLMBaseUrl);
-        if (!values.customLLMModel) throw new Error(msg('msgCustomLLMModelRequired'));
-        const api = typeof browser !== 'undefined' ? browser : typeof chrome !== 'undefined' ? chrome : null;
-        if (!api?.permissions) throw new Error(msg('msgCustomLLMExtensionRequired'));
-        const granted = await api.permissions.request({ origins: [`${endpoint.origin}/*`] });
-        if (!granted) throw new Error(msg('msgCustomLLMPermissionDenied'));
-        button.disabled = true;
-        status.textContent = msg('msgCustomLLMTesting');
-        currentSettings = updateSettings(values);
-        await saveSettings();
-        const result = await new CustomLLMProvider(values).translate(['Hello, world.'], 'zh-CN');
-        status.textContent = `${msg('msgCustomLLMTestSuccess')} ${result[0]}`;
-    } catch (error) { status.textContent = `${msg('msgCustomLLMTestFailed')} ${error.message}`; }
-    finally { button.disabled = false; }
-});
-
-// SVG icon paths (Material Icons)
-const SVG_ICONS = {
-    dragIndicator: 'M11 18c0 1.1-.9 2-2 2s-2-.9-2-2 .9-2 2-2 2 .9 2 2zm-2-8c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0-6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm6 4c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z',
-    delete: 'M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z',
-    musicNote: 'M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z',
-    arrowDropDown: 'M7 10l5 5 5-5z',
-    visibility: 'M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z',
-    visibilityOff: 'M12 7c2.76 0 5 2.24 5 5 0 .65-.13 1.26-.36 1.83l2.92 2.92c1.51-1.26 2.7-2.89 3.43-4.75-1.73-4.39-6-7.5-11-7.5-1.4 0-2.74.25-3.98.7l2.16 2.16C10.74 7.13 11.35 7 12 7zM2 4.27l2.28 2.28.46.46C3.08 8.3 1.78 10.02 1 12c1.73 4.39 6 7.5 11 7.5 1.55 0 3.03-.3 4.38-.84l.42.42L19.73 22 21 20.73 3.27 3 2 4.27zM7.53 9.8l1.55 1.55c-.05.21-.08.43-.08.65 0 1.66 1.34 3 3 3 .22 0 .44-.03.65-.08l1.55 1.55c-.67.33-1.41.53-2.2.53-2.76 0-5-2.24-5-5 0-.79.2-1.53.53-2.2zm4.31-.78l3.15 3.15.02-.16c0-1.66-1.34-3-3-3l-.17.01z',
-    uploadFile: 'M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm4 18H6V4h7v5h5v11zM8 15.01l1.41 1.41L11 14.84V19h2v-4.16l1.59 1.59L16 15.01 12.01 11z',
-    hourglassEmpty: 'M6 2v6l2 2-2 2v6h12v-6l-2-2 2-2V2H6zm10 14.5l-4-2-4 2V17h8v-.5zm0-9l-4 2-4-2V5h8v2.5z',
+        return (typeof msg === 'function' ? msg(key, substitutions) : '') || fallback;
+    } catch {
+        return fallback;
+    }
 };
 
-const RESTART_REQUIRED_KEYS = [
-    'isEnabled',
-    'YTSongInfo',
-    'YTSongInfoDisableSeekbar',
-    'dynamicPlayer'
-];
-
-const SUPPORTED_PLATFORMS = [
-    { name: 'YouTube Music', url: "*://music.youtube.com/*" },
-    { name: 'Apple Music', url: "*://music.apple.com/*" },
-    { name: 'Tidal', url: "*://listen.tidal.com/*" }
-];
-
-async function getAvailableTabs() {
-    return new Promise((resolve) => {
-        let results = [];
-        let checkedCount = 0;
-
-        SUPPORTED_PLATFORMS.forEach(platform => {
-            chrome.tabs.query({ url: platform.url }, (tabs) => {
-                if (tabs && tabs.length > 0) {
-                    results.push({ ...platform, tabs });
-                }
-                checkedCount++;
-                if (checkedCount === SUPPORTED_PLATFORMS.length) {
-                    resolve(results);
-                }
-            });
-        });
-    });
-}
-
-async function showReloadNotification(changedKey) {
-    if (changedKey && !RESTART_REQUIRED_KEYS.includes(changedKey)) {
-        return;
-    }
-
-    const availablePlatforms = await getAvailableTabs();
-    const notification = document.getElementById('reload-notification');
-    const notificationText = document.getElementById('notification-text');
-    const reloadBtnText = document.getElementById('reload-button-text');
-
-    if (notification && notificationText) {
-        if (availablePlatforms.length > 0) {
-            const names = availablePlatforms.map(p => p.name);
-            let platformString = names.length > 1
-                ? names.slice(0, -1).join(', ') + ' & ' + names.slice(-1)
-                : names[0];
-
-            notificationText.innerHTML = msg('msgSettingsSavedRestartPlatform', platformString).replace(platformString, `<strong>${platformString}</strong>`);
-            if (reloadBtnText) reloadBtnText.textContent = availablePlatforms.length > 1 ? msg('buttonRestartTabs') : `${msg('buttonRestart')} ${names[0]}`;
-        } else {
-            notificationText.textContent = msg('msgSettingsSavedRestart');
-            if (reloadBtnText) reloadBtnText.textContent = msg('buttonRestart');
-        }
-        notification.style.display = 'flex';
-    }
-}
-
-function hideReloadNotification() {
-    const notification = document.getElementById('reload-notification');
-    if (notification) {
-        notification.style.display = 'none';
-    }
-}
-
-const autoSaveControls = [
-    // General
-    { id: 'enabled', key: 'isEnabled', type: 'checkbox' },
-    { id: 'wordByWord', key: 'wordByWord', type: 'checkbox' },
-    { id: 'ytsonginfo', key: 'YTSongInfo', type: 'checkbox' },
-    { id: 'ytsonginfo-disableseekbar', key: 'YTSongInfoDisableSeekbar', type: 'checkbox' },
-    { id: 'sponsor-block', key: 'useSponsorBlock', type: 'checkbox' },
-    { id: 'bypass-apple', key: 'appleMusicTTMLBypass', type: 'checkbox' },
-    { id: 'apple-title-correction', key: 'appleMusicTitleCorrection', type: 'value' },
-    { id: 'prefer-unison-video', key: 'preferUnisonVideo', type: 'checkbox' },
-
-    // Sources
-    { id: 'custom-kpoe-url', key: 'customKpoeUrl', type: 'value', debounce: 500 },
-
-    // Translation
-    { id: 'translation-provider', key: 'translationProvider', type: 'value' },
-    { id: 'gemini-api-key', key: 'geminiApiKey', type: 'value', debounce: 500 },
-    { id: 'gemini-model', key: 'geminiModel', type: 'value' },
-    { id: 'openrouter-api-key', key: 'openRouterApiKey', type: 'value', debounce: 500 },
-    { id: 'openrouter-model', key: 'openRouterModel', type: 'value', debounce: 500 },
-    { id: 'deepl-api-key', key: 'deeplApiKey', type: 'value', debounce: 500 },
-    { id: 'romanization-provider', key: 'romanizationProvider', type: 'value' },
-    { id: 'transliteration-target', key: 'transliterationTargetScript', type: 'value' },
-    { id: 'gemini-romanization-model', key: 'geminiRomanizationModel', type: 'value' },
-    { id: 'custom-translate-target', key: 'customTranslateTarget', type: 'value' },
-    { id: 'override-gemini-prompt', key: 'overrideGeminiPrompt', type: 'checkbox' },
-    { id: 'custom-gemini-prompt', key: 'customGeminiPrompt', type: 'value', debounce: 500 },
-    { id: 'override-gemini-romanize-prompt', key: 'overrideGeminiRomanizePrompt', type: 'checkbox' },
-    { id: 'custom-gemini-romanize-prompt', key: 'customGeminiRomanizePrompt', type: 'value', debounce: 500 },
-
-    // Appearance
-    { id: 'larger-text-mode', key: 'largerTextMode', type: 'value' },
-    { id: 'hide-phoneticdup', key: 'hidePhoneticDup', type: 'checkbox' },
-    { id: 'bkg-overlap', key: 'bkgOverlap', type: 'checkbox' },
-    { id: 'lightweight', key: 'lightweight', type: 'checkbox' },
-    { id: 'hide-offscreen', key: 'hideOffscreen', type: 'checkbox' },
-    { id: 'blur-inactive', key: 'blurInactive', type: 'checkbox' },
-    { id: 'dynamic-player', key: 'dynamicPlayer', type: 'checkbox' },
-    { id: 'audio-beat-sync', key: 'audioBeatSync', type: 'checkbox' },
-    { id: 'relax-scroll', key: 'relaxScroll', type: 'checkbox' },
-    { id: 'useSongPaletteFullscreen', key: 'useSongPaletteFullscreen', type: 'checkbox' },
-    { id: 'useSongPaletteAllModes', key: 'useSongPaletteAllModes', type: 'checkbox' },
-    { id: 'overridePaletteColor', key: 'overridePaletteColor', type: 'value', debounce: 500 },
-    { id: 'custom-css', key: 'customCSS', type: 'value', debounce: 800 },
-
-    // Cache
-    { id: 'cache-strategy', key: 'cacheStrategy', type: 'value' },
-];
-
-function setupAutoSaveListeners() {
-    bindAutoSave(autoSaveControls, (key) => {
-        showReloadNotification(key);
-    });
-}
-
-function updateUI(settings) {
-    currentSettings = settings;
-
-    // Helper to safely set element value
-    const setVal = (id, val) => {
-        const el = document.getElementById(id);
-        if (el) el.value = val !== undefined ? val : '';
-    };
-    const setCheck = (id, val) => {
-        const el = document.getElementById(id);
-        if (el) el.checked = !!val;
-    };
-
-    // General
-    setCheck('enabled', currentSettings.isEnabled);
-    setCheck('wordByWord', currentSettings.wordByWord);
-    setCheck('ytsonginfo', currentSettings.YTSongInfo);
-    setCheck('ytsonginfo-disableseekbar', currentSettings.YTSongInfoDisableSeekbar);
-    setCheck('sponsor-block', currentSettings.useSponsorBlock);
-    setCheck('bypass-apple', currentSettings.appleMusicTTMLBypass);
-    setVal('apple-title-correction', ['off', 'original', 'cn', 'jp'].includes(currentSettings.appleMusicTitleCorrection) ? currentSettings.appleMusicTitleCorrection : 'off');
-    updateCustomSelectDisplay('apple-title-correction');
-    setCheck('prefer-unison-video', currentSettings.preferUnisonVideo);
-
-    // Sources
-    setVal('custom-kpoe-url', currentSettings.customKpoeUrl);
-
-    // Translation
-    setVal('translation-provider', currentSettings.translationProvider);
-    updateCustomSelectDisplay('translation-provider');
-    setVal('gemini-api-key', currentSettings.geminiApiKey);
-    document.getElementById('gemini-api-key').type = 'password';
-    setVal('gemini-model', currentSettings.geminiModel || 'gemini-1.5-flash');
-    updateCustomSelectDisplay('gemini-model');
-    setVal('openrouter-api-key', currentSettings.openRouterApiKey);
-    setVal('openrouter-model', currentSettings.openRouterModel);
-    setVal('custom-llm-url', currentSettings.customLLMBaseUrl);
-    setVal('custom-llm-key', currentSettings.customLLMApiKey);
-    setVal('custom-llm-model', currentSettings.customLLMModel);
-    setVal('deepl-api-key', currentSettings.deeplApiKey);
-    document.getElementById('deepl-api-key').type = 'password';
-
-    setVal('romanization-provider', currentSettings.romanizationProvider);
-    updateCustomSelectDisplay('romanization-provider');
-    setVal('transliteration-target', currentSettings.transliterationTargetScript || 'latin');
-    updateCustomSelectDisplay('transliteration-target');
-    setVal('gemini-romanization-model', currentSettings.geminiRomanizationModel || 'gemini-1.5-pro-latest');
-    updateCustomSelectDisplay('gemini-romanization-model');
-
-    setVal('custom-translate-target', currentSettings.customTranslateTarget || '');
-    updateCustomSelectDisplay('custom-translate-target');
-    setCheck('override-gemini-prompt', currentSettings.overrideGeminiPrompt);
-    setVal('custom-gemini-prompt', currentSettings.customGeminiPrompt);
-    setCheck('override-gemini-romanize-prompt', currentSettings.overrideGeminiRomanizePrompt);
-    setVal('custom-gemini-romanize-prompt', currentSettings.customGeminiRomanizePrompt);
-
-    // Appearance
-    previewPlayerFont(currentSettings.appleMusicPlayerFont);
-    setVal('larger-text-mode', currentSettings.largerTextMode);
-    updateCustomSelectDisplay('larger-text-mode');
-    setCheck('hide-phoneticdup', currentSettings.hidePhoneticDup);
-    setCheck('bkg-overlap', currentSettings.bkgOverlap);
-    setCheck('lightweight', currentSettings.lightweight);
-    setCheck('hide-offscreen', currentSettings.hideOffscreen);
-    setCheck('blur-inactive', currentSettings.blurInactive);
-    setCheck('dynamic-player', currentSettings.dynamicPlayer);
-    setCheck('audio-beat-sync', currentSettings.audioBeatSync);
-    setCheck('relax-scroll', currentSettings.relaxScroll);
-    setCheck('useSongPaletteFullscreen', currentSettings.useSongPaletteFullscreen);
-    setCheck('useSongPaletteAllModes', currentSettings.useSongPaletteAllModes);
-    setVal('overridePaletteColor', currentSettings.overridePaletteColor);
-    setVal('custom-css', currentSettings.customCSS);
-
-    // Cache
-    setVal('cache-strategy', currentSettings.cacheStrategy);
-    updateCustomSelectDisplay('cache-strategy');
-
-    // Visibility Toggles
-    toggleKpoeSourcesVisibility();
-    toggleCustomKpoeUrlVisibility();
-    toggleYTSongInfoSeekbarVisibility();
-    toggleGeminiSettingsVisibility();
-    toggleOpenRouterSettingsVisibility();
-    toggleDeepLSettingsVisibility();
-    toggleGeminiPromptVisibility();
-    toggleGeminiRomanizePromptVisibility();
-    toggleRomanizationModelVisibility();
-    toggleOfflineDictionaryVisibility();
-    applyTransliterationTargetState();
-
-    populateDraggableProviders();
-    populateDraggableSources();
-    updateCacheSize();
-    populateLocalLyricsList();
-    updateGroupItemRounding();
-}
-
-function updateGroupItemRounding() {
-    document.querySelectorAll('.settings-group').forEach(group => {
-        const items = Array.from(group.children).filter(child => {
-            return child.classList.contains('setting-item') && window.getComputedStyle(child).display !== 'none';
-        });
-
-        // Clear dynamic rounding classes
-        group.querySelectorAll('.setting-item').forEach(item => {
-            item.classList.remove('is-first-visible', 'is-last-visible', 'is-only-visible');
-        });
-
-        if (items.length === 1) {
-            items[0].classList.add('is-only-visible');
-        } else if (items.length > 1) {
-            items[0].classList.add('is-first-visible');
-            items[items.length - 1].classList.add('is-last-visible');
-        }
-    });
-}
-
-function initRowClickListeners() {
-    document.querySelectorAll('.setting-item.has-switch').forEach(row => {
-        row.addEventListener('click', (e) => {
-            if (e.target.closest('input, button, a, select, .m3-switch, .drag-handle, textarea, .m3-select, .m3-select-menu')) {
-                return;
-            }
-            const switchInput = row.querySelector('.m3-switch input[type="checkbox"]');
-            if (switchInput) {
-                switchInput.checked = !switchInput.checked;
-                switchInput.dispatchEvent(new Event('change', { bubbles: true }));
-            }
-        });
-    });
-}
-
-document.querySelectorAll('.navigation-drawer .nav-item').forEach(item => {
-    item.addEventListener('click', (e) => {
-        e.preventDefault();
-        document.querySelectorAll('.navigation-drawer .nav-item').forEach(i => i.classList.remove('active'));
-        item.classList.add('active');
-
-        const sectionId = item.getAttribute('data-section');
-        document.querySelectorAll('.settings-card').forEach(section => section.classList.remove('active'));
-        const targetSection = document.getElementById(sectionId);
-        if (targetSection) {
-            targetSection.classList.add('active');
-            updateGroupItemRounding();
-            const scrollArea = document.querySelector('.scroll-area');
-            if (scrollArea) scrollArea.scrollTop = 0;
-        }
-    });
-});
-
-document.getElementById('clear-lyrics-cache')?.addEventListener('click', () => clearCache('lyrics'));
-document.getElementById('clear-translation-cache')?.addEventListener('click', () => clearCache('translations'));
-document.getElementById('clear-romanization-cache')?.addEventListener('click', () => clearCache('romanization'));
-document.getElementById('clear-cache')?.addEventListener('click', () => clearCache('all'));
-
-setupSettingsMessageListener(updateUI);
-
+let currentSettings = getSettings();
 let draggedItem = null;
-
-function getSourceDisplayName(sourceName) {
-    if (APPLE_LYRICS_NAMES[sourceName]) return APPLE_LYRICS_NAMES[sourceName];
-    const sourceKeys = {
-        'kpoe': 'sourceNameLyricsPlusProvider',
-        'customKpoe': 'sourceNameCustomKpoe',
-        'unison': 'sourceNameUnison',
-        'lrcred': 'sourceNameLrcred',
-        'binilyrics': 'sourceNameLrcred',
-        'lrclib': 'sourceNameLRCLib',
-        'lyricsplus': 'sourceNameLyricsPlus',
-        'apple': 'sourceNameApple',
-        'qq': 'sourceNameQQ',
-        'spotify': 'sourceNameSpotify',
-        'musixmatch': 'sourceNameMusixmatch',
-        'musixmatch-word': 'sourceNameMusixmatchWord'
-    };
-    if (sourceKeys[sourceName]) {
-        return msg(sourceKeys[sourceName]) || sourceName;
-    }
-    return sourceName.charAt(0).toUpperCase() + sourceName.slice(1).replace('-', ' ');
-}
-
-function createDraggableProviderItem(providerName) {
-    const li = document.createElement('div');
-    li.className = 'draggable-source-item';
-    li.dataset.provider = providerName;
-    li.setAttribute('draggable', true);
-
-    const dragHandle = createSvgIcon(SVG_ICONS.dragIndicator);
-    dragHandle.classList.add('drag-handle');
-
-    const nameSpan = document.createElement('span');
-    nameSpan.className = 'source-name';
-    nameSpan.textContent = getSourceDisplayName(providerName);
-
-    const subtitle = document.createElement('span');
-    subtitle.className = 'provider-fast-path-indicator';
-    subtitle.textContent = ` (${msg('labelFastPath') || 'Fast Path'})`;
-    subtitle.style.fontSize = '0.8em';
-    subtitle.style.opacity = '0.7';
-    subtitle.style.marginLeft = '8px';
-    nameSpan.appendChild(subtitle);
-
-    const removeBtn = document.createElement('button');
-    removeBtn.className = 'm3-button icon remove-source-button';
-    removeBtn.title = msg('titleRemoveSource') || 'Remove';
-
-    const deleteIcon = createSvgIcon(SVG_ICONS.delete);
-    deleteIcon.classList.add('icon-svg');
-
-    removeBtn.appendChild(deleteIcon);
-    removeBtn.onclick = () => removeProvider(providerName);
-    if (isAppleSourceSettings() && providerName === 'applemusic') {
-        removeBtn.disabled = true;
-        li.draggable = false;
-    }
-
-    li.appendChild(dragHandle);
-    li.appendChild(nameSpan);
-    li.appendChild(removeBtn);
-
-    return li;
-}
-
-function isAppleSourceSettings() { return document.getElementById('source-platform')?.value !== 'other'; }
-function providerOrderKey() { return isAppleSourceSettings() ? 'appleMusicLyricsProviderOrder' : 'lyricsProviderOrder'; }
-function currentProviderOrder() {
-    return isAppleSourceSettings() ? normalizeAppleLyricsOrder(currentSettings.appleMusicLyricsProviderOrder).join(',')
-        : currentSettings.lyricsProviderOrder || 'kpoe,lrcred,unison,lrclib';
-}
-
-function populateDraggableProviders() {
-    const draggableContainer = document.getElementById('provider-order-draggable');
-    const availableProvidersDropdown = document.getElementById('available-providers-dropdown');
-    const allowedProviders = isAppleSourceSettings() ? APPLE_LYRICS_ORDER : ['kpoe', 'lrcred', 'customKpoe', 'unison', 'lrclib'];
-
-    if (!draggableContainer || !availableProvidersDropdown) return;
-
-    draggableContainer.innerHTML = '';
-    availableProvidersDropdown.innerHTML = '<option value="" disabled selected></option>';
-
-    const currentActiveProviders = currentProviderOrder()
-        .split(',')
-        .map(s => {
-            const trimmed = s?.trim();
-            return trimmed === 'binilyrics' ? 'lrcred' : trimmed;
-        })
-        .filter(Boolean);
-    currentActiveProviders.forEach(provider => {
-        if (allowedProviders.includes(provider.trim())) {
-            draggableContainer.appendChild(createDraggableProviderItem(provider.trim()));
-        }
-    });
-
-    updateFastPathIndicators();
-    document.querySelector('#setting-provider-order .setting-description').textContent = msg(isAppleSourceSettings() ? 'helperAppleProviderOrder' : 'helperProviderOrder');
-    document.getElementById('custom-kpoe-category').hidden = isAppleSourceSettings();
-    document.getElementById('legacy-unison-title').closest('.settings-category').hidden = isAppleSourceSettings();
-
-    const providersToAdd = allowedProviders.filter(provider => !currentActiveProviders.includes(provider));
-    const addProviderButton = document.getElementById('add-provider-button');
-
-    if (providersToAdd.length === 0) {
-        availableProvidersDropdown.disabled = true;
-        availableProvidersDropdown.innerHTML = `<option value="" disabled selected>${msg('msgAllProvidersAdded') || msg('msgAllSourcesAdded') || 'All providers added'}</option>`;
-        if (addProviderButton) addProviderButton.disabled = true;
-    } else {
-        availableProvidersDropdown.disabled = false;
-        availableProvidersDropdown.innerHTML = `<option value="" disabled selected>${msg('placeholderSelectProvider') || msg('msgSelectSource') || 'Select provider...'}</option>`;
-        if (addProviderButton) addProviderButton.disabled = false;
-        providersToAdd.forEach(provider => {
-            const option = document.createElement('option');
-            option.value = provider;
-            option.textContent = getSourceDisplayName(provider);
-            availableProvidersDropdown.appendChild(option);
-        });
-    }
-    updateCustomSelectDisplay('available-providers-dropdown');
-    addProviderDragDropListeners();
-    addProviderTouchListeners();
-}
-
-function updateFastPathIndicators() {
-    const draggableContainer = document.getElementById('provider-order-draggable');
-    if (!draggableContainer) return;
-
-    Array.from(draggableContainer.children).forEach((child, index) => {
-        const indicator = child.querySelector('.provider-fast-path-indicator');
-        if (indicator) {
-            indicator.style.display = index === 0 ? 'inline' : 'none';
-        }
-    });
-}
-
-function saveProviderOrder() {
-    const draggableContainer = document.getElementById('provider-order-draggable');
-    if (!draggableContainer) return;
-
-    let orderedProviders = Array.from(draggableContainer.children)
-        .map(item => item.dataset.provider);
-    if (isAppleSourceSettings()) orderedProviders = normalizeAppleLyricsOrder(orderedProviders);
-    currentSettings[providerOrderKey()] = orderedProviders.join(',');
-    updateSettings({ [providerOrderKey()]: orderedProviders.join(',') });
-    saveSettings();
-    updateFastPathIndicators();
-    toggleKpoeSourcesVisibility();
-    toggleCustomKpoeUrlVisibility();
-    showReloadNotification('lyricsProviderOrder');
-    if (isAppleSourceSettings()) populateDraggableProviders();
-}
-
-function addProvider() {
-    const providerName = document.getElementById('available-providers-dropdown').value;
-    if (!providerName) {
-        showStatusMessage('add-provider-status', msg('msgSelectSource'), true);
-        return;
-    }
-
-    const providers = currentProviderOrder().split(',').filter(s => s?.trim());
-    if (providers.includes(providerName)) {
-        showStatusMessage('add-provider-status', msg('msgSourceExists', getSourceDisplayName(providerName)), true);
-        return;
-    }
-
-    providers.push(providerName);
-    currentSettings[providerOrderKey()] = (isAppleSourceSettings() ? normalizeAppleLyricsOrder(providers) : providers).join(',');
-    updateSettings({ [providerOrderKey()]: currentSettings[providerOrderKey()] });
-    saveSettings();
-    showReloadNotification('lyricsProviderOrder');
-
-    populateDraggableProviders();
-    showStatusMessage('add-provider-status', msg('msgSourceAdded', getSourceDisplayName(providerName)), false);
-}
-
-function removeProvider(providerName) {
-    if (isAppleSourceSettings() && providerName === 'applemusic') return;
-    const providers = currentProviderOrder().split(',').filter(s => s?.trim());
-
-    if (providers.length <= 1) {
-        showStatusMessage('add-provider-status', "Cannot remove last provider", true);
-        return;
-    }
-
-    currentSettings[providerOrderKey()] = providers.filter(s => s !== providerName).join(',');
-    updateSettings({ [providerOrderKey()]: currentSettings[providerOrderKey()] });
-    saveSettings();
-    showReloadNotification('lyricsProviderOrder');
-
-    populateDraggableProviders();
-    toggleKpoeSourcesVisibility();
-    toggleCustomKpoeUrlVisibility();
-    showStatusMessage('add-provider-status', msg('msgSourceRemoved', getSourceDisplayName(providerName)), false);
-}
-
-function addProviderDragDropListeners() {
-    const draggableContainer = document.getElementById('provider-order-draggable');
-    if (!draggableContainer || draggableContainer.dataset.dragListenersAttached) return;
-
-    const onDragEnd = () => {
-        if (draggedItem) {
-            draggedItem.classList.remove('dragging');
-        }
-        draggedItem = null;
-        saveProviderOrder();
-    };
-
-    draggableContainer.addEventListener('dragstart', (e) => {
-        if (e.target.classList.contains('draggable-source-item')) {
-            draggedItem = e.target;
-            setTimeout(() => draggedItem?.classList.add('dragging'), 0);
-        }
-    });
-
-    draggableContainer.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        const afterElement = getDragAfterElement(draggableContainer, e.clientY);
-        const currentDraggable = document.querySelector('.draggable-source-item.dragging');
-        if (currentDraggable && currentDraggable.parentNode === draggableContainer) {
-            if (afterElement) {
-                draggableContainer.insertBefore(currentDraggable, afterElement);
-            } else {
-                draggableContainer.appendChild(currentDraggable);
-            }
-            updateFastPathIndicators();
-        }
-    });
-
-    draggableContainer.addEventListener('dragend', onDragEnd);
-    draggableContainer.dataset.dragListenersAttached = 'true';
-}
-
-function addProviderTouchListeners() {
-    const draggableContainer = document.getElementById('provider-order-draggable');
-    if (!draggableContainer || draggableContainer.dataset.touchListenersAttached) return;
-
-    let touchDraggedItem = null;
-
-    draggableContainer.addEventListener('touchstart', (e) => {
-        const handle = e.target.closest('.drag-handle');
-        if (!handle) return;
-        const item = handle.closest('.draggable-source-item');
-        if (!item) return;
-
-        e.preventDefault();
-        touchDraggedItem = item;
-        touchDraggedItem.classList.add('dragging');
-        touchDraggedItem.style.opacity = '0.5';
-    }, { passive: false });
-
-    draggableContainer.addEventListener('touchmove', (e) => {
-        if (!touchDraggedItem || touchDraggedItem.parentNode !== draggableContainer) return;
-        e.preventDefault();
-
-        const touchLocation = e.targetTouches[0];
-        const afterElement = getDragAfterElement(draggableContainer, touchLocation.clientY);
-
-        if (afterElement) {
-            draggableContainer.insertBefore(touchDraggedItem, afterElement);
-        } else {
-            draggableContainer.appendChild(touchDraggedItem);
-        }
-        updateFastPathIndicators();
-    }, { passive: false });
-
-    draggableContainer.addEventListener('touchend', (e) => {
-        if (touchDraggedItem) {
-            touchDraggedItem.classList.remove('dragging');
-            touchDraggedItem.style.opacity = '1';
-            touchDraggedItem = null;
-            saveProviderOrder();
-        }
-    });
-    draggableContainer.dataset.touchListenersAttached = 'true';
-}
-
-function createDraggableSourceItem(sourceName) {
-    const item = document.createElement('div');
-    item.className = 'draggable-source-item';
-    item.setAttribute('draggable', 'true');
-    item.dataset.source = sourceName;
-    const dragHandle = createSvgIcon(SVG_ICONS.dragIndicator);
-    dragHandle.classList.add('drag-handle');
-
-    const nameSpan = document.createElement('span');
-    nameSpan.className = 'source-name';
-    nameSpan.textContent = getSourceDisplayName(sourceName);
-
-    const removeBtn = document.createElement('button');
-    removeBtn.className = 'm3-button icon remove-source-button';
-    removeBtn.title = msg('titleRemoveSource') || 'Remove source';
-    removeBtn.appendChild(createSvgIcon(SVG_ICONS.delete));
-
-    item.appendChild(dragHandle);
-    item.appendChild(nameSpan);
-    item.appendChild(removeBtn);
-
-    item.querySelector('.remove-source-button').addEventListener('click', (e) => {
-        e.stopPropagation();
-        removeSource(sourceName);
-    });
-    return item;
-}
-
-function populateDraggableSources() {
-    const draggableContainer = document.getElementById('lyrics-source-order-draggable');
-    const availableSourcesDropdown = document.getElementById('available-sources-dropdown');
-    const allowedSources = ['lyricsplus', 'apple', 'qq', 'musixmatch', 'musixmatch-word'];
-
-    if (!draggableContainer || !availableSourcesDropdown) return;
-
-    draggableContainer.innerHTML = '';
-    availableSourcesDropdown.innerHTML = '<option value="" disabled selected></option>';
-
-    const currentActiveSources = (currentSettings.lyricsSourceOrder || '').split(',').filter(s => s?.trim());
-    currentActiveSources.forEach(source => {
-        if (allowedSources.includes(source.trim())) {
-            draggableContainer.appendChild(createDraggableSourceItem(source.trim()));
-        }
-    });
-
-    const sourcesToAdd = allowedSources.filter(source => !currentActiveSources.includes(source));
-    const addSourceButton = document.getElementById('add-source-button');
-
-    if (sourcesToAdd.length === 0) {
-        availableSourcesDropdown.disabled = true;
-        availableSourcesDropdown.innerHTML = `<option value="" disabled selected>${msg('msgAllSourcesAdded') || 'All sources added'}</option>`;
-        if (addSourceButton) addSourceButton.disabled = true;
-    } else {
-        availableSourcesDropdown.disabled = false;
-        availableSourcesDropdown.innerHTML = `<option value="" disabled selected>${msg('placeholderSelectSource') || msg('msgSelectSource') || 'Select source...'}</option>`;
-        if (addSourceButton) addSourceButton.disabled = false;
-        sourcesToAdd.forEach(source => {
-            const option = document.createElement('option');
-            option.value = source;
-            option.textContent = getSourceDisplayName(source);
-            availableSourcesDropdown.appendChild(option);
-        });
-    }
-    updateCustomSelectDisplay('available-sources-dropdown');
-    addDragDropListeners();
-    addTouchListeners();
-}
-
-let statusMessageTimeout = {};
-
-function showStatusMessage(elementId, message, isError = false) {
-    const targetStatusElement = document.getElementById(elementId);
-    if (!targetStatusElement) return;
-
-    clearTimeout(statusMessageTimeout[elementId]);
-    targetStatusElement.textContent = message;
-    targetStatusElement.style.color = isError ? 'var(--md-sys-color-error)' : 'var(--md-sys-color-primary)';
-    targetStatusElement.style.opacity = '1';
-
-    statusMessageTimeout[elementId] = setTimeout(() => {
-        targetStatusElement.style.opacity = '0';
-        setTimeout(() => { targetStatusElement.textContent = ''; }, 300);
-    }, 3000);
-}
-
-function saveSourceOrder() {
-    const draggableContainer = document.getElementById('lyrics-source-order-draggable');
-    if (!draggableContainer) return;
-
-    const orderedSources = Array.from(draggableContainer.children)
-        .map(item => item.dataset.source);
-
-    updateSettings({
-        lyricsSourceOrder: orderedSources.join(',')
-    });
-    saveSettings();
-    showReloadNotification('lyricsSourceOrder');
-}
-
-function addSource() {
-    const sourceName = document.getElementById('available-sources-dropdown').value;
-    if (!sourceName) {
-        showStatusMessage('add-source-status', msg('msgSelectSource'), true);
-        return;
-    }
-
-    const sources = (currentSettings.lyricsSourceOrder || '').split(',').filter(s => s?.trim());
-    if (sources.includes(sourceName)) {
-        showStatusMessage('add-source-status', msg('msgSourceExists', getSourceDisplayName(sourceName)), true);
-        return;
-    }
-
-    sources.push(sourceName);
-    currentSettings.lyricsSourceOrder = sources.join(',');
-    updateSettings({ lyricsSourceOrder: currentSettings.lyricsSourceOrder });
-    saveSettings();
-    showReloadNotification('lyricsSourceOrder');
-
-    populateDraggableSources();
-    showStatusMessage('add-source-status', msg('msgSourceAdded', getSourceDisplayName(sourceName)), false);
-}
-
-function removeSource(sourceName) {
-    const sources = (currentSettings.lyricsSourceOrder || '').split(',').filter(s => s?.trim());
-    currentSettings.lyricsSourceOrder = sources.filter(s => s !== sourceName).join(',');
-
-    // Auto-save immediately
-    updateSettings({ lyricsSourceOrder: currentSettings.lyricsSourceOrder });
-    saveSettings();
-    showReloadNotification('lyricsSourceOrder');
-
-    populateDraggableSources();
-    showStatusMessage('add-source-status', msg('msgSourceRemoved', getSourceDisplayName(sourceName)), false);
-}
-
-function addDragDropListeners() {
-    const draggableContainer = document.getElementById('lyrics-source-order-draggable');
-    if (!draggableContainer || draggableContainer.dataset.dragListenersAttached) return;
-
-    const onDragEnd = () => {
-        if (draggedItem) {
-            draggedItem.classList.remove('dragging');
-        }
-        draggedItem = null;
-        saveSourceOrder();
-    };
-
-    draggableContainer.addEventListener('dragstart', (e) => {
-        if (e.target.classList.contains('draggable-source-item')) {
-            draggedItem = e.target;
-            setTimeout(() => draggedItem?.classList.add('dragging'), 0);
-        }
-    });
-
-    draggableContainer.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        const afterElement = getDragAfterElement(draggableContainer, e.clientY);
-        const currentDraggable = document.querySelector('.draggable-source-item.dragging');
-        if (currentDraggable) {
-            if (afterElement) {
-                draggableContainer.insertBefore(currentDraggable, afterElement);
-            } else {
-                draggableContainer.appendChild(currentDraggable);
-            }
-        }
-    });
-
-    draggableContainer.addEventListener('dragend', onDragEnd);
-    draggableContainer.dataset.dragListenersAttached = 'true';
-}
-
-function getDragAfterElement(container, y) {
-    const draggableElements = [...container.querySelectorAll('.draggable-source-item:not(.dragging)')];
-    return draggableElements.reduce((closest, child) => {
-        const box = child.getBoundingClientRect();
-        const offset = y - box.top - box.height / 2;
-        if (offset < 0 && offset > closest.offset) {
-            return { offset: offset, element: child };
-        } else {
-            return closest;
-        }
-    }, { offset: -Infinity }).element;
-}
-
-function addTouchListeners() {
-    const draggableContainer = document.getElementById('lyrics-source-order-draggable');
-    if (!draggableContainer || draggableContainer.dataset.touchListenersAttached) return;
-
-    let touchDraggedItem = null;
-    let initialY = 0;
-    let currentY = 0;
-    let yOffset = 0;
-
-    draggableContainer.addEventListener('touchstart', (e) => {
-        const handle = e.target.closest('.drag-handle');
-        if (!handle) return;
-
-        const item = handle.closest('.draggable-source-item');
-        if (!item) return;
-
-        e.preventDefault();
-
-        touchDraggedItem = item;
-        touchDraggedItem.classList.add('dragging');
-
-        touchDraggedItem.style.opacity = '0.5';
-    }, { passive: false });
-
-    draggableContainer.addEventListener('touchmove', (e) => {
-        if (!touchDraggedItem) return;
-        e.preventDefault();
-
-        const touchLocation = e.targetTouches[0];
-        const afterElement = getDragAfterElement(draggableContainer, touchLocation.clientY);
-
-        if (afterElement) {
-            draggableContainer.insertBefore(touchDraggedItem, afterElement);
-        } else {
-            draggableContainer.appendChild(touchDraggedItem);
-        }
-    }, { passive: false });
-
-    draggableContainer.addEventListener('touchend', (e) => {
-        if (touchDraggedItem) {
-            touchDraggedItem.classList.remove('dragging');
-            touchDraggedItem.style.opacity = '1';
-            touchDraggedItem = null;
-            saveSourceOrder();
-        }
-    });
-    draggableContainer.dataset.touchListenersAttached = 'true';
-}
-
-document.getElementById('add-provider-button').addEventListener('click', addProvider);
-document.getElementById('add-source-button').addEventListener('click', addSource);
-
-document.getElementById('add-lyrics-fab').addEventListener('click', () => {
-    document.getElementById('upload-lyrics-modal').style.display = 'flex';
-});
-
-document.querySelector('#upload-lyrics-modal .close-button').addEventListener('click', () => {
-    document.getElementById('upload-lyrics-modal').style.display = 'none';
-});
-
-document.querySelector('#upload-lyrics-modal .modal-scrim').addEventListener('click', () => {
-    document.getElementById('upload-lyrics-modal').style.display = 'none';
-});
-
-document.getElementById('modal-upload-lyrics-button').addEventListener('click', handleUploadLocalLyrics);
-document.getElementById('refresh-local-lyrics-list').addEventListener('click', populateLocalLyricsList);
-
-document.getElementById('override-gemini-prompt').addEventListener('change', (e) => {
-    currentSettings.overrideGeminiPrompt = e.target.checked;
-    toggleGeminiPromptVisibility();
-});
-
-document.getElementById('override-gemini-romanize-prompt').addEventListener('change', (e) => {
-    currentSettings.overrideGeminiRomanizePrompt = e.target.checked;
-    toggleGeminiRomanizePromptVisibility();
-});
-
-document.getElementById('romanization-provider').addEventListener('change', () => {
-    toggleGeminiSettingsVisibility();
-    toggleRomanizationModelVisibility();
-    toggleOpenRouterSettingsVisibility();
-    toggleOfflineDictionaryVisibility();
-    applyTransliterationTargetState();
-});
-
-document.getElementById('translation-provider').addEventListener('change', (e) => {
-    currentSettings.translationProvider = e.target.value;
-    toggleGeminiSettingsVisibility();
-    toggleOpenRouterSettingsVisibility();
-    toggleDeepLSettingsVisibility();
-});
-
-document.getElementById('ytsonginfo').addEventListener('change', () => {
-    toggleYTSongInfoSeekbarVisibility();
-});
-
-function toggleYTSongInfoSeekbarVisibility() {
-    const isYTSongInfo = document.getElementById('ytsonginfo')?.checked;
-    toggleElementVisibility('ytsonginfo-disableseekbar-group', isYTSongInfo);
-}
-
-function toggleElementVisibility(elementId, isVisible, displayType = null) {
-    const element = document.getElementById(elementId);
-    if (element) {
-        if (isVisible) {
-            element.style.display = displayType || (element.classList.contains('settings-category') ? 'block' : 'flex');
-        } else {
-            element.style.display = 'none';
-        }
-        updateGroupItemRounding();
-    }
-}
-
-function toggleKpoeSourcesVisibility() {
-    const providerOrderStr = currentSettings.lyricsProviderOrder || 'kpoe,lrcred,unison,lrclib';
-    const providers = providerOrderStr.split(',').map(s => s.trim());
-    const isVisible = !isAppleSourceSettings() && (providers.includes('kpoe') || providers.includes('customKpoe'));
-    const sourceOrderContainer = document.getElementById('setting-source-order');
-    if (sourceOrderContainer) {
-        sourceOrderContainer.style.display = isVisible ? 'block' : 'none';
-        sourceOrderContainer.style.opacity = isVisible ? '1' : '0';
-    }
-}
-
-function toggleCustomKpoeUrlVisibility() {
-    const providerOrderStr = currentSettings.lyricsProviderOrder || 'kpoe,lrcred,unison,lrclib';
-    const providers = providerOrderStr.split(',').map(s => s.trim());
-    const isVisible = providers.includes('customKpoe');
-    toggleElementVisibility('custom-kpoe-url-group', isVisible);
-}
-
-function toggleGeminiSettingsVisibility() {
-    const isTranslationGemini = document.getElementById('translation-provider').value === 'gemini';
-    const isRomanizationGemini = document.getElementById('romanization-provider').value === 'gemini';
-    const isGemini = isTranslationGemini || isRomanizationGemini;
-
-    toggleElementVisibility('gemini-settings-category', isGemini);
-    toggleElementVisibility('gemini-model-group', isTranslationGemini);
-
-    // Prompt overrides are shared with OpenRouter
-    const isGeminiOrOpenRouter = isTranslationGemini || document.getElementById('translation-provider').value === 'openrouter';
-    toggleElementVisibility('override-gemini-prompt-group', isGeminiOrOpenRouter);
-
-    // Romanization prompt override is shared
-    const isRomanizationGeminiOrOpenRouter = isGeminiOrOpenRouter || ['gemini', 'openrouter'].includes(document.getElementById('romanization-provider').value);
-    toggleElementVisibility('override-gemini-romanize-prompt-group', isRomanizationGeminiOrOpenRouter);
-    toggleGeminiPromptVisibility();
-    toggleGeminiRomanizePromptVisibility();
-}
-
-function toggleOpenRouterSettingsVisibility() {
-    toggleElementVisibility('custom-llm-settings-category', document.getElementById('translation-provider').value === 'customllm');
-    const isTranslationOpenRouter = document.getElementById('translation-provider').value === 'openrouter';
-    const isRomanizationOpenRouter = document.getElementById('romanization-provider').value === 'openrouter';
-    toggleElementVisibility('openrouter-settings-category', isTranslationOpenRouter || isRomanizationOpenRouter);
-}
+let draggedTouchItem = null;
+const statusTimers = new Map();
+const RESTART_REQUIRED_KEYS = new Set(['isEnabled', 'appleMusicAMLL']);
+const TRANSLATION_STATUS = 'translation-save-status';
+const PLAYBACK_STATUS = 'playback-save-status';
+const ADVANCED_STATUS = 'advanced-save-status';
+const FAILURE_MESSAGE = ['msgSettingsSaveFailed', 'Could not save settings. Try again.'];
+
+const ICONS = {
+    drag: 'M11 18c0 1.1-.9 2-2 2s-2-.9-2-2 .9-2 2-2 2 .9 2 2zm-2-8c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0-6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm6 4c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z',
+    delete: 'M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z',
+    music: 'M12 3v10.55A4 4 0 1 0 14 17V7h5V3h-7z'
+};
 
 const DEEPL_SUPPORTED_CODES = new Set([
     '', 'ace', 'af', 'sq', 'ar', 'an', 'hy', 'as', 'ay', 'az', 'ba', 'eu', 'be', 'bn', 'bho', 'bs', 'br',
@@ -1006,733 +55,899 @@ const DEEPL_SUPPORTED_CODES = new Set([
     'ur', 'uz', 'vi', 'cy', 'wo', 'xh', 'yi', 'zu'
 ]);
 
-function updateTargetLanguageOptionsForProvider() {
-    const provider = document.getElementById('translation-provider')?.value;
-    const targetSelect = document.getElementById('custom-translate-target');
-    if (!targetSelect) return;
+function showStatus(elementId, message, isError = false) {
+    const element = $(elementId);
+    if (!element) return;
+    clearTimeout(statusTimers.get(elementId));
+    element.textContent = message;
+    element.classList.toggle('error', isError);
+    element.setAttribute('role', isError ? 'alert' : 'status');
+    if (message) {
+        statusTimers.set(elementId, setTimeout(() => {
+            if (element.textContent === message) element.textContent = '';
+        }, isError ? 6000 : 3500));
+    }
+}
 
-    const isDeepL = provider === 'deepl' || provider === 'deepl-keyless';
-    let currentValValid = false;
+function setHidden(id, hidden) {
+    const element = $(id);
+    if (!element) return;
+    element.hidden = hidden;
+    if (hidden) element.setAttribute('hidden', '');
+    else element.removeAttribute('hidden');
+}
 
-    Array.from(targetSelect.options).forEach(opt => {
-        if (!opt.value) {
-            opt.hidden = false;
-            return;
-        }
-        if (isDeepL) {
-            const isSupported = DEEPL_SUPPORTED_CODES.has(opt.value);
-            opt.hidden = !isSupported;
-            if (opt.value === targetSelect.value && isSupported) {
-                currentValValid = true;
-            }
+const controlBindings = [
+    { id: 'enabled', key: 'isEnabled', type: 'checkbox', statusId: PLAYBACK_STATUS },
+    { id: 'apple-music-amll', key: 'appleMusicAMLL', type: 'checkbox', statusId: PLAYBACK_STATUS },
+    { id: 'apple-music-background', key: 'appleMusicAMLLBackground', type: 'checkbox', statusId: PLAYBACK_STATUS },
+    { id: 'apple-music-display-mode', key: 'appleMusicDisplayMode', type: 'value', statusId: PLAYBACK_STATUS },
+    { id: 'apple-title-correction', key: 'appleMusicTitleCorrection', type: 'value', statusId: PLAYBACK_STATUS },
+    { id: 'wordByWord', key: 'wordByWord', type: 'checkbox', statusId: PLAYBACK_STATUS },
+    { id: 'larger-text-mode', key: 'largerTextMode', type: 'value', statusId: PLAYBACK_STATUS },
+    { id: 'hide-phoneticdup', key: 'hidePhoneticDup', type: 'checkbox', statusId: PLAYBACK_STATUS },
+    { id: 'lightweight', key: 'lightweight', type: 'checkbox', statusId: PLAYBACK_STATUS },
+    { id: 'translation-provider', key: 'translationProvider', type: 'value', statusId: TRANSLATION_STATUS },
+    { id: 'custom-translate-target', key: 'customTranslateTarget', type: 'value', statusId: TRANSLATION_STATUS },
+    { id: 'gemini-api-key', key: 'geminiApiKey', type: 'value', statusId: TRANSLATION_STATUS, delay: 500 },
+    { id: 'gemini-model', key: 'geminiModel', type: 'value', statusId: TRANSLATION_STATUS },
+    { id: 'openrouter-api-key', key: 'openRouterApiKey', type: 'value', statusId: TRANSLATION_STATUS, delay: 500 },
+    { id: 'openrouter-model', key: 'openRouterModel', type: 'value', statusId: TRANSLATION_STATUS, delay: 500 },
+    { id: 'custom-llm-url', key: 'customLLMBaseUrl', type: 'value', statusId: TRANSLATION_STATUS, delay: 500 },
+    { id: 'custom-llm-key', key: 'customLLMApiKey', type: 'value', statusId: TRANSLATION_STATUS, delay: 500 },
+    { id: 'custom-llm-model', key: 'customLLMModel', type: 'value', statusId: TRANSLATION_STATUS, delay: 500 },
+    { id: 'deepl-api-key', key: 'deeplApiKey', type: 'value', statusId: TRANSLATION_STATUS, delay: 500 },
+    { id: 'romanization-provider', key: 'romanizationProvider', type: 'value', statusId: TRANSLATION_STATUS },
+    { id: 'transliteration-target', key: 'transliterationTargetScript', type: 'value', statusId: TRANSLATION_STATUS },
+    { id: 'gemini-romanization-model', key: 'geminiRomanizationModel', type: 'value', statusId: TRANSLATION_STATUS },
+    { id: 'override-gemini-prompt', key: 'overrideGeminiPrompt', type: 'checkbox', statusId: TRANSLATION_STATUS },
+    { id: 'custom-gemini-prompt', key: 'customGeminiPrompt', type: 'value', statusId: TRANSLATION_STATUS, delay: 500 },
+    { id: 'override-gemini-romanize-prompt', key: 'overrideGeminiRomanizePrompt', type: 'checkbox', statusId: TRANSLATION_STATUS },
+    { id: 'custom-gemini-romanize-prompt', key: 'customGeminiRomanizePrompt', type: 'value', statusId: TRANSLATION_STATUS, delay: 500 },
+    { id: 'cache-strategy', key: 'cacheStrategy', type: 'value', statusId: ADVANCED_STATUS }
+];
+
+function failureStatusFor(key) {
+    if (['cacheStrategy'].includes(key)) return ADVANCED_STATUS;
+    if (/^(translationProvider|romanizationProvider|transliterationTargetScript|gemini|openRouter|customLLM|deepl|overrideGemini|customGemini|customTranslateTarget)/.test(key)) return TRANSLATION_STATUS;
+    return PLAYBACK_STATUS;
+}
+
+function notifySaveFailure(key) {
+    showStatus(failureStatusFor(key), t(...FAILURE_MESSAGE), true);
+}
+
+async function persistControl(control) {
+    try {
+        await saveSettings();
+        const message = control.statusId === TRANSLATION_STATUS
+            ? t('msgTranslationSettingsSaved', 'Translation settings saved and applied to the Apple Music player.')
+            : control.statusId === ADVANCED_STATUS
+                ? t('msgAdvancedSettingsSaved', 'Settings saved.')
+                : t('msgPlaybackSettingsSaved', 'Playback settings saved and applied to Apple Music.');
+        showStatus(control.statusId, message, false);
+        if (RESTART_REQUIRED_KEYS.has(control.key)) showReloadNotification(control.key);
+    } catch {
+        notifySaveFailure(control.key);
+    }
+}
+
+function debounceTask(task, delay) {
+    let timer;
+    return (...args) => {
+        clearTimeout(timer);
+        timer = setTimeout(() => task(...args), delay);
+    };
+}
+
+function bindSettingControls() {
+    for (const control of controlBindings) {
+        const element = $(control.id);
+        if (!element) continue;
+        const eventName = control.type === 'checkbox' || element.tagName === 'SELECT' ? 'change' : 'input';
+        const stage = () => {
+            const value = control.type === 'checkbox' ? element.checked : element.value;
+            currentSettings = updateSettings({ [control.key]: value });
+            applyConditionalVisibility(control.key === 'romanizationProvider');
+        };
+        if (control.delay) {
+            const persistLater = debounceTask(() => persistControl(control), control.delay);
+            element.addEventListener(eventName, () => {
+                stage();
+                persistLater();
+            });
         } else {
-            opt.hidden = false;
-            if (opt.value === targetSelect.value) {
-                currentValValid = true;
-            }
+            element.addEventListener(eventName, () => {
+                stage();
+                persistControl(control);
+            });
+        }
+    }
+}
+
+function setValue(id, value) {
+    const element = $(id);
+    if (element) element.value = value ?? '';
+}
+
+function setChecked(id, value) {
+    const element = $(id);
+    if (element) element.checked = !!value;
+}
+
+function updateUI(settings) {
+    currentSettings = { ...defaultSettings, ...pickSettings(settings) };
+    setChecked('enabled', currentSettings.isEnabled);
+    setChecked('apple-music-amll', currentSettings.appleMusicAMLL !== false);
+    setChecked('apple-music-background', currentSettings.appleMusicAMLLBackground !== false);
+    setValue('apple-music-display-mode', ['none', 'translate', 'romanize', 'both'].includes(currentSettings.appleMusicDisplayMode) ? currentSettings.appleMusicDisplayMode : 'none');
+    setValue('apple-title-correction', ['off', 'original', 'cn', 'jp'].includes(currentSettings.appleMusicTitleCorrection) ? currentSettings.appleMusicTitleCorrection : 'off');
+    setChecked('wordByWord', currentSettings.wordByWord);
+    setValue('larger-text-mode', currentSettings.largerTextMode === 'romanization' ? 'romanization' : 'lyrics');
+    setChecked('hide-phoneticdup', currentSettings.hidePhoneticDup);
+    setChecked('lightweight', currentSettings.lightweight);
+    setValue('translation-provider', currentSettings.translationProvider || 'google');
+    ensureTargetOption(currentSettings.customTranslateTarget);
+    setValue('custom-translate-target', currentSettings.customTranslateTarget || '');
+    setValue('gemini-api-key', currentSettings.geminiApiKey);
+    setValue('gemini-model', currentSettings.geminiModel || 'gemini-flash-lite-latest');
+    setValue('openrouter-api-key', currentSettings.openRouterApiKey);
+    setValue('openrouter-model', currentSettings.openRouterModel);
+    setValue('custom-llm-url', currentSettings.customLLMBaseUrl);
+    setValue('custom-llm-key', currentSettings.customLLMApiKey);
+    setValue('custom-llm-model', currentSettings.customLLMModel);
+    setValue('deepl-api-key', currentSettings.deeplApiKey);
+    setValue('romanization-provider', currentSettings.romanizationProvider || 'offline');
+    setValue('transliteration-target', currentSettings.transliterationTargetScript || 'latin');
+    setValue('gemini-romanization-model', currentSettings.geminiRomanizationModel || 'gemini-flash-latest');
+    setChecked('override-gemini-prompt', currentSettings.overrideGeminiPrompt);
+    setValue('custom-gemini-prompt', currentSettings.customGeminiPrompt);
+    setChecked('override-gemini-romanize-prompt', currentSettings.overrideGeminiRomanizePrompt);
+    setValue('custom-gemini-romanize-prompt', currentSettings.customGeminiRomanizePrompt);
+    setValue('cache-strategy', currentSettings.cacheStrategy || 'aggressive');
+
+    for (const id of ['gemini-api-key', 'openrouter-api-key', 'deepl-api-key', 'custom-llm-key']) {
+        const input = $(id);
+        if (input) input.type = 'password';
+    }
+
+    previewPlayerFont(currentSettings.appleMusicPlayerFont);
+    applyConditionalVisibility(true);
+    populateDraggableProviders();
+    populateLocalLyricsList();
+    updateCacheSize();
+}
+
+function ensureTargetOption(value) {
+    const select = $('custom-translate-target');
+    if (!select || !value) return;
+    if (!Array.from(select.options).some(option => option.value === value)) {
+        const option = document.createElement('option');
+        option.value = value;
+        option.textContent = value;
+        select.appendChild(option);
+    }
+}
+
+function updateTargetLanguageOptionsForProvider() {
+    const provider = $('translation-provider')?.value;
+    const select = $('custom-translate-target');
+    if (!select) return;
+    const isDeepL = provider === 'deepl' || provider === 'deepl-keyless';
+    let selectedValid = false;
+    for (const option of Array.from(select.options)) {
+        if (!option.value) {
+            option.hidden = false;
+            continue;
+        }
+        const supported = !isDeepL || DEEPL_SUPPORTED_CODES.has(option.value);
+        option.hidden = !supported;
+        if (option.value === select.value && supported) selectedValid = true;
+    }
+    if (isDeepL && select.value && !selectedValid) {
+        select.value = '';
+        currentSettings = updateSettings({ customTranslateTarget: '' });
+        saveSettings().catch(() => notifySaveFailure('customTranslateTarget'));
+        showStatus(TRANSLATION_STATUS, t('msgTargetResetForDeepL', 'Target language reset to Auto because DeepL does not support the previous selection.'), false);
+    }
+}
+
+function applyConditionalVisibility(refreshDictionaries = false) {
+    const translation = $('translation-provider')?.value || currentSettings.translationProvider;
+    const romanization = $('romanization-provider')?.value || currentSettings.romanizationProvider;
+    const translationGemini = translation === 'gemini';
+    const translationOpenRouter = translation === 'openrouter';
+    const romanizationGemini = romanization === 'gemini';
+    const romanizationOpenRouter = romanization === 'openrouter';
+    const translationAI = translationGemini || translationOpenRouter;
+    const romanizationAI = romanizationGemini || romanizationOpenRouter;
+
+    setHidden('gemini-settings-category', !(translationGemini || romanizationGemini));
+    setHidden('gemini-translation-model-group', !translationGemini);
+    setHidden('openrouter-settings-category', !(translationOpenRouter || romanizationOpenRouter));
+    setHidden('custom-llm-settings-category', translation !== 'customllm');
+    setHidden('deepl-settings-category', translation !== 'deepl');
+    setHidden('override-gemini-prompt-group', !translationAI);
+    setHidden('custom-gemini-prompt-group', !(translationAI && $('override-gemini-prompt')?.checked));
+    setHidden('override-gemini-romanize-prompt-group', !romanizationAI);
+    setHidden('custom-gemini-romanize-prompt-group', !(romanizationAI && $('override-gemini-romanize-prompt')?.checked));
+    setHidden('gemini-romanization-model-group', !romanizationGemini);
+    setHidden('offline-japanese-dict-group', romanization !== 'offline');
+    setHidden('offline-arabic-dict-group', romanization !== 'offline');
+
+    const target = $('transliteration-target');
+    if (target) target.disabled = !romanizationAI;
+    setHidden('transliteration-target-note', romanizationAI);
+    if (!romanizationAI && currentSettings.transliterationTargetScript && currentSettings.transliterationTargetScript !== 'latin') {
+        currentSettings = updateSettings({ transliterationTargetScript: 'latin' });
+        setValue('transliteration-target', 'latin');
+        saveSettings().catch(() => notifySaveFailure('transliterationTargetScript'));
+    }
+
+    updateTargetLanguageOptionsForProvider();
+    updateGroupRounding();
+    if (romanization === 'offline' && refreshDictionaries) {
+        updateDictionaryStatus('japanese');
+        updateDictionaryStatus('arabic');
+    }
+}
+
+function updateGroupRounding() {
+    document.querySelectorAll('.settings-group').forEach(group => {
+        const items = Array.from(group.children).filter(child => child.classList.contains('setting-item') && !child.hidden);
+        group.querySelectorAll('.setting-item').forEach(item => item.classList.remove('is-first-visible', 'is-last-visible', 'is-only-visible'));
+        if (items.length === 1) items[0].classList.add('is-only-visible');
+        if (items.length > 1) {
+            items[0].classList.add('is-first-visible');
+            items[items.length - 1].classList.add('is-last-visible');
         }
     });
+}
 
-    if (isDeepL && targetSelect.value && !currentValValid) {
-        targetSelect.value = '';
-        currentSettings.customTranslateTarget = '';
-        updateSettings({ customTranslateTarget: '' });
-        saveSettings();
+function currentProviderOrder() {
+    return normalizeAppleLyricsOrder(currentSettings.appleMusicLyricsProviderOrder);
+}
+
+function createProviderRow(name) {
+    const row = document.createElement('div');
+    row.className = 'draggable-source-item';
+    row.dataset.provider = name;
+    row.draggable = name !== 'applemusic';
+    row.setAttribute('aria-label', APPLE_LYRICS_NAMES[name] || name);
+
+    if (name !== 'applemusic') {
+        const handle = createSvgIcon(ICONS.drag);
+        handle.classList.add('drag-handle');
+        row.appendChild(handle);
     }
 
-    if (targetSelect.customSelect) {
-        const valueDisplay = targetSelect.customSelect.valueDisplay;
-        const selectedOption = targetSelect.options[targetSelect.selectedIndex];
-        if (selectedOption) {
-            valueDisplay.textContent = selectedOption.textContent;
-        }
+    const label = document.createElement('span');
+    label.className = 'source-name';
+    label.textContent = APPLE_LYRICS_NAMES[name] || name;
+    row.appendChild(label);
+
+    if (name === 'applemusic') {
+        const pinned = document.createElement('span');
+        pinned.className = 'source-meta';
+        pinned.textContent = t('sourceNativePinned', 'Always used as the final fallback');
+        row.appendChild(pinned);
+    } else {
+        const remove = document.createElement('button');
+        remove.type = 'button';
+        remove.className = 'm3-button icon remove-source-button';
+        remove.title = t('titleRemoveSource', 'Remove item');
+        remove.setAttribute('aria-label', remove.title);
+        remove.appendChild(createSvgIcon(ICONS.delete));
+        remove.addEventListener('click', event => {
+            event.stopPropagation();
+            removeProvider(name);
+        });
+        row.appendChild(remove);
     }
+    return row;
 }
 
-function toggleDeepLSettingsVisibility() {
-    const provider = document.getElementById('translation-provider').value;
-    const isDeepL = provider === 'deepl';
-    toggleElementVisibility('deepl-settings-category', isDeepL);
-    updateTargetLanguageOptionsForProvider();
-}
+function populateDraggableProviders() {
+    const list = $('provider-order-draggable');
+    const select = $('available-providers-dropdown');
+    const addButton = $('add-provider-button');
+    if (!list || !select) return;
+    const active = currentProviderOrder();
+    list.replaceChildren(...active.map(createProviderRow));
 
-
-function toggleGeminiPromptVisibility() {
-    const isGeminiOrOpenRouter = ['gemini', 'openrouter'].includes(document.getElementById('translation-provider').value);
-    const isVisible = isGeminiOrOpenRouter && document.getElementById('override-gemini-prompt').checked;
-    toggleElementVisibility('custom-gemini-prompt-group', isVisible);
-}
-
-function toggleGeminiRomanizePromptVisibility() {
-    const isGeminiOrOpenRouter = ['gemini', 'openrouter'].includes(document.getElementById('translation-provider').value) ||
-        ['gemini', 'openrouter'].includes(document.getElementById('romanization-provider').value);
-    const isVisible = isGeminiOrOpenRouter && document.getElementById('override-gemini-romanize-prompt').checked;
-    toggleElementVisibility('custom-gemini-romanize-prompt-group', isVisible);
-}
-
-function toggleRomanizationModelVisibility() {
-    const isVisible = document.getElementById('romanization-provider').value === 'gemini';
-    toggleElementVisibility('gemini-romanization-model-group', isVisible);
-}
-
-function applyTransliterationTargetState() {
-    const targetSelect = document.getElementById('transliteration-target');
-    const note = document.getElementById('transliteration-target-note');
-    const isAi = ['gemini', 'openrouter'].includes(document.getElementById('romanization-provider').value);
-
-    if (targetSelect) {
-        targetSelect.disabled = !isAi;
-
-        if (!isAi && currentSettings.transliterationTargetScript && currentSettings.transliterationTargetScript !== 'latin') {
-            // Google Translate cannot output non-Latin scripts, so fall back to Latin
-            // to keep the saved state consistent with what actually runs.
-            currentSettings.transliterationTargetScript = 'latin';
-            targetSelect.value = 'latin';
-            updateSettings({ transliterationTargetScript: 'latin' });
-            saveSettings();
-        }
-
-        updateCustomSelectDisplay('transliteration-target');
+    const missing = APPLE_LYRICS_ORDER.filter(name => !active.includes(name));
+    select.replaceChildren();
+    const placeholder = document.createElement('option');
+    placeholder.value = '';
+    placeholder.disabled = true;
+    placeholder.selected = true;
+    placeholder.textContent = missing.length
+        ? t('placeholderSelectSource', 'Select source…')
+        : t('msgAllSourcesAdded', 'All sources added');
+    select.appendChild(placeholder);
+    for (const name of missing) {
+        const option = document.createElement('option');
+        option.value = name;
+        option.textContent = APPLE_LYRICS_NAMES[name] || name;
+        select.appendChild(option);
     }
-
-    if (note) {
-        note.style.display = isAi ? 'none' : 'block';
-    }
+    if (addButton) addButton.disabled = missing.length === 0;
+    updateGroupRounding();
 }
 
-function toggleOfflineDictionaryVisibility() {
-    const isOffline = document.getElementById('romanization-provider').value === 'offline';
-    toggleElementVisibility('offline-japanese-dict-group', isOffline);
-    toggleElementVisibility('offline-arabic-dict-group', isOffline);
-    if (isOffline) {
-        updateJapaneseDictStatus();
-        updateArabicDictStatus();
-    }
-}
-
-async function updateJapaneseDictStatus() {
-    const statusBadge = document.getElementById('offline-japanese-dict-status');
-    const downloadBtn = document.getElementById('btn-download-japanese-dict');
-    const downloadBtnText = document.getElementById('btn-download-japanese-dict-text');
-    const deleteBtn = document.getElementById('btn-delete-japanese-dict');
-
-    if (!statusBadge || !downloadBtn) return;
-
+async function saveProviderOrder(order = null) {
+    const list = $('provider-order-draggable');
+    const providers = order || Array.from(list?.children || []).map(item => item.dataset.provider);
+    const normalized = normalizeAppleLyricsOrder(providers);
+    currentSettings = updateSettings({ appleMusicLyricsProviderOrder: normalized.join(',') });
     try {
-        const status = await getDictionaryStatus('japanese');
-        if (status && status.installed) {
-            const size = status.sizeMB ? `${status.sizeMB} MB` : '17 MB';
-            statusBadge.textContent = msg('dictStatusInstalled', size) || `Installed (~${size})`;
-            statusBadge.style.color = 'var(--md3-sys-color-primary, #625b71)';
-            downloadBtn.style.display = 'none';
-            if (deleteBtn) deleteBtn.style.display = 'inline-flex';
-        } else {
-            statusBadge.textContent = msg('dictStatusNotInstalled', '17 MB') || 'Not Installed (~17 MB)';
-            statusBadge.style.color = 'inherit';
-            downloadBtn.style.display = 'inline-flex';
-            downloadBtn.disabled = false;
-            if (downloadBtnText) downloadBtnText.textContent = msg('btnDownloadDict') || 'Download';
-            if (deleteBtn) deleteBtn.style.display = 'none';
-        }
-    } catch (e) {
-        statusBadge.textContent = 'Unavailable';
+        await saveSettings();
+        populateDraggableProviders();
+        showStatus('source-order-status', t('msgSourceOrderSaved', 'Lyrics source order saved.'), false);
+        return true;
+    } catch {
+        showStatus('source-order-status', t('msgSourceOrderSaveFailed', 'Could not save the lyric source order.'), true);
+        return false;
     }
 }
 
-async function handleDownloadJapaneseDict() {
-    const confirmMsg = msg('confirmDownloadJapaneseDict')
-        || 'Download the Japanese Kuromoji dictionary (~17 MB)? It will be stored locally in your browser for offline Japanese pronunciation.';
-
-    if (!window.confirm(confirmMsg)) return;
-
-    const statusBadge = document.getElementById('offline-japanese-dict-status');
-    const downloadBtn = document.getElementById('btn-download-japanese-dict');
-    const downloadBtnText = document.getElementById('btn-download-japanese-dict-text');
-
-    if (downloadBtn) downloadBtn.disabled = true;
-    if (statusBadge) statusBadge.textContent = msg('dictStatusDownloading', '17 MB') || 'Downloading (~17 MB)...';
-    if (downloadBtnText) downloadBtnText.textContent = '...';
-
-    try {
-        await downloadDictionary('japanese');
-        await updateJapaneseDictStatus();
-    } catch (err) {
-        console.error('Download error:', err);
-        if (statusBadge) statusBadge.textContent = 'Download failed';
-        if (downloadBtn) downloadBtn.disabled = false;
-        if (downloadBtnText) downloadBtnText.textContent = msg('btnDownloadDict') || 'Download';
-        alert('Failed to download dictionary: ' + (err?.message || err));
-    }
-}
-
-async function handleDeleteJapaneseDict() {
-    const confirmMsg = msg('confirmDeleteJapaneseDict')
-        || 'Are you sure you want to delete the offline Japanese Kuromoji dictionary?';
-
-    if (!window.confirm(confirmMsg)) return;
-
-    const statusBadge = document.getElementById('offline-japanese-dict-status');
-    const deleteBtn = document.getElementById('btn-delete-japanese-dict');
-
-    if (deleteBtn) deleteBtn.disabled = true;
-    if (statusBadge) statusBadge.textContent = 'Deleting...';
-
-    try {
-        await deleteDictionary('japanese');
-        if (deleteBtn) deleteBtn.disabled = false;
-        await updateJapaneseDictStatus();
-    } catch (err) {
-        console.error('Delete error:', err);
-        if (deleteBtn) deleteBtn.disabled = false;
-        await updateJapaneseDictStatus();
-        alert('Failed to delete dictionary: ' + (err?.message || err));
-    }
-}
-
-document.getElementById('btn-download-japanese-dict')?.addEventListener('click', handleDownloadJapaneseDict);
-document.getElementById('btn-delete-japanese-dict')?.addEventListener('click', handleDeleteJapaneseDict);
-
-async function updateArabicDictStatus() {
-    const statusBadge = document.getElementById('offline-arabic-dict-status');
-    const downloadBtn = document.getElementById('btn-download-arabic-dict');
-    const downloadBtnText = document.getElementById('btn-download-arabic-dict-text');
-    const deleteBtn = document.getElementById('btn-delete-arabic-dict');
-
-    if (!statusBadge || !downloadBtn) return;
-
-    try {
-        const status = await getDictionaryStatus('arabic');
-        if (status && status.installed) {
-            const size = status.sizeMB ? `${status.sizeMB} MB` : '74.3 MB';
-            statusBadge.textContent = msg('dictStatusInstalled', size) || `Installed (~${size})`;
-            statusBadge.style.color = 'var(--md3-sys-color-primary, #625b71)';
-            downloadBtn.style.display = 'none';
-            if (deleteBtn) deleteBtn.style.display = 'inline-flex';
-        } else {
-            statusBadge.textContent = msg('dictStatusNotInstalled', '74.3 MB') || 'Not Installed (~74.3 MB)';
-            statusBadge.style.color = 'inherit';
-            downloadBtn.style.display = 'inline-flex';
-            downloadBtn.disabled = false;
-            if (downloadBtnText) downloadBtnText.textContent = msg('btnDownloadDict') || 'Download';
-            if (deleteBtn) deleteBtn.style.display = 'none';
-        }
-    } catch (e) {
-        statusBadge.textContent = 'Unavailable';
-    }
-}
-
-async function handleDownloadArabicDict() {
-    const confirmMsg = msg('confirmDownloadArabicDict')
-        || 'Download the Arabic CaTT diacritizer model (~74.3 MB)? It will be stored locally in your browser for offline Arabic pronunciation.';
-
-    if (!window.confirm(confirmMsg)) return;
-
-    const statusBadge = document.getElementById('offline-arabic-dict-status');
-    const downloadBtn = document.getElementById('btn-download-arabic-dict');
-    const downloadBtnText = document.getElementById('btn-download-arabic-dict-text');
-
-    if (downloadBtn) downloadBtn.disabled = true;
-    if (statusBadge) statusBadge.textContent = msg('dictStatusDownloading', '74.3 MB') || 'Downloading (~74.3 MB)...';
-    if (downloadBtnText) downloadBtnText.textContent = '...';
-
-    try {
-        await downloadDictionary('arabic');
-        await updateArabicDictStatus();
-    } catch (err) {
-        console.error('Download error:', err);
-        if (statusBadge) statusBadge.textContent = 'Download failed';
-        if (downloadBtn) downloadBtn.disabled = false;
-        if (downloadBtnText) downloadBtnText.textContent = msg('btnDownloadDict') || 'Download';
-        alert('Failed to download model: ' + (err?.message || err));
-    }
-}
-
-async function handleDeleteArabicDict() {
-    const confirmMsg = msg('confirmDeleteArabicDict')
-        || 'Are you sure you want to delete the offline Arabic CaTT model?';
-
-    if (!window.confirm(confirmMsg)) return;
-
-    const statusBadge = document.getElementById('offline-arabic-dict-status');
-    const deleteBtn = document.getElementById('btn-delete-arabic-dict');
-
-    if (deleteBtn) deleteBtn.disabled = true;
-    if (statusBadge) statusBadge.textContent = 'Deleting...';
-
-    try {
-        await deleteDictionary('arabic');
-        if (deleteBtn) deleteBtn.disabled = false;
-        await updateArabicDictStatus();
-    } catch (err) {
-        console.error('Delete error:', err);
-        if (deleteBtn) deleteBtn.disabled = false;
-        await updateArabicDictStatus();
-        alert('Failed to delete model: ' + (err?.message || err));
-    }
-}
-
-document.getElementById('btn-download-arabic-dict')?.addEventListener('click', handleDownloadArabicDict);
-document.getElementById('btn-delete-arabic-dict')?.addEventListener('click', handleDeleteArabicDict);
-
-async function handleUploadLocalLyrics() {
-    const titleInput = document.getElementById('modal-upload-song-title');
-    const artistInput = document.getElementById('modal-upload-artist-name');
-    const albumInput = document.getElementById('modal-upload-album-name');
-    const lyricsFileInput = document.getElementById('modal-upload-lyrics-file');
-    const uploadButton = document.getElementById('modal-upload-lyrics-button');
-    const uploadButtonIcon = uploadButton.querySelector('.icon-svg');
-
-    const title = titleInput.value.trim();
-    const artist = artistInput.value.trim();
-    const album = albumInput.value.trim();
-    const lyricsFile = lyricsFileInput.files[0];
-
-    if (!title || !artist || !lyricsFile) {
-        showStatusMessage('modal-upload-status', msg('msgUploadRequired'), true);
+async function addProvider() {
+    const select = $('available-providers-dropdown');
+    const name = select?.value;
+    if (!name) {
+        showStatus('add-provider-status', t('msgSelectSource', 'Please select a source to add.'), true);
         return;
     }
+    const next = [...currentProviderOrder().filter(item => item !== 'applemusic'), name, 'applemusic'];
+    if (await saveProviderOrder(next)) {
+        showStatus('add-provider-status', t('msgSourceAdded', '"$NAME$" added.', [APPLE_LYRICS_NAMES[name] || name]), false);
+    }
+}
 
-    const getFileExtension = (filename) => filename.split('.').pop().toLowerCase();
-    const format = getFileExtension(lyricsFile.name);
+async function removeProvider(name) {
+    if (name === 'applemusic') return;
+    const next = currentProviderOrder().filter(item => item !== name && item !== 'applemusic');
+    next.push('applemusic');
+    if (await saveProviderOrder(next)) {
+        showStatus('add-provider-status', t('msgSourceRemoved', '"$NAME$" removed.', [APPLE_LYRICS_NAMES[name] || name]), false);
+    }
+}
 
-    uploadButton.disabled = true;
-    swapSvgIconPath(uploadButtonIcon, SVG_ICONS.hourglassEmpty);
-    showStatusMessage('modal-upload-status', msg('msgUploading'), false);
+function getDragAfterElement(container, y) {
+    return [...container.querySelectorAll('.draggable-source-item:not(.dragging)')].reduce((closest, child) => {
+        const box = child.getBoundingClientRect();
+        const offset = y - box.top - box.height / 2;
+        return offset < 0 && offset > closest.offset ? { offset, element: child } : closest;
+    }, { offset: -Infinity }).element;
+}
 
-    const reader = new FileReader();
-    reader.onload = async (e) => {
-        try {
-            const lyricsContent = e.target.result;
-            const songInfo = { title, artist, album };
-            let parsedLyrics;
-            switch (format) {
-                case 'lrc': case 'elrc': parsedLyrics = parseSyncedLyrics(lyricsContent); break;
-                case 'ttml': parsedLyrics = parseAppleTTML(lyricsContent); break;
-                case 'json':
-                    parsedLyrics = JSON.parse(lyricsContent);
-                    const firstItem = parsedLyrics.lyrics?.[0];
-                    if (firstItem && firstItem.isLineEnding !== undefined) {
-                        parsedLyrics = v1Tov2(parsedLyrics);
-                    }
-                    break;
-                default: throw new Error('Unsupported lyrics format.');
-            }
-            const jsonLyrics = format === 'json' ? parsedLyrics : convertToStandardJson(parsedLyrics);
-            await uploadLocalLyrics(songInfo, jsonLyrics);
-            showStatusMessage('modal-upload-status', msg('msgUploadSuccess'), false);
-            titleInput.value = ''; artistInput.value = ''; albumInput.value = ''; lyricsFileInput.value = '';
-            document.getElementById('upload-lyrics-modal').style.display = 'none';
-            populateLocalLyricsList();
-        } catch (error) {
-            showStatusMessage('modal-upload-status', msg('msgUploadError', String(error.message || error)), true);
-        } finally {
-            uploadButton.disabled = false;
-            swapSvgIconPath(uploadButtonIcon, SVG_ICONS.uploadFile);
+function bindProviderOrderInteractions() {
+    const list = $('provider-order-draggable');
+    if (!list || list.dataset.bound) return;
+    list.dataset.bound = 'true';
+
+    list.addEventListener('dragstart', event => {
+        const item = event.target.closest('.draggable-source-item');
+        if (!item || item.dataset.provider === 'applemusic') return event.preventDefault();
+        draggedItem = item;
+        item.classList.add('dragging');
+        event.dataTransfer?.setData('text/plain', item.dataset.provider);
+    });
+    list.addEventListener('dragover', event => {
+        if (!draggedItem) return;
+        event.preventDefault();
+        const after = getDragAfterElement(list, event.clientY);
+        if (after) list.insertBefore(draggedItem, after);
+        else {
+            const native = list.querySelector('[data-provider="applemusic"]');
+            if (native) list.insertBefore(draggedItem, native);
+            else list.appendChild(draggedItem);
         }
-    };
-    reader.onerror = () => {
-        showStatusMessage('modal-upload-status', msg('msgFileReadError'), true);
-        uploadButton.disabled = false;
-        swapSvgIconPath(uploadButtonIcon, SVG_ICONS.uploadFile);
-    };
-    reader.readAsText(lyricsFile);
+    });
+    list.addEventListener('dragend', () => {
+        if (draggedItem) draggedItem.classList.remove('dragging');
+        draggedItem = null;
+        saveProviderOrder();
+    });
+
+    list.addEventListener('touchstart', event => {
+        const handle = event.target.closest('.drag-handle');
+        const item = handle?.closest('.draggable-source-item');
+        if (!item) return;
+        event.preventDefault();
+        draggedTouchItem = item;
+        item.classList.add('dragging');
+    }, { passive: false });
+    list.addEventListener('touchmove', event => {
+        if (!draggedTouchItem) return;
+        event.preventDefault();
+        const touch = event.targetTouches[0];
+        const after = getDragAfterElement(list, touch.clientY);
+        if (after) list.insertBefore(draggedTouchItem, after);
+        else {
+            const native = list.querySelector('[data-provider="applemusic"]');
+            if (native) list.insertBefore(draggedTouchItem, native);
+            else list.appendChild(draggedTouchItem);
+        }
+    }, { passive: false });
+    list.addEventListener('touchend', () => {
+        if (draggedTouchItem) draggedTouchItem.classList.remove('dragging');
+        draggedTouchItem = null;
+        saveProviderOrder();
+    });
 }
 
 async function populateLocalLyricsList() {
-    const listContainer = document.getElementById('local-lyrics-list');
-    const noLyricsMessage = document.getElementById('no-local-lyrics-message');
-    if (!listContainer) return;
-
-    listContainer.innerHTML = '';
-    listContainer.appendChild(noLyricsMessage);
+    const list = $('local-lyrics-list');
+    if (!list) return;
+    list.replaceChildren();
+    const empty = document.createElement('p');
+    empty.className = 'helper-text';
+    empty.textContent = t('msgNoLocalLyrics', 'No local TTML imports yet.');
+    list.appendChild(empty);
 
     try {
-        const lyricsList = await getLocalLyricsList();
-        noLyricsMessage.style.display = lyricsList.length === 0 ? 'block' : 'none';
+        const entries = await getLocalLyricsList();
+        if (!Array.isArray(entries) || entries.length === 0) return;
+        empty.hidden = true;
+        for (const entry of entries) {
+            const info = entry.songInfo || {};
+            const row = document.createElement('div');
+            row.className = 'draggable-source-item local-lyrics-item';
+            row.dataset.songId = entry.songId || '';
 
-        lyricsList.forEach(item => {
-            const listItem = document.createElement('div');
-            listItem.className = 'draggable-source-item';
-            listItem.dataset.songId = item.songId;
-            const musicIcon = createSvgIcon(SVG_ICONS.musicNote);
-            musicIcon.classList.add('drag-handle');
+            const icon = createSvgIcon(ICONS.music);
+            icon.classList.add('local-lyrics-icon');
+            row.appendChild(icon);
 
-            const nameSpan = document.createElement('span');
-            nameSpan.className = 'source-name';
-            nameSpan.textContent = `${item.songInfo.title} - ${item.songInfo.artist}`;
+            const copy = document.createElement('div');
+            copy.className = 'local-lyrics-copy';
+            const title = document.createElement('span');
+            title.className = 'source-name';
+            title.textContent = [info.title || info.name || entry.songId, info.artist].filter(Boolean).join(' — ');
+            copy.appendChild(title);
+            const metaText = [info.album, entry.songId].filter(Boolean).join(' · ');
+            if (metaText) {
+                const meta = document.createElement('span');
+                meta.className = 'source-meta';
+                meta.textContent = metaText;
+                copy.appendChild(meta);
+            }
+            row.appendChild(copy);
 
-            const removeBtn = document.createElement('button');
-            removeBtn.className = 'm3-button icon remove-source-button';
-            removeBtn.title = msg('titleDeleteLocalLyrics') || 'Delete local lyrics';
-            removeBtn.appendChild(createSvgIcon(SVG_ICONS.delete));
-
-            listItem.appendChild(musicIcon);
-            listItem.appendChild(nameSpan);
-            listItem.appendChild(removeBtn);
-            listItem.querySelector('.remove-source-button').addEventListener('click', async (e) => {
-                e.stopPropagation();
-                if (confirm(msg('confirmDeleteLyrics', `${item.songInfo.title} - ${item.songInfo.artist}`))) {
-                    try {
-                        await deleteLocalLyrics(item.songId);
-                        showStatusMessage('local-lyrics-status', msg('msgLocalLyricsDeleted'), false);
-                        populateLocalLyricsList();
-                    } catch (error) {
-                        showStatusMessage('local-lyrics-status', msg('msgDeleteError', String(error)), true);
-                    }
+            const remove = document.createElement('button');
+            remove.type = 'button';
+            remove.className = 'm3-button icon remove-source-button';
+            remove.title = t('titleDeleteLocalLyrics', 'Delete local lyrics');
+            remove.setAttribute('aria-label', remove.title);
+            remove.appendChild(createSvgIcon(ICONS.delete));
+            remove.addEventListener('click', async () => {
+                const songName = title.textContent;
+                if (!window.confirm(t('confirmDeleteLyrics', 'Delete local lyrics for "$NAME$"?', [songName]))) return;
+                remove.disabled = true;
+                try {
+                    await deleteLocalLyrics(entry.songId);
+                    showStatus('local-lyrics-status', t('msgLocalLyricsDeleted', 'Local lyrics deleted.'), false);
+                    await populateLocalLyricsList();
+                } catch (error) {
+                    remove.disabled = false;
+                    showStatus('local-lyrics-status', t('msgDeleteError', 'Could not delete local lyrics: $ERROR$', [String(error?.message || error)]), true);
                 }
             });
-            listContainer.appendChild(listItem);
-        });
+            row.appendChild(remove);
+            list.appendChild(row);
+        }
     } catch (error) {
-        console.error("Failed to load local lyrics list:", error);
-        noLyricsMessage.textContent = msg('msgErrorLoadingLocalLyrics', String(error.message || error));
-        noLyricsMessage.style.display = 'block';
+        empty.hidden = false;
+        empty.textContent = t('msgErrorLoadingLocalLyrics', 'Could not load local lyrics: $ERROR$', [String(error?.message || error)]);
     }
 }
 
-document.getElementById('toggle-gemini-api-key-visibility').addEventListener('click', () => {
-    const apiKeyInput = document.getElementById('gemini-api-key');
-    const iconSvg = document.querySelector('#toggle-gemini-api-key-visibility .icon-svg');
-    if (apiKeyInput.type === 'password') {
-        apiKeyInput.type = 'text';
-        swapSvgIconPath(iconSvg, SVG_ICONS.visibilityOff);
-    } else {
-        apiKeyInput.type = 'password';
-        swapSvgIconPath(iconSvg, SVG_ICONS.visibility);
-    }
+const fontInput = $('player-font-file');
+const importFontButton = $('import-player-font');
+const resetFontButton = $('reset-player-font');
+const fontStatus = $('player-font-status');
+const fontPreviewLoader = createImportedFontLoader(family => {
+    const preview = $('player-font-preview');
+    if (preview) preview.style.fontFamily = family || 'inherit';
+}, () => {
+    if (fontStatus) fontStatus.textContent = t('msgPlayerFontLoadFailed', 'Unable to load the font. Please import the file again.');
 });
 
-document.getElementById('toggle-openrouter-api-key-visibility').addEventListener('click', () => {
-    const apiKeyInput = document.getElementById('openrouter-api-key');
-    const iconSvg = document.querySelector('#toggle-openrouter-api-key-visibility .icon-svg');
-    if (apiKeyInput.type === 'password') {
-        apiKeyInput.type = 'text';
-        swapSvgIconPath(iconSvg, SVG_ICONS.visibilityOff);
-    } else {
-        apiKeyInput.type = 'password';
-        swapSvgIconPath(iconSvg, SVG_ICONS.visibility);
-    }
-});
+function previewPlayerFont(value) {
+    const metadata = getSettings().appleMusicPlayerFontFile;
+    if (fontStatus) fontStatus.textContent = metadata?.name || t('msgPlayerFontDefault', 'Using default font');
+    fontPreviewLoader.update(metadata, playerFontFamily(value));
+}
 
-document.getElementById('toggle-deepl-api-key-visibility').addEventListener('click', () => {
-    const apiKeyInput = document.getElementById('deepl-api-key');
-    const iconSvg = document.querySelector('#toggle-deepl-api-key-visibility .icon-svg');
-    if (apiKeyInput.type === 'password') {
-        apiKeyInput.type = 'text';
-        swapSvgIconPath(iconSvg, SVG_ICONS.visibilityOff);
-    } else {
-        apiKeyInput.type = 'password';
-        swapSvgIconPath(iconSvg, SVG_ICONS.visibility);
-    }
-});
+if (importFontButton && fontInput) {
+    importFontButton.addEventListener('click', () => fontInput.click());
+    fontInput.addEventListener('change', async () => {
+        const file = fontInput.files?.[0];
+        if (!file) return;
+        const previous = {
+            appleMusicPlayerFont: getSettings().appleMusicPlayerFont,
+            appleMusicPlayerFontFile: getSettings().appleMusicPlayerFontFile
+        };
+        importFontButton.disabled = resetFontButton.disabled = true;
+        if (fontStatus) {
+            fontStatus.classList.remove('error');
+            fontStatus.textContent = t('msgPlayerFontImporting', 'Importing font…');
+        }
+        let imported;
+        try {
+            imported = await importPlayerFont(file);
+            currentSettings = updateSettings({ appleMusicPlayerFont: '', appleMusicPlayerFontFile: imported });
+            await saveSettings();
+            previewPlayerFont('');
+            if (fontStatus) fontStatus.textContent = t('msgPlayerFontImported', 'Font imported and applied to the Apple Music player.');
+            if (previous.appleMusicPlayerFontFile?.id) deleteImportedFont(previous.appleMusicPlayerFontFile.id).catch(() => {});
+        } catch (error) {
+            if (imported) {
+                currentSettings = updateSettings(previous);
+                deleteImportedFont(imported.id).catch(() => {});
+                saveSettings().catch(() => {});
+            }
+            if (fontStatus) {
+                fontStatus.classList.add('error');
+                fontStatus.textContent = t(error?.message === 'FONT_SIZE' ? 'msgPlayerFontSize' : 'msgPlayerFontImportFailed', 'Unable to import this font. Choose a valid font file; the previous font is kept.');
+            }
+        } finally {
+            importFontButton.disabled = resetFontButton.disabled = false;
+            fontInput.value = '';
+        }
+    });
+}
 
-function setAppVersion() {
+if (resetFontButton) {
+    resetFontButton.addEventListener('click', async () => {
+        const previous = {
+            appleMusicPlayerFont: getSettings().appleMusicPlayerFont,
+            appleMusicPlayerFontFile: getSettings().appleMusicPlayerFontFile
+        };
+        try {
+            currentSettings = updateSettings({ appleMusicPlayerFont: '', appleMusicPlayerFontFile: null });
+            await saveSettings();
+            previewPlayerFont('');
+            if (fontStatus) {
+                fontStatus.classList.remove('error');
+                fontStatus.textContent = t('msgPlayerFontReset', 'Default player font restored.');
+            }
+            if (previous.appleMusicPlayerFontFile?.id) deleteImportedFont(previous.appleMusicPlayerFontFile.id).catch(() => {});
+        } catch {
+            currentSettings = updateSettings(previous);
+            if (fontStatus) {
+                fontStatus.classList.add('error');
+                fontStatus.textContent = t('msgSettingsSaveFailed', 'Could not save settings. Try again.');
+            }
+        }
+    });
+}
+
+window.addEventListener('pagehide', () => fontPreviewLoader.dispose(), { once: true });
+
+function bindApiKeyToggle(buttonId, inputId) {
+    const button = $(buttonId);
+    const input = $(inputId);
+    if (!button || !input) return;
+    const updateLabel = () => {
+        button.textContent = input.type === 'password'
+            ? t('buttonShowKey', 'Show')
+            : t('buttonHideKey', 'Hide');
+    };
+    updateLabel();
+    button.addEventListener('click', () => {
+        input.type = input.type === 'password' ? 'text' : 'password';
+        updateLabel();
+    });
+}
+bindApiKeyToggle('toggle-gemini-api-key-visibility', 'gemini-api-key');
+bindApiKeyToggle('toggle-openrouter-api-key-visibility', 'openrouter-api-key');
+bindApiKeyToggle('toggle-deepl-api-key-visibility', 'deepl-api-key');
+
+async function testCustomLLM() {
+    const button = $('test-custom-llm');
+    if (!button) return;
+    const values = {
+        customLLMBaseUrl: $('custom-llm-url')?.value.trim() || '',
+        customLLMApiKey: $('custom-llm-key')?.value.trim() || '',
+        customLLMModel: $('custom-llm-model')?.value.trim() || ''
+    };
     try {
-        const version = chrome.runtime.getManifest().version;
-        document.querySelector('.version').textContent = msg('labelVersion', version);
-    } catch (e) {
-        console.error("Could not retrieve extension version:", e);
+        const endpoint = customLLMEndpoint(values.customLLMBaseUrl);
+        if (!values.customLLMModel) throw new Error(t('msgCustomLLMModelRequired', 'Enter a model name.'));
+        const api = globalThis.browser || globalThis.chrome;
+        if (!api?.permissions) throw new Error(t('msgCustomLLMExtensionRequired', 'This connection test requires the extension context.'));
+        button.disabled = true;
+        showStatus('custom-llm-status', t('msgCustomLLMTesting', 'Testing connection…'), false);
+        currentSettings = updateSettings(values);
+        await saveSettings();
+        const granted = await api.permissions.request({ origins: [endpoint.origin + '/*'] });
+        if (!granted) throw new Error(t('msgCustomLLMPermissionDenied', 'Permission for this API address was not granted.'));
+        const result = await new CustomLLMProvider(values).translate(['Hello, world.'], 'zh-CN');
+        showStatus('custom-llm-status', t('msgCustomLLMTestSuccess', 'Connection successful:') + ' ' + result[0], false);
+        showStatus(TRANSLATION_STATUS, t('msgTranslationSettingsSaved', 'Translation settings saved and applied to the Apple Music player.'), false);
+    } catch (error) {
+        showStatus('custom-llm-status', t('msgCustomLLMTestFailed', 'Connection failed:') + ' ' + String(error?.message || error), true);
+    } finally {
+        if (button) button.disabled = false;
     }
 }
+$('test-custom-llm')?.addEventListener('click', testCustomLLM);
+
+async function updateDictionaryStatus(kind) {
+    const statusId = kind === 'japanese' ? 'offline-japanese-dict-status' : 'offline-arabic-dict-status';
+    const downloadId = kind === 'japanese' ? 'btn-download-japanese-dict' : 'btn-download-arabic-dict';
+    const deleteId = kind === 'japanese' ? 'btn-delete-japanese-dict' : 'btn-delete-arabic-dict';
+    const textId = kind === 'japanese' ? 'btn-download-japanese-dict-text' : 'btn-download-arabic-dict-text';
+    const status = $(statusId);
+    const download = $(downloadId);
+    const remove = $(deleteId);
+    const downloadText = $(textId);
+    if (!status || !download) return;
+    try {
+        const result = await getDictionaryStatus(kind);
+        const fallbackSize = kind === 'japanese' ? '17 MB' : '74.3 MB';
+        const size = result?.sizeMB ? result.sizeMB + ' MB' : fallbackSize;
+        if (result?.installed) {
+            status.textContent = t('dictStatusInstalled', 'Installed (~$SIZE$)', [size]);
+            status.classList.add('installed');
+            download.hidden = true;
+            if (remove) remove.hidden = false;
+        } else {
+            status.textContent = t('dictStatusNotInstalled', 'Not installed (~$SIZE$)', [fallbackSize]);
+            status.classList.remove('installed');
+            download.hidden = false;
+            download.disabled = false;
+            if (downloadText) downloadText.textContent = t('btnDownloadDict', 'Download');
+            if (remove) remove.hidden = true;
+        }
+    } catch {
+        status.textContent = t('msgDictionaryUnavailable', 'Unavailable');
+        status.classList.remove('installed');
+    }
+}
+
+async function downloadOfflineDictionary(kind) {
+    const isJapanese = kind === 'japanese';
+    const confirmKey = isJapanese ? 'confirmDownloadJapaneseDict' : 'confirmDownloadArabicDict';
+    if (!window.confirm(t(confirmKey, isJapanese ? 'Download the Japanese dictionary (~17 MB) now?' : 'Download the Arabic model (~74.3 MB) now?'))) return;
+    const download = $(isJapanese ? 'btn-download-japanese-dict' : 'btn-download-arabic-dict');
+    const status = $(isJapanese ? 'offline-japanese-dict-status' : 'offline-arabic-dict-status');
+    const text = $(isJapanese ? 'btn-download-japanese-dict-text' : 'btn-download-arabic-dict-text');
+    if (download) download.disabled = true;
+    if (status) status.textContent = t('dictStatusDownloading', 'Downloading (~$SIZE$)…', [isJapanese ? '17 MB' : '74.3 MB']);
+    if (text) text.textContent = '…';
+    try {
+        await downloadDictionary(kind);
+        await updateDictionaryStatus(kind);
+    } catch (error) {
+        if (status) status.textContent = t('msgDictionaryDownloadFailed', 'Download failed');
+        if (download) download.disabled = false;
+        if (text) text.textContent = t('btnDownloadDict', 'Download');
+        showStatus(TRANSLATION_STATUS, t('msgDictionaryDownloadFailedDetail', 'Could not download the offline dictionary: $ERROR$', [String(error?.message || error)]), true);
+    }
+}
+
+async function removeOfflineDictionary(kind) {
+    const isJapanese = kind === 'japanese';
+    const confirmKey = isJapanese ? 'confirmDeleteJapaneseDict' : 'confirmDeleteArabicDict';
+    if (!window.confirm(t(confirmKey, 'Delete this offline dictionary?'))) return;
+    const remove = $(isJapanese ? 'btn-delete-japanese-dict' : 'btn-delete-arabic-dict');
+    if (remove) remove.disabled = true;
+    try {
+        await deleteDictionary(kind);
+        await updateDictionaryStatus(kind);
+    } catch (error) {
+        showStatus(TRANSLATION_STATUS, t('msgDictionaryDeleteFailed', 'Could not delete the offline dictionary: $ERROR$', [String(error?.message || error)]), true);
+        await updateDictionaryStatus(kind);
+    } finally {
+        if (remove) remove.disabled = false;
+    }
+}
+
+$('btn-download-japanese-dict')?.addEventListener('click', () => downloadOfflineDictionary('japanese'));
+$('btn-delete-japanese-dict')?.addEventListener('click', () => removeOfflineDictionary('japanese'));
+$('btn-download-arabic-dict')?.addEventListener('click', () => downloadOfflineDictionary('arabic'));
+$('btn-delete-arabic-dict')?.addEventListener('click', () => removeOfflineDictionary('arabic'));
+
+async function clearCacheTarget(target) {
+    try {
+        const result = await clearCache(target);
+        if (!result?.success) throw new Error(result?.error || 'Unknown error');
+        await updateCacheSize();
+        showStatus(ADVANCED_STATUS, t('msgCacheCleared', 'Cache cleared successfully!'), false);
+    } catch (error) {
+        showStatus(ADVANCED_STATUS, t('msgCacheClearFailed', 'Failed to clear cache.') + ' ' + String(error?.message || error), true);
+    }
+}
+$('clear-lyrics-cache')?.addEventListener('click', () => clearCacheTarget('lyrics'));
+$('clear-translation-cache')?.addEventListener('click', () => clearCacheTarget('translations'));
+$('clear-romanization-cache')?.addEventListener('click', () => clearCacheTarget('romanization'));
+$('clear-cache')?.addEventListener('click', () => clearCacheTarget('all'));
 
 function exportSettings() {
     try {
-        const settings = getSettings();
-        const settingsJson = JSON.stringify(settings, null, 2);
-        const blob = new Blob([settingsJson], { type: 'application/json' });
+        const settings = pickSettings(getSettings());
+        const blob = new Blob([JSON.stringify(settings, null, 2)], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        const date = new Date().toISOString().slice(0, 10);
-        a.download = `youlyplus-settings-${date}.json`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'youlyplus-apple-settings-' + new Date().toISOString().slice(0, 10) + '.json';
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
         URL.revokeObjectURL(url);
-        showStatusMessage('config-status', msg('msgExportSuccess'), false);
+        showStatus('config-status', t('msgExportSuccess', 'Settings exported successfully!'), false);
     } catch (error) {
-        console.error('Failed to export settings:', error);
-        showStatusMessage('config-status', msg('msgExportError', error.message), true);
+        showStatus('config-status', t('msgExportError', 'Could not export settings: $ERROR$', [String(error?.message || error)]), true);
     }
 }
 
-function importSettings(event) {
-    const file = event.target.files[0];
-    if (!file) {
-        return;
+const ENUM_SETTINGS = {
+    appleMusicDisplayMode: new Set(['none', 'translate', 'romanize', 'both']),
+    appleMusicTitleCorrection: new Set(['off', 'original', 'cn', 'jp']),
+    largerTextMode: new Set(['lyrics', 'romanization']),
+    translationProvider: new Set(['google', 'gemini', 'openrouter', 'customllm', 'deepl', 'deepl-keyless']),
+    romanizationProvider: new Set(['offline', 'google', 'gemini', 'openrouter']),
+    transliterationTargetScript: new Set(['latin', 'japanese', 'korean', 'cyrillic', 'devanagari', 'arabic', 'hebrew', 'greek', 'thai']),
+    cacheStrategy: new Set(['aggressive', 'moderate', 'none'])
+};
+
+function validFontMetadata(value) {
+    return value === null || (
+        value && typeof value === 'object' && !Array.isArray(value)
+        && typeof value.id === 'string' && value.id.length > 0
+        && typeof value.name === 'string'
+        && Number.isFinite(value.size)
+    );
+}
+
+function sanitizeImportedSettings(values) {
+    const picked = pickSettings(values);
+    const result = {};
+    for (const [key, value] of Object.entries(picked)) {
+        if (key === 'appleMusicPlayerFontFile') {
+            if (validFontMetadata(value)) result[key] = value === null ? null : {
+                id: value.id,
+                name: value.name,
+                size: value.size
+            };
+            continue;
+        }
+        const expected = defaultSettings[key];
+        if (expected === null || typeof expected === 'object') continue;
+        if (typeof value !== typeof expected) continue;
+        if (ENUM_SETTINGS[key] && !ENUM_SETTINGS[key].has(value)) continue;
+        result[key] = value;
     }
+    return result;
+}
 
+function importSettings(event) {
+    const file = event.target.files?.[0];
+    if (!file) return;
     const reader = new FileReader();
-    reader.onload = (e) => {
+    reader.onload = async () => {
         try {
-            const importedSettings = JSON.parse(e.target.result);
-
-            if (typeof importedSettings !== 'object' || importedSettings === null || typeof importedSettings.isEnabled === 'undefined') {
-                throw new Error('Invalid or corrupted settings file.');
-            }
-
-            updateSettings(importedSettings);
-            saveSettings();
+            const parsed = JSON.parse(String(reader.result || ''));
+            const source = parsed && typeof parsed === 'object' && parsed.settings && typeof parsed.settings === 'object'
+                ? parsed.settings
+                : parsed;
+            const imported = sanitizeImportedSettings(source || {});
+            if (!Object.keys(imported).length) throw new Error(t('msgImportNoValidSettings', 'This file contains no supported YouLy+ settings.'));
+            currentSettings = updateSettings(imported);
+            await saveSettings();
             updateUI(getSettings());
-            showStatusMessage('config-status', msg('msgImportSuccess'), false);
+            showStatus('config-status', t('msgImportSuccess', 'Settings imported successfully! Reload required.'), false);
             showReloadNotification();
         } catch (error) {
-            console.error('Failed to import settings:', error);
-            showStatusMessage('config-status', msg('msgImportError', error.message), true);
+            showStatus('config-status', t('msgImportError', 'Could not import settings: $ERROR$', [String(error?.message || error)]), true);
         } finally {
             event.target.value = '';
         }
     };
-    reader.onerror = () => {
-        showStatusMessage('config-status', msg('msgFileReadError'), true);
-    };
+    reader.onerror = () => showStatus('config-status', t('msgFileReadError', 'Could not read the file.'), true);
     reader.readAsText(file);
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-    loadSettings((settings) => {
-        initCustomSelects(); // Init custom selects first
-        updateUI(settings);
-        setupAutoSaveListeners();
-        initRowClickListeners();
-
-        const firstNavItem = document.querySelector('.navigation-drawer .nav-item');
-        const activeSectionId = firstNavItem?.getAttribute('data-section') || 'appearance';
-        document.querySelector(`.navigation-drawer .nav-item[data-section="${activeSectionId}"]`)?.classList.add('active');
-        document.getElementById(activeSectionId)?.classList.add('active');
-        updateGroupItemRounding();
-    });
-
-    setAppVersion();
-
-    document.getElementById('reload-button')?.addEventListener('click', async () => {
-        const availablePlatforms = await getAvailableTabs();
-        if (availablePlatforms.length > 0) {
-            let reloadPromises = [];
-            availablePlatforms.forEach(p => {
-                p.tabs.forEach(tab => {
-                    reloadPromises.push(new Promise(r => chrome.tabs.reload(tab.id, r)));
-                });
-            });
-            await Promise.all(reloadPromises);
-            hideReloadNotification();
-        } else {
-            alert(msg('msgNoActiveTabs'));
+async function queryAppleTabs() {
+    const api = globalThis.browser?.tabs || globalThis.chrome?.tabs;
+    if (!api?.query) return [];
+    try {
+        if (globalThis.browser?.tabs) {
+            const tabs = await api.query({ url: '*://music.apple.com/*' });
+            return Array.isArray(tabs) ? tabs : [];
         }
-    });
+        return await new Promise(resolve => {
+            api.query({ url: '*://music.apple.com/*' }, tabs => resolve(globalThis.chrome?.runtime?.lastError ? [] : Array.isArray(tabs) ? tabs : []));
+        });
+    } catch {
+        return [];
+    }
+}
 
-    document.getElementById('export-settings-button').addEventListener('click', exportSettings);
-    document.getElementById('import-settings-button').addEventListener('click', () => {
-        document.getElementById('import-settings-file').click();
-    });
-    document.getElementById('import-settings-file').addEventListener('change', importSettings);
+async function showReloadNotification(changedKey) {
+    if (changedKey && !RESTART_REQUIRED_KEYS.has(changedKey)) return;
+    const notification = $('reload-notification');
+    if (!notification) return;
+    const tabs = await queryAppleTabs();
+    notification.style.display = tabs.length ? 'flex' : 'none';
+}
+
+async function reloadAppleMusicTabs() {
+    const tabs = await queryAppleTabs();
+    const api = globalThis.browser?.tabs || globalThis.chrome?.tabs;
+    for (const tab of tabs) {
+        if (tab.id == null) continue;
+        try {
+            if (globalThis.browser?.tabs) await api.reload(tab.id);
+            else await new Promise(resolve => api.reload(tab.id, resolve));
+        } catch {}
+    }
+    const notification = $('reload-notification');
+    if (notification) notification.style.display = 'none';
+}
+
+$('reload-button')?.addEventListener('click', reloadAppleMusicTabs);
+$('export-settings-button')?.addEventListener('click', exportSettings);
+$('import-settings-button')?.addEventListener('click', () => $('import-settings-file')?.click());
+$('import-settings-file')?.addEventListener('change', importSettings);
+$('refresh-local-lyrics-list')?.addEventListener('click', async () => {
+    await populateLocalLyricsList();
+    showStatus('local-lyrics-status', t('msgLocalLyricsRefreshed', 'Local TTML library refreshed.'), false);
+});
+$('add-provider-button')?.addEventListener('click', addProvider);
+
+window.addEventListener('YOUPLUS_SETTINGS_SAVE_FAILED', event => {
+    const key = event?.detail?.key || '';
+    showStatus(failureStatusFor(key), t(...FAILURE_MESSAGE), true);
 });
 
-function updateCustomSelectDisplay(selectId) {
-    const nativeSelect = document.getElementById(selectId);
-    if (!nativeSelect || !nativeSelect.customSelect) return;
-
-    const customSelect = nativeSelect.customSelect.container;
-    const valueDisplay = nativeSelect.customSelect.valueDisplay;
-    const selectedOption = nativeSelect.options[nativeSelect.selectedIndex];
-
-    if (nativeSelect.disabled) {
-        customSelect.classList.add('disabled');
-    } else {
-        customSelect.classList.remove('disabled');
-    }
-
-    if (selectedOption) {
-        valueDisplay.textContent = selectedOption.textContent;
-        const menu = nativeSelect.customSelect.menu;
-        menu.querySelector('.selected')?.classList.remove('selected');
-        if (selectedOption.value) {
-            customSelect.classList.add('has-value');
-            menu.querySelector(`[data-value="${selectedOption.value}"]`)?.classList.add('selected');
-        } else {
-            customSelect.classList.remove('has-value');
-            menu.querySelector(`[data-value=""]`)?.classList.add('selected');
-        }
-    } else {
-        valueDisplay.textContent = '';
-        customSelect.classList.remove('has-value');
-    }
-}
-
-function initCustomSelects() {
-    document.querySelectorAll('.form-group').forEach(formGroup => {
-        const nativeSelect = formGroup.querySelector('select');
-        if (!nativeSelect) return;
-
-        const customSelect = document.createElement('div');
-        customSelect.className = 'm3-select';
-
-        const valueDisplay = document.createElement('div');
-        valueDisplay.className = 'm3-select-value';
-
-        const arrow = createSvgIcon(SVG_ICONS.arrowDropDown);
-        arrow.classList.add('m3-select-arrow');
-
-        const menu = document.createElement('div');
-        menu.className = 'm3-select-menu';
-
-        customSelect.append(valueDisplay, arrow, menu);
-
-        nativeSelect.customSelect = { container: customSelect, valueDisplay: valueDisplay, menu: menu };
-
-        function populateOptions() {
-            menu.innerHTML = '';
-            const isSinglePlaceholder = nativeSelect.options.length === 1 && nativeSelect.options[0].disabled;
-            Array.from(nativeSelect.options).forEach(option => {
-                if (option.hidden || option.style.display === 'none') return;
-                if (option.disabled && option.value === '' && !isSinglePlaceholder && nativeSelect.options.length > 1) return;
-
-                const customOption = document.createElement('div');
-                customOption.className = 'm3-select-option';
-                customOption.dataset.value = option.value;
-                customOption.textContent = option.textContent;
-
-                if (option.disabled) {
-                    customOption.classList.add('disabled');
-                }
-
-                if (option.selected) {
-                    if (option.value !== '') {
-                        customOption.classList.add('selected');
-                        customSelect.classList.add('has-value');
-                    } else {
-                        customSelect.classList.remove('has-value');
-                    }
-                    valueDisplay.textContent = option.textContent;
-                }
-
-                if (!option.disabled) {
-                    customOption.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        nativeSelect.value = option.value;
-                        nativeSelect.dispatchEvent(new Event('change', { bubbles: true }));
-                        customSelect.classList.remove('open');
-                        updateCustomSelectDisplay(nativeSelect.id);
-                    });
-                }
-                menu.appendChild(customOption);
-            });
-
-            if (nativeSelect.disabled || isSinglePlaceholder) {
-                customSelect.classList.add('disabled');
-            } else {
-                customSelect.classList.remove('disabled');
-            }
-
-            updateCustomSelectDisplay(nativeSelect.id);
-        }
-
-        populateOptions();
-
-        customSelect.addEventListener('click', (e) => {
-            e.stopPropagation();
-            if (nativeSelect.disabled || customSelect.classList.contains('disabled')) return;
-            document.querySelectorAll('.m3-select.open').forEach(openSelect => {
-                if (openSelect !== customSelect) openSelect.classList.remove('open');
-            });
-            const isOpen = customSelect.classList.toggle('open');
-            if (isOpen) {
-                const selectedOption = menu.querySelector('.selected');
-                if (selectedOption) {
-                    requestAnimationFrame(() => {
-                        const topOffset = selectedOption.offsetTop - (menu.clientHeight / 2) + (selectedOption.clientHeight / 2);
-                        menu.scrollTop = Math.max(0, topOffset);
-                    });
-                }
-            }
+function initNavigation() {
+    document.querySelectorAll('.navigation-drawer .nav-item').forEach(item => {
+        item.addEventListener('click', event => {
+            event.preventDefault();
+            const section = item.dataset.section;
+            document.querySelectorAll('.navigation-drawer .nav-item').forEach(other => other.classList.toggle('active', other === item));
+            document.querySelectorAll('.settings-card').forEach(card => card.classList.toggle('active', card.id === section));
+            if (window.innerWidth <= 768) closeDrawer();
         });
-
-        nativeSelect.classList.add('m3-select-hidden');
-        formGroup.insertBefore(customSelect, nativeSelect);
-
-        new MutationObserver(populateOptions).observe(nativeSelect, { childList: true, subtree: true, attributes: true, attributeFilter: ['disabled', 'hidden', 'style'] });
     });
 
-    document.addEventListener('click', () => {
-        document.querySelectorAll('.m3-select.open').forEach(select => select.classList.remove('open'));
+    const menuButton = $('mobile-menu-button');
+    const overlay = $('drawer-overlay');
+    menuButton?.addEventListener('click', event => {
+        event.stopPropagation();
+        document.querySelector('.navigation-drawer')?.classList.toggle('open');
+        overlay?.classList.toggle('visible');
     });
-
-    // Mobile Drawer Logic
-    const mobileMenuButton = document.getElementById('mobile-menu-button');
-    const drawerOverlay = document.getElementById('drawer-overlay');
-    const navDrawer = document.querySelector('.navigation-drawer');
-
-    // Sidebar auto-hiding scrollbar with smooth fade animation
-    if (navDrawer) {
-        let currentAlpha = 0;
-        let animationFrame = null;
-        let hideTimeout = null;
-
-        function animateAlpha(targetAlpha, duration = 250) {
-            if (animationFrame) cancelAnimationFrame(animationFrame);
-            const startAlpha = currentAlpha;
-            const startTime = performance.now();
-
-            function step(now) {
-                const elapsed = now - startTime;
-                const progress = Math.min(elapsed / duration, 1);
-                // Ease out cubic: fast start, soft stop
-                const ease = 1 - Math.pow(1 - progress, 3);
-                currentAlpha = startAlpha + (targetAlpha - startAlpha) * ease;
-                navDrawer.style.setProperty('--sidebar-scroll-alpha', currentAlpha.toFixed(3));
-
-                if (progress < 1) {
-                    animationFrame = requestAnimationFrame(step);
-                } else {
-                    currentAlpha = targetAlpha;
-                    navDrawer.style.setProperty('--sidebar-scroll-alpha', currentAlpha.toFixed(3));
-                    animationFrame = null;
-                }
-            }
-
-            animationFrame = requestAnimationFrame(step);
-        }
-
-        navDrawer.addEventListener('scroll', () => {
-            if (animationFrame) cancelAnimationFrame(animationFrame);
-            currentAlpha = 1;
-            navDrawer.style.setProperty('--sidebar-scroll-alpha', '1');
-
-            clearTimeout(hideTimeout);
-            hideTimeout = setTimeout(() => {
-                animateAlpha(0, 400); 
-            }, 800);
-        }, { passive: true });
-    }
-
-    if (mobileMenuButton && drawerOverlay && navDrawer) {
-        function toggleDrawer() {
-            navDrawer.classList.toggle('open');
-            drawerOverlay.classList.toggle('visible');
-        }
-
-        function closeDrawer() {
-            navDrawer.classList.remove('open');
-            drawerOverlay.classList.remove('visible');
-        }
-
-        mobileMenuButton.addEventListener('click', (e) => {
-            e.stopPropagation();
-            toggleDrawer();
-        });
-
-        drawerOverlay.addEventListener('click', closeDrawer);
-
-        // Close drawer when a nav item is clicked (on mobile)
-        document.querySelectorAll('.navigation-drawer .nav-item').forEach(item => {
-            item.addEventListener('click', () => {
-                if (window.innerWidth <= 768) {
-                    closeDrawer();
-                }
-            });
-        });
-    }
+    overlay?.addEventListener('click', closeDrawer);
 }
 
-initRipple();
+function closeDrawer() {
+    document.querySelector('.navigation-drawer')?.classList.remove('open');
+    $('drawer-overlay')?.classList.remove('visible');
+}
+
+function setVersion() {
+    try {
+        const version = globalThis.chrome?.runtime?.getManifest?.().version || 'unknown';
+        const element = document.querySelector('.version');
+        if (element) element.textContent = t('labelVersion', 'Version $VERSION$', [version]);
+    } catch {}
+}
+
+document.addEventListener('DOMContentLoaded', async () => {
+    initRipple();
+    initSwitches();
+    initNavigation();
+    bindProviderOrderInteractions();
+    setVersion();
+
+    const settings = await loadSettings();
+    updateUI(settings);
+    bindSettingControls();
+    setupSettingsMessageListener(updateUI);
+});
 

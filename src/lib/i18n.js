@@ -1,44 +1,72 @@
 /**
- * Cross-browser i18n helper for YouLy+ extension pages (popup & settings).
- * Works with both Chrome (chrome.i18n) and Firefox (browser.i18n).
+ * Cross-browser i18n helper for YouLy+ extension pages and content contexts.
+ * Keep the global t()/msg() API because classic scripts share this file.
  */
+(function initYouLyI18n(scope) {
+    const i18nApi = scope.browser?.i18n || scope.chrome?.i18n || null;
 
-const i18nApi = (typeof browser !== 'undefined' && browser.i18n) ? browser.i18n : chrome.i18n;
+    function readMessage(key, substitutions) {
+        if (!key || !i18nApi?.getMessage) return '';
+        try {
+            const value = i18nApi.getMessage(key, substitutions);
+            return typeof value === 'string' ? value : '';
+        } catch {
+            return '';
+        }
+    }
 
-/**
- * Get a localized message by key, with optional substitutions.
- */
-function msg(key, substitutions) {
-    return i18nApi.getMessage(key, substitutions) || '';
-}
+    /**
+     * Translate a _locales key.
+     * @param {string} key
+     * @param {string|string[]|undefined} substitutions
+     * @param {string} fallback English fallback used when the key is absent.
+     */
+    function t(key, substitutions, fallback = '') {
+        return readMessage(key, substitutions) || fallback || '';
+    }
 
-/**
- * Apply i18n translations to all elements with data-i18n attributes.
- * Supports:
- *   data-i18n="key"             → sets textContent
- *   data-i18n-title="key"       → sets title attribute
- *   data-i18n-placeholder="key" → sets placeholder attribute
- */
-function applyI18n() {
-    document.querySelectorAll('[data-i18n]').forEach(el => {
-        const translated = msg(el.dataset.i18n);
-        if (translated) el.textContent = translated;
-    });
+    // Preserve the original helper contract used by classic content scripts.
+    function msg(key, substitutions) {
+        return readMessage(key, substitutions);
+    }
 
-    document.querySelectorAll('[data-i18n-title]').forEach(el => {
-        const translated = msg(el.dataset.i18nTitle);
-        if (translated) el.title = translated;
-    });
+    function applyI18n(root = scope.document) {
+        if (!root?.querySelectorAll) return;
+        root.querySelectorAll('[data-i18n]').forEach(element => {
+            const translated = readMessage(element.dataset.i18n);
+            if (translated) element.textContent = translated;
+        });
+        root.querySelectorAll('[data-i18n-title]').forEach(element => {
+            const translated = readMessage(element.dataset.i18nTitle);
+            if (translated) element.title = translated;
+        });
+        root.querySelectorAll('[data-i18n-placeholder]').forEach(element => {
+            const translated = readMessage(element.dataset.i18nPlaceholder);
+            if (translated) element.placeholder = translated;
+        });
+        root.querySelectorAll('[data-i18n-aria-label]').forEach(element => {
+            const translated = readMessage(element.dataset.i18nAriaLabel);
+            if (translated) element.setAttribute('aria-label', translated);
+        });
+    }
 
-    document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
-        const translated = msg(el.dataset.i18nPlaceholder);
-        if (translated) el.placeholder = translated;
-    });
-}
+    function getUserLanguage() {
+        return i18nApi?.getUILanguage?.() || scope.navigator?.language || 'en';
+    }
 
-// Auto-apply translations when DOM is ready
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', applyI18n);
-} else {
-    applyI18n();
-}
+    const uiLanguage = getUserLanguage();
+    if (uiLanguage && scope.document?.documentElement) {
+        scope.document.documentElement.lang = uiLanguage;
+    }
+
+    scope.t = t;
+    scope.msg = msg;
+    scope.getUserLanguage = getUserLanguage;
+    scope.applyI18n = applyI18n;
+
+    if (scope.document?.readyState === 'loading') {
+        scope.document.addEventListener('DOMContentLoaded', () => applyI18n(), { once: true });
+    } else if (scope.document) {
+        applyI18n();
+    }
+})(globalThis);

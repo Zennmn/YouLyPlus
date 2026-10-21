@@ -61,10 +61,9 @@ export function shouldMachineTranslateLyrics(lyrics, songInfo = {}) {
 /** Apple Music only requests machine translation for native lyrics without a translation track. */
 export function canMachineTranslateLyrics(lyrics, songInfo = {}) {
   const provider = lyrics?.provider || lyrics?.metadata?.provider;
-  const appleMusic = songInfo.appleId || ['applemusic', 'amll', 'lunabeat', 'amlyrics'].includes(provider);
-  if (appleMusic && provider !== 'applemusic') return false;
+  if (!songInfo.appleId || provider !== 'applemusic') return false;
   // Any source translation track is authoritative, regardless of language or completeness.
-  if (appleMusic && lyrics?.data?.some(line => line.translation != null || line.translatedText)) return false;
+  if (lyrics?.data?.some(line => line.translation != null || line.translatedText)) return false;
   return shouldMachineTranslateLyrics(lyrics, songInfo);
 }
 

@@ -19,10 +19,10 @@ async function renderNative(mode, translationResponse) {
   const lyrics = new AppleMusicLyricsService().parse(nativeTTML, 'applemusic');
   let rendered;
   const context = vm.createContext({
-    currentFetchMediaId: 'test', lastBaseLyrics: lyrics, lastTranslationResponse: translationResponse,
+    currentSongInfo: { appleId: '1437948973' }, currentFetchMediaId: 'test', lastBaseLyrics: lyrics, lastTranslationResponse: translationResponse,
     lastRomanizationResponse: null, currentDisplayMode: mode, currentSettings: { wordByWord: true },
     lastKnownSongInfo: null, lastProcessedDisplayMode: 'none',
-    applySubtitleRetiming: async () => null, applySponsorBlock: async value => value.data,
+    getAppleMusicLyricsLanguage: () => 'en',
     renderFinalLyrics: (value, song, displayMode) => { rendered = { value, displayMode }; },
     LyricsPlusAPI: {},
   });
@@ -55,12 +55,8 @@ test('Apple native language uses browser or explicit translation language indepe
   assert.equal(context.getAppleMusicLyricsLanguage(), 'en-US');
 });
 
-test('Apple translation enrichment uses the same language as native lyrics without changing other platforms', () => {
-  const context = vm.createContext({
-    getAppleMusicLyricsLanguage: () => 'zh-Hans-CN',
-    document: { documentElement: { getAttribute: () => 'en-US' } },
-  });
+test('Apple translation enrichment uses the Apple native target language', () => {
+  const context = vm.createContext({ getAppleMusicLyricsLanguage: () => 'zh-Hans-CN' });
   vm.runInContext(functionSource(manager, 'getLyricsTargetLanguage'), context);
   assert.equal(context.getLyricsTargetLanguage({ appleId: '1437948973' }), 'zh-Hans-CN');
-  assert.equal(context.getLyricsTargetLanguage({ videoId: 'yt-fixture' }), 'en-US');
 });

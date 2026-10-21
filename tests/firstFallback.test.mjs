@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import vm from 'node:vm';
 import { readFileSync } from 'node:fs';
 
+const defaults = readFileSync(new URL('../src/lib/defaultSettings.js', import.meta.url), 'utf8');
 const settings = readFileSync(new URL('../src/modules/lyrics/settings.js', import.meta.url), 'utf8');
 const manager = readFileSync(new URL('../src/modules/lyrics/lyricsManager.js', import.meta.url), 'utf8');
 const settle = () => new Promise(resolve => setImmediate(resolve));
@@ -21,7 +22,7 @@ test('a first LunaBeat/AmLyrics index cache write cannot restart the previous so
     const context = vm.createContext({
       window, AudioContext: class {}, console: { log() {}, warn() {}, error() {} },
       CustomEvent: class { constructor(type, options) { this.type = type; Object.assign(this, options); } },
-      setTimeout, clearTimeout,
+      setTimeout, clearTimeout, currentSongInfo: old, getAppleMusicLyricsLanguage: () => 'en',
       browser: { storage: { onChanged: { addListener(fn) { storageChanged = fn; } } }, runtime: { sendMessage: async message => {
         if (message.type !== 'FETCH_LYRICS') return { success: false };
         requests.push(message.songInfo.appleId);
@@ -34,8 +35,8 @@ test('a first LunaBeat/AmLyrics index cache write cannot restart the previous so
         displayLyrics(lyrics, info) { if (info.appleId === song.appleId) { renders.push(lyrics); states.push('ready'); } },
       },
     });
-    vm.runInContext(settings + '\n' + manager, context);
-    vm.runInContext(`lastKnownSongInfo=${JSON.stringify(old)}; lastBaseLyrics={type:'Line',provider:'amll',data:[{text:'Old lyric'}]}; applySubtitleRetiming=async()=>null; applySponsorBlock=async lyrics=>lyrics.data;`, context);
+    vm.runInContext(defaults + '\n' + settings + '\n' + manager, context);
+    vm.runInContext(`currentSongInfo=${JSON.stringify(song)}; lastKnownSongInfo=${JSON.stringify(old)}; lastBaseLyrics={type:'Line',provider:'amll',data:[{text:'Old lyric'}]};`, context);
     const load = context.fetchAndDisplayLyrics(song, true);
     await settle();
     storageChanged({ [`lyplusAppleLyricsIndex_${provider}`]: { newValue: { checkedAt: Date.now(), data: {} } } }, 'local');

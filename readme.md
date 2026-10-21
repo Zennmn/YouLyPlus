@@ -1,218 +1,55 @@
-# YouLy+
+# YouLy+ Apple Music
 
-A web extension to elevate your **YouTube Music, Tidal & Apple Music** Experience with **ultra-performant, word-by-word lyrics**.
+为 Apple Music 网页提供 AMLL 全屏播放器、逐字歌词、多来源 TTML、本地歌词和翻译/音译。本分支仅支持 [Apple Music 网页](https://music.apple.com/)。
 
-## AMLL Apple Music player (this fork)
+## 安装与更新
 
-This fork adds the AMLL full-screen Apple Music player, additional TTML lyric
-sources, custom LLM translation, saved player preferences, browser fullscreen,
-player font-file imports, and an optional song title correction (original region / mainland China / Japan) shown inside the AMLL player only. The original project is
-[ibratabian17/YouLyPlus](https://github.com/ibratabian17/YouLyPlus).
-
-This fork is licensed under the **GNU Affero General Public License, version 3
-only (AGPL-3.0-only)**. See [LICENSE](LICENSE) for the full terms and
-[third-party notices](THIRD_PARTY_NOTICES.md) for the original YouLy+ MIT
-copyright and permission notice and other dependency licenses.
-
-To build this fork for Chrome / Edge, install Node.js and npm, then run:
+需要 Node.js 及 npm。在项目目录运行：
 
 ```sh
-git clone https://github.com/Zennmn/YouLyPlus.git
-cd YouLyPlus
 npm ci
 npm run package:chrome
 ```
 
-Enable developer mode in the browser's extensions page and load
-`dist/youlyplus-amll-chrome` as an unpacked extension. After updates, rebuild
-and reload the extension. See [the player guide](docs/applemusic-amll-testing.md)
-for settings and manual checks, and [third-party notices](THIRD_PARTY_NOTICES.md)
-for AMLL and OpenCC licenses. The sections below describe the original project;
-its store listings and release links refer to the upstream version.
+在 Chrome / Edge 扩展管理页开启开发者模式，加载 `dist/youlyplus-amll-chrome`。请先关闭其他版本的 YouLy+，避免重复注入。更新源码后重新运行上述打包命令，再重载扩展并刷新 Apple Music 网页。
 
-[![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg?style=for-the-badge)](LICENSE)
-[![Latest Version](https://img.shields.io/github/v/release/ibratabian17/YouLyPlus?style=for-the-badge)](https://github.com/ibratabian17/YouLyPlus/releases)
-[![GitHub Stars](https://img.shields.io/github/stars/ibratabian17/YouLyPlus?style=for-the-badge&color=yellow)](https://github.com/ibratabian17/YouLyPlus/stargazers)
-[![GitHub Forks](https://img.shields.io/github/forks/ibratabian17/YouLyPlus?style=for-the-badge&color=blue)](https://github.com/ibratabian17/YouLyPlus/network/members)
+`bundle.ps1`（PowerShell 7）或 `bundle.sh` 在同一次构建后生成 Chrome 和 Firefox 压缩包，共用 `scripts/package-chrome.mjs` 的包装规则。Firefox 包保留作为兼容出口，实际浏览器功能由用户手动验证。
 
-<p align="center">
-<img src="youlyplus.png" alt="The Screenshot">
-</p>
+## 功能
 
----
+- 使用本地 AMLL 的播放器、歌词、背景、播放控制和自动横竖布局；播放仍由网页现有 MusicKit 实例负责。
+- 歌词按 **AMLL TTML DB → LunaBeat → AmLyrics → Apple Music 原生** 获取。前三个来源可调整顺序，Apple Music 固定为最终回退。
+- 从播放器菜单导入当前歌曲的 TTML，按 Apple Music ID 保存并优先在自动模式中使用。设置页管理本地歌词；旧版已导入记录继续兼容。
+- 下载当前歌曲的原生 TTML，支持离线提取、LLM 翻译和独立翻译轴写回。
+- 保留歌词自带翻译与音译；机器翻译仅作用于没有自带翻译轴的 Apple Music 原生外文歌词。
+- 支持 Google、Gemini、OpenRouter、DeepL、自定义兼容接口的 LLM 翻译，以及离线/在线音译。
+- 持久化显示模式、背景、按歌曲保存的来源与偏移；支持全播放器字体/字体文件导入、歌名地区修正、浏览器全屏与原生播放器回退。
+- AMLL 在扩展 iframe 中隔离渲染，提供按需卡顿诊断与报告导出。
 
-## ➡️ Why YouLy+?
+使用方法及手动检查见 [播放器指南](docs/applemusic-amll-testing.md)，离线翻译见 [TTML 翻译说明](docs/ttml-translation.md)。设置保存后会应用到当前歌曲；翻译服务、模型、提示词和目标语言的改变使用独立缓存。扩展总开关需要刷新网页时，设置页会提供提示。
 
-Streaming services offer great music libraries, but their web interfaces are buggy, outdated and often only have line-by-line lyrics. **YouLy+ replaces these broken implementations with a word-by-word, lightweight, precise (idts), and visually faithful rendering engine.**
+## 开发与目录
 
-Other open-source projects that provide Apple Music-like lyrics often require dedicated GPUs for full performance. **YouLy+ smartly utilises CSS animations to hit 60FPS on almost any machine with graphics acceleration. See [Performance Reference](#performance-reference).**
+```sh
+npm run dev           # 本地模拟预览，不播放真实音频
+npm run build         # 构建 TTML 解析器与 AMLL 播放器
+npm run package:chrome
+```
 
-## Supported streaming platforms
+| 目录 | 职责 |
+| --- | --- |
+| `src/inject/applemusic` | 页面内 MusicKit 控制与原生歌词/歌曲信息获取 |
+| `src/modules/applemusic` | 内容脚本与扩展播放器桥接 |
+| `src/modules/lyrics` | 歌词、翻译与音译状态协调 |
+| `src/background` | 扩展 Service Worker：歌词源、存储、翻译与离线音译 |
+| `ui/applemusic-player` | 播放器集成源码 |
+| `vendor/amll` | 固定版本的 AMLL 源码及本地补丁说明 |
+| `src/vendor` | 由构建生成的播放器与解析器产物 |
 
-* **YouTube Music:** Transforms the default static or plain text lyrics into a rich, timed, karaoke-style experience.
-* **Tidal Web (Experimental):** While Tidal Web offers synced lyrics, they are limited to **line-by-line** synchronization. YouLy+ makes them **word-by-word**.
-* **Apple Music Web (Experimental):** The native web player attempts word-by-word sync, but the implementation is flawed and inaccurate. YouLy+ replaces their laggy implementation with a CSS-animation driven smooth experience.
+设置默认值集中在 `src/lib/defaultSettings.js`。不需要部署独立服务端。`tests/` 保留开发回归材料；功能验证由用户手动进行，构建成功不代表真实 Apple Music 会话已验证。
 
-## Installation
+## 来源与许可
 
-### ⭐ Recommended: Install from Official Stores
+本项目基于 [ibratabian17/YouLyPlus](https://github.com/ibratabian17/YouLyPlus)，播放器基于 [AMLL](https://github.com/amll-dev/applemusic-like-lyrics)。感谢原项目、歌词数据库和各依赖的贡献者。
 
-For the safest and easiest experience, install YouLy+ directly from your browser's web store. This ensures you get automatic updates and a verified version of the extension.
-
-<p float="left">
-<a href="https://chromewebstore.google.com/detail/youly+/pboadpgpgabkmepmgchhlnlfnimlnmoe" target="_blank"><img src="https://developer.chrome.com/static/docs/webstore/branding/image/iNEddTyWiMfLSwFD6qGq.png" alt="Google Chrome Webstore Extensions" height="60"/></a>
-<a href="https://addons.mozilla.org/en-US/firefox/addon/youly/" target="_blank"><img src="https://blog.mozilla.org/addons/files/2020/04/get-the-addon-fx-apr-2020.svg" alt="Firefox Add-ons" height="60"/></a>
-<a href="https://microsoftedge.microsoft.com/addons/detail/youly/gichhhcjpkhbidkecadfejcjgcmdlnpb" target="_blank"><img src="https://upload.wikimedia.org/wikipedia/commons/f/f7/Get_it_from_Microsoft_Badge.svg" alt="Microsoft Edge Extensions" height="60"/></a>
-</p>
-
-<details>
-<summary><b>For Developers & Advanced Users: Install from Source</b></summary>
-
-### For Chromium Based Browsers (Manifest V3)
-
-1.  **Clone or Download the Repository:**
-    ```bash
-    git clone [https://github.com/ibratabian17/YouLyPlus.git](https://github.com/ibratabian17/YouLyPlus.git)
-    ```
-2.  Alternatively, you can download the latest release from [Github Releases](https://github.com/ibratabian17/YouLyPlus/releases/latest) and extract them.
-3.  **Open Chrome Extensions Page:**
-    Navigate to `chrome://extensions/`.
-4.  **Enable Developer Mode:**
-    Toggle the "Developer mode" switch in the top right corner.
-5.  **Load Unpacked Extension:**
-    Click on "Load unpacked" and select the cloned repository folder.
-
-### For Firefox
-
-1.  **Clone or Download the Repository:**
-    ```bash
-    git clone [https://github.com/ibratabian17/YouLyPlus.git](https://github.com/ibratabian17/YouLyPlus.git)
-    ```
-2.  Alternatively, you can download the latest release from [Github Releases](https://github.com/ibratabian17/YouLyPlus/releases/latest).
-3.  **Open Firefox Debugging Page:**
-    Navigate to `about:debugging#/runtime/this-firefox`.
-4.  **Load Temporary Add-on:**
-    Click on "Load Temporary Add-on" and choose the `manifest.json` file from the repository folder.
-
-</details>
-
-## Usage
-
-Once installed, simply open one of the supported players:
-* **[YouTube Music](https://music.youtube.com/)**
-* **[Tidal Web Player](https://listen.tidal.com/)** *(Experimental)*
-* **[Apple Music Web](https://music.apple.com/)**
-
-Play any song, and the lyrics panel will automatically be enhanced by YouLy+.
-
--   **Quick Settings:** Access quick toggles by clicking the YouLy+ icon in your browser's toolbar.
--   **Full Settings:** For comprehensive customization, click **"More Settings"** from the popup.
-
-## Notes
-
-* Due to TIDAL updated the UI recently, the extension may lack of some features. I will try my best to fix them as soon as possible.
-
-## Features
-
-### Core Features
-
--   **Word-by-word, syllable-synced lyrics**: YouLy+ features real-time, accurately synced lyrics with word-by-word highlighting.
--   **Apple Music engine overhaul**: Replaces the resource-heavy native Apple Music Web UI. YouLy+ replace their murdered animation with Apple native-like animation with optimization. It also expands the lyric sources—if AM lacks synced lyrics, YouLy+ finds them elsewhere!
--   **Multi-platform fallback**: Automatically searches multiple platforms to find lyrics for almost every song.
--   **Fits seamlessly**: Replaces default lyrics panels out of the box with designs that fit in to whichever platform you use.
-
-### Translation & Romanization
-
--   **Instant Translation**: YouLy+ utilises label-provided translations but also supports **Google Translate**, **DeepL**, and **Gemini/OpenRouter** (BYO API key) translations.
--   **Romanization**: For different writing systems, YouLy+ can provide romanizations from your own device without external API locally! or you can use Google Translate or Openrouter or Gemini AI (BYO API key) for better romanization. (Local Romanize for Japanese and Arabic may need to download dictionary/model on the Settings Menu)
--   **Full Gemini AI Control**: For advanced users, connect your own Gemini AI account to customize translation instructions and AI settings.
--   **Transliteration**: You speak on non latin language but want to read lyrics in your own script? YouLy+ can help you. For example, you can transliterate lyrics from latin alphabet to hangul, arabic or many other scripts. (AI Required)
-
-### Appearance & Customization
-
--   **Dynamic Theming**: Lyrics and backgrounds automatically adapt to the **song's color palette**.
--   **Custom CSS**: Full control for advanced users to inject custom CSS and style the lyrics exactly how you want.
-
-### Performance
-
--   **Optimized Renderer**: YouLy+ is designed and tested to run smoothly on older hardware without noticeable lag. on MBA M1, it stable at 60FPS with all heavy effects enabled.
--   **Lightweight Mode**: While 15 years old PC can run it on heavy effect enabled (AMD FX6300), more potato pc can enable lightweight mode to run it at 60FPS with less effects.
--   **Smart Music Video Adaption:** Automatically adapts lyrics timeline to follow non-music segments like intros, outros, and sponsors on music videos with SponsorBlock/Subtitle Alignment. (Feature currently exclusive to YouTube Music)
-
-## Performance Reference
-
-The benchmark machine used to develop this project is older hardware (AMD FX-6300 + GT 620 from ~2012). YouLy+ is optimized to run where native web players fail.
-
-### GPU Performance (Targeting 60 FPS)
-
-- **768p (1366x768):** Stable 60 FPS on **NVIDIA GT 620** (1GB) or equivalent integrated graphics.
-- **1080p (1920x1080):** GTX 650 / GT 1030 or above recommended for a locked 60 FPS.
-
-- Tested on a M1 MacBook Air (base specs, 2560x1600 (1440x900 DPI) Retina display), YouLy+ stays stable at 60FPS with little decrease in battery life.
-
-## Self-Hosting & Open Source
-
-YouLy+ is proudly open-source.
-
-**Backend API (Lyrics+):** YouLy+ mainly utilises Lyrics+ for lyrics. This API is also fully open-source. If you could host your instance, YouLy+ would benefit lots from it! See instructions at the repo: [**ibratabian17/lyricsplus**](https://github.com/ibratabian17/lyricsplus)
-
-### External Services & Data Sources
- 
-YouLy+ integrates with several third-party lyrics providers. By using this extension, you agree to the respective Terms of Service of these platforms:
- 
-* **[lrc.red](https://lrc.red):** Apple Music word-synced lyrics database.
-* **[Unison](https://github.com/better-lyrics/unison):** As our alternate word-sync API lyrics using data from the Better-Lyrics community.
-* **[LRCLIB](https://github.com/tranxuanthang/lrclib):** A massive, crowdsourced database API that used as a primary fallback for synchronized lyrics.
-* **Lyrics+ Backend:** Our internal engine that prioritizes official metadata from Apple Music, QQ Music, and Musixmatch to ensure professional-grade accuracy. while it has our own community-driven source too!
-
-## Development
-
-If you're interested in contributing to or modifying YouLy+:
-
-1.  **Clone the Repository:**
-    ```bash
-    git clone [https://github.com/ibratabian17/YouLyPlus.git](https://github.com/ibratabian17/YouLyPlus.git)
-    ```
-2.  **Load the Extension:**
-    Use your browser’s "Load unpacked" feature (as described in the [Installation](#installation) section) to test your changes in real-time.
-
-## Packaging
-
-To create distributable `.zip` files for various browsers:
-
-1.  **Prerequisites:** Ensure you have `jq` and a zip utility (`zip` or `7z`) installed on your system.
-2.  **Run the Script:**
-    -   On Linux/macOS: `./bundle.sh`
-    -   On Windows (PowerShell): `./bundle.ps1`
-
-These scripts will generate optimized packages for different browsers within the `dist/` folder.
-
-## Contributing
-
-Contributions are very appreciated! Please feel free to fork this repository and submit a pull request. For significant changes or new features, it's recommended to open an issue first to discuss your ideas.
-
-### Contributors
-
-Thanks to everyone who has contributed code, translations, bug reports and ideas to YouLy+!
-
-<table>
-  <tr>
-    <td align="center"><a href="https://github.com/mfadamo"><img src="https://github.com/mfadamo.png?size=100" width="80" alt="mfadamo"><br>mfadamo</a></td>
-    <td align="center"><a href="https://github.com/imannig"><img src="https://github.com/imannig.png?size=100" width="80" alt="imannig"><br>imannig</a></td>
-    <td align="center"><a href="https://github.com/MeDustyy"><img src="https://github.com/MeDustyy.png?size=100" width="80" alt="MeDustyy"><br>MeDustyy</a></td>
-    <td align="center"><a href="https://github.com/binimum"><img src="https://github.com/binimum.png?size=100" width="80" alt="binimum"><br>binimum</a></td>
-  </tr>
-  <tr>
-    <td align="center"><a href="https://github.com/oRevived"><img src="https://github.com/oRevived.png?size=100" width="80" alt="oRevived"><br>oRevived</a></td>
-    <td align="center"><a href="https://github.com/Dipak-Chauhan"><img src="https://github.com/Dipak-Chauhan.png?size=100" width="80" alt="Dipak-Chauhan"><br>Dipak-Chauhan</a></td>
-    <td align="center"><a href="https://github.com/DeVFirmino"><img src="https://github.com/DeVFirmino.png?size=100" width="80" alt="DeVFirmino"><br>DeVFirmino</a></td>
-  </tr>
-</table>
-
-And also big thanks for @boidushya for optimization helps. @pascal-00, @binimum and @mgytr for keeping the infrastructure alive!
-
-This project is a dedicated effort covering both the client extension and the server backend. If YouLy+ enhances your music experience, please consider supporting its continued development:
-
--   [**Support on Ko-fi**](https://ko-fi.com/ibratabian17)
--   [**Support on Patreon**](https://patreon.com/ibratabian17)
--   [**GitHub Sponsors**](https://github.com/sponsors) (see `FUNDING.yml`)
+本分支整体使用 **AGPL-3.0-only**。完整协议见 [LICENSE](LICENSE)，原 YouLy+ 的 MIT 版权与许可及其他第三方声明见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。当前分支源码与问题反馈分别位于 [Zennmn/YouLyPlus](https://github.com/Zennmn/YouLyPlus) 和 [Issues](https://github.com/Zennmn/YouLyPlus/issues)。

@@ -1,45 +1,193 @@
 /* Host sizing only. AMLL's own component styles define the player's appearance. */
-.lyplus-amll-player { position: relative; width: 100%; height: 100%; isolation: isolate; color: white; font-family: -apple-system, BlinkMacSystemFont, sans-serif; }
+.lyplus-amll-player { position: relative; width: 100%; height: 100%; min-width: 0; min-height: 0; overflow: hidden; isolation: isolate; color: white; font-family: -apple-system, BlinkMacSystemFont, sans-serif; }
 .lyplus-amll-layout { position: absolute; inset: 0; width: 100%; height: 100%; }
 .lyplus-amll-player[data-custom-font] { font-family: var(--lyplus-player-font), -apple-system, BlinkMacSystemFont, sans-serif; }
-.lyplus-amll-player[data-custom-font] :where(div, span, p, small, strong, label, button, input, select, option, li) { font-family: var(--lyplus-player-font), -apple-system, BlinkMacSystemFont, sans-serif; }
+.lyplus-amll-player[data-custom-font] :where(div, span, p, small, strong, label, button, input, select, option, li, summary) { font-family: var(--lyplus-player-font), -apple-system, BlinkMacSystemFont, sans-serif; }
 .lyplus-amll-fullscreen { flex-shrink: 0; cursor: pointer; }
 .lyplus-amll-fullscreen:hover { opacity: 0.8; }
 .lyplus-amll-fullscreen:focus-visible { outline: 2px solid currentColor; outline-offset: 3px; border-radius: 8px; }
 .lyplus-amll-fullscreen:disabled { cursor: wait; }
 
 /* Extra lyrics actions are accessible only through AMLL's existing menu button. */
+.lyplus-amll-panel-layer {
+  position: absolute; inset: 0; z-index: 7; display: grid; place-items: center;
+  box-sizing: border-box; min-width: 0; min-height: 0;
+  padding: max(16px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(16px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+  background-color: #0003;
+}
+.lyplus-amll-panel-layer[data-state="open"] { animation: lyplus-amll-layer-in 220ms ease-out both; }
+.lyplus-amll-panel-layer[data-state="open"] .lyplus-amll-settings { animation: lyplus-amll-card-in 260ms cubic-bezier(.22, 1, .36, 1) both; }
+.lyplus-amll-panel-layer[data-state="closing"] { pointer-events: none; animation: lyplus-amll-layer-out 160ms ease-in both; }
+.lyplus-amll-panel-layer[data-state="closing"] .lyplus-amll-settings { animation: lyplus-amll-card-out 160ms ease-in both; }
+@keyframes lyplus-amll-layer-in { from { background-color: #0000; } to { background-color: #0003; } }
+@keyframes lyplus-amll-layer-out { from { background-color: #0003; } to { background-color: #0000; } }
+@keyframes lyplus-amll-card-in {
+  from { opacity: 0; transform: translateY(12px) scale(.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes lyplus-amll-card-out {
+  from { opacity: 1; transform: translateY(0) scale(1); }
+  to { opacity: 0; transform: translateY(8px) scale(.97); }
+}
 .lyplus-amll-settings {
-  position: absolute; z-index: 7; top: 36px; right: 24px; width: min(330px, calc(100% - 48px));
-  padding: 20px; display: grid; gap: 18px; font-size: 14px; line-height: 1.4;
-  border: 1px solid #ffffff20; border-radius: 20px; color: #fff;
-  background: #232126ed; backdrop-filter: blur(32px) saturate(150%); box-shadow: 0 20px 60px #0005;
-  max-height: calc(100% - 72px); overflow: auto;
+  box-sizing: border-box; width: min(440px, 100%); min-width: 0; min-height: 0; max-height: 100%;
+  display: flex; flex-direction: column; overflow: hidden; font-size: 14px; line-height: 1.4;
+  border: 1px solid #ffffff18; border-radius: 24px; color: #fff; font-weight: 400;
+  background: #18181899; backdrop-filter: blur(48px) saturate(130%); box-shadow: 0 20px 60px #0004;
 }
-.lyplus-amll-settings button, .lyplus-amll-settings select, .lyplus-amll-settings input { font: inherit; }
+.lyplus-amll-settings *, .lyplus-amll-settings *::before, .lyplus-amll-settings *::after { box-sizing: border-box; }
+.lyplus-amll-settings:focus { outline: none; }
+.lyplus-amll-panel-body {
+  min-width: 0; min-height: 0; margin-inline: 4px; padding: 8px 8px 20px; display: grid; gap: 12px;
+  overflow-y: auto; overscroll-behavior: contain; scrollbar-gutter: stable both-edges;
+}
+/* Match the player's translucent controls while keeping native scrolling/dragging. */
+.lyplus-amll-panel-body, .lyplus-amll-settings-heading, .lyplus-amll-select-options { scrollbar-width: thin; scrollbar-color: #ffffff38 transparent; }
+.lyplus-amll-panel-body:hover, .lyplus-amll-panel-body:focus-within,
+.lyplus-amll-settings-heading:hover, .lyplus-amll-settings-heading:focus-within,
+.lyplus-amll-select-options:hover, .lyplus-amll-select-options:focus-within { scrollbar-color: #fff5 transparent; }
+@supports selector(::-webkit-scrollbar) {
+  /* Non-auto standard properties override Chromium's detailed pseudo-element styles. */
+  .lyplus-amll-panel-body, .lyplus-amll-settings-heading, .lyplus-amll-select-options { scrollbar-width: auto; scrollbar-color: auto; }
+  .lyplus-amll-panel-body:hover, .lyplus-amll-panel-body:focus-within,
+  .lyplus-amll-settings-heading:hover, .lyplus-amll-settings-heading:focus-within,
+  .lyplus-amll-select-options:hover, .lyplus-amll-select-options:focus-within { scrollbar-color: auto; }
+  .lyplus-amll-panel-body::-webkit-scrollbar, .lyplus-amll-settings-heading::-webkit-scrollbar, .lyplus-amll-select-options::-webkit-scrollbar { width: 8px; height: 8px; background: transparent; }
+  .lyplus-amll-panel-body::-webkit-scrollbar-track, .lyplus-amll-settings-heading::-webkit-scrollbar-track, .lyplus-amll-select-options::-webkit-scrollbar-track { background: transparent; margin-block: 8px; }
+  .lyplus-amll-panel-body::-webkit-scrollbar-thumb, .lyplus-amll-settings-heading::-webkit-scrollbar-thumb, .lyplus-amll-select-options::-webkit-scrollbar-thumb {
+    min-height: 36px; border: 2px solid transparent; border-radius: 999px;
+    background: #ffffff38; background-clip: padding-box;
+  }
+  .lyplus-amll-panel-body:hover::-webkit-scrollbar-thumb, .lyplus-amll-panel-body:focus-within::-webkit-scrollbar-thumb,
+  .lyplus-amll-settings-heading:hover::-webkit-scrollbar-thumb, .lyplus-amll-settings-heading:focus-within::-webkit-scrollbar-thumb,
+  .lyplus-amll-select-options:hover::-webkit-scrollbar-thumb, .lyplus-amll-select-options:focus-within::-webkit-scrollbar-thumb { background-color: #fff5; }
+  .lyplus-amll-panel-body::-webkit-scrollbar-thumb:hover, .lyplus-amll-settings-heading::-webkit-scrollbar-thumb:hover, .lyplus-amll-select-options::-webkit-scrollbar-thumb:hover { background-color: #ffffff80; }
+  .lyplus-amll-panel-body::-webkit-scrollbar-thumb:active, .lyplus-amll-settings-heading::-webkit-scrollbar-thumb:active, .lyplus-amll-select-options::-webkit-scrollbar-thumb:active { background-color: #ffffffa6; }
+  .lyplus-amll-panel-body::-webkit-scrollbar-button, .lyplus-amll-settings-heading::-webkit-scrollbar-button, .lyplus-amll-select-options::-webkit-scrollbar-button { display: none; width: 0; height: 0; }
+  .lyplus-amll-panel-body::-webkit-scrollbar-corner, .lyplus-amll-settings-heading::-webkit-scrollbar-corner, .lyplus-amll-select-options::-webkit-scrollbar-corner { background: transparent; }
+}
+.lyplus-amll-settings button, .lyplus-amll-settings input { font: inherit; }
 .lyplus-amll-settings button {
-  border: 1px solid #ffffff12; background: #ffffff12; border-radius: 12px;
-  color: #fff; min-width: 38px; min-height: 38px; padding: 6px 12px; cursor: pointer;
+  border: 1px solid transparent; background: #ffffff15; border-radius: 12px;
+  color: #fff; min-width: 0; min-height: 38px; padding: 8px 12px; cursor: pointer;
+  overflow-wrap: anywhere; text-align: center; font-weight: 500;
+  transition: background-color .3s, transform .3s, opacity .3s;
 }
-.lyplus-amll-settings button:hover { background: #ffffff28; }
+.lyplus-amll-settings button:hover { background: #fff2; }
+.lyplus-amll-settings button:active:not(:disabled) { transform: scale(.97); }
 .lyplus-amll-settings button:disabled { opacity: .5; cursor: default; }
 .lyplus-amll-diagnostic-result { display: grid; gap: 10px; }
-.lyplus-amll-diagnostic-status { position: absolute; z-index: 8; top: 12px; right: 16px; font-size: 12px; color: #fffc; pointer-events: none; }
-.lyplus-amll-settings :focus-visible { outline: 2px solid #fff; outline-offset: 4px; }
-.lyplus-amll-settings-heading { display: flex; align-items: center; justify-content: space-between; }
-.lyplus-amll-settings label { display: grid; gap: 8px; font-size: 13px; color: #fffc; }
-.lyplus-amll-settings select, .lyplus-amll-settings input {
-  width: 100%; background: #ffffff0c; color: #fff; border: 1px solid #ffffff20;
-  border-radius: 8px; padding: 9px 10px; color-scheme: dark;
+.lyplus-amll-settings :focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+.lyplus-amll-settings-heading { flex: 0 0 auto; display: grid; grid-template-columns: 32px minmax(0, 1fr) 32px; align-items: center; gap: 8px; margin-inline: 4px; padding: 18px 8px 12px; overflow-y: hidden; scrollbar-gutter: stable both-edges; }
+.lyplus-amll-settings-heading strong { grid-column: 2; min-width: 0; overflow-wrap: anywhere; text-align: center; font-size: 17px; font-weight: 500; }
+.lyplus-amll-settings-heading button { grid-column: 3; width: 32px; min-height: 32px; padding: 0; display: grid; place-items: center; border-radius: 50%; opacity: .65; }
+.lyplus-amll-settings-heading button:hover { opacity: 1; }
+.lyplus-amll-settings-heading button svg { width: 20px; height: 20px; }
+.lyplus-amll-settings-fields { min-width: 0; display: grid; padding: 2px 12px; border-radius: 14px; background: #ffffff08; }
+.lyplus-amll-settings label, .lyplus-amll-settings .lyplus-amll-setting-row {
+  min-width: 0; min-height: 48px; display: grid; grid-template-columns: minmax(0, 8em) minmax(0, 1fr);
+  align-items: center; gap: 12px; font-size: 13px; color: #ffffffbf;
 }
-.lyplus-amll-settings label:has(input[type=checkbox]) { grid-template-columns: 1fr auto; align-items: center; }
-.lyplus-amll-settings input[type=checkbox] { width: 18px; height: 18px; accent-color: #f86888; }
-.lyplus-amll-settings-actions { display: flex; gap: 10px; justify-content: space-between; font-size: 12px; }
+.lyplus-amll-settings label + label, .lyplus-amll-settings label + .lyplus-amll-setting-row,
+.lyplus-amll-settings .lyplus-amll-setting-row + label, .lyplus-amll-settings .lyplus-amll-setting-row + .lyplus-amll-setting-row { border-top: 1px solid #ffffff12; }
+.lyplus-amll-settings label > span, .lyplus-amll-settings .lyplus-amll-setting-row > span { min-width: 0; overflow-wrap: anywhere; }
+.lyplus-amll-settings input {
+  box-sizing: border-box; min-width: 0; max-width: 100%; width: 100%; min-height: 38px;
+  background: transparent; color: #fff; border: 1px solid transparent;
+  border-radius: 8px; padding: 8px 4px; color-scheme: dark; font-weight: 500;
+}
+.lyplus-amll-select { position: relative; z-index: 1; width: 100%; min-width: 0; align-self: center; }
+.lyplus-amll-select[data-open="true"] { z-index: 20; }
+.lyplus-amll-settings .lyplus-amll-select-trigger {
+  width: 100%; min-width: 0; min-height: 38px; padding: 8px 6px 8px 10px;
+  display: grid; grid-template-columns: minmax(0, 1fr) 16px; align-items: center; gap: 8px;
+  border-color: transparent; background: #ffffff0b; text-align: end;
+}
+.lyplus-amll-settings .lyplus-amll-select-trigger:hover { background: #ffffff15; }
+.lyplus-amll-settings .lyplus-amll-select-trigger:active:not(:disabled) { transform: none; }
+.lyplus-amll-select[data-open="true"] .lyplus-amll-select-trigger { border-color: #ffffff16; background: #ffffff17; }
+.lyplus-amll-select-value { display: block; min-width: 0; overflow-wrap: anywhere; text-align: end; line-height: 1.35; }
+.lyplus-amll-select-chevron { display: block; width: 16px; height: 16px; justify-self: end; pointer-events: none; transition: transform .2s cubic-bezier(.22, 1, .36, 1), opacity .2s; }
+.lyplus-amll-select[data-open="true"] .lyplus-amll-select-chevron { transform: rotate(180deg); }
+.lyplus-amll-select-options {
+  position: absolute; z-index: 30; left: 0; right: 0; top: calc(100% + 6px);
+  box-sizing: border-box; width: 100%; min-width: 0; max-width: 100%; max-height: min(280px, 60vh);
+  display: none; margin: 0; padding: 6px; overflow-y: auto; overscroll-behavior: contain;
+  color: #fff; background: #181818d9; border: 1px solid #ffffff24; border-radius: 12px;
+  box-shadow: 0 14px 34px #0007, inset 0 1px 0 #ffffff0a;
+  -webkit-backdrop-filter: blur(24px) saturate(130%); backdrop-filter: blur(24px) saturate(130%);
+  transform-origin: top center;
+}
+.lyplus-amll-select[data-open="true"] .lyplus-amll-select-options {
+  display: grid; align-content: start; gap: 2px;
+  animation: lyplus-amll-select-open-down 160ms cubic-bezier(.22, 1, .36, 1) both;
+}
+.lyplus-amll-select[data-side="top"] .lyplus-amll-select-options { top: auto; bottom: calc(100% + 6px); transform-origin: bottom center; }
+.lyplus-amll-select[data-open="true"][data-side="top"] .lyplus-amll-select-options { animation-name: lyplus-amll-select-open-up; }
+@keyframes lyplus-amll-select-open-down {
+  from { opacity: 0; transform: translateY(-4px) scale(.985); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes lyplus-amll-select-open-up {
+  from { opacity: 0; transform: translateY(4px) scale(.985); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+.lyplus-amll-select-option {
+  box-sizing: border-box; min-width: 0; min-height: 34px; padding: 7px 8px;
+  display: grid; grid-template-columns: minmax(0, 1fr) 16px; align-items: center; gap: 8px;
+  border-radius: 8px; color: #ffffffd9; cursor: pointer; user-select: none;
+  line-height: 1.35; text-align: start; overflow-wrap: anywhere;
+  transition: background-color .16s ease, color .16s ease, opacity .16s ease;
+}
+.lyplus-amll-select-option > span { min-width: 0; white-space: normal; overflow-wrap: anywhere; }
+.lyplus-amll-select-option[aria-selected="true"] { color: #fff; background: #ffffff0d; }
+.lyplus-amll-select-option:hover, .lyplus-amll-select-option[data-active="true"] { color: #fff; background: #ffffff1a; }
+.lyplus-amll-select-option[aria-selected="true"]:hover, .lyplus-amll-select-option[aria-selected="true"][data-active="true"] { background: #ffffff1f; }
+.lyplus-amll-select-check { display: block; width: 16px; height: 16px; justify-self: end; opacity: 0; transition: opacity .16s ease; }
+.lyplus-amll-select-option[aria-selected="true"] .lyplus-amll-select-check { opacity: 1; }
+.lyplus-amll-select-option[aria-disabled="true"] { opacity: .38; cursor: default; }
+.lyplus-amll-select-option[aria-disabled="true"]:hover, .lyplus-amll-select-option[aria-disabled="true"][data-active="true"] { color: #ffffffd9; background: transparent; }
+.lyplus-amll-settings input[type=number] { text-align: end; font-variant-numeric: tabular-nums; }
+.lyplus-amll-settings input[type=checkbox] { appearance: none; position: relative; justify-self: end; width: 34px; height: 20px; min-height: 0; margin: 0; padding: 0; border: 0; border-radius: 20px; background: #ffffff26; cursor: pointer; transition: background-color .3s; }
+.lyplus-amll-settings input[type=checkbox]::before { content: ''; position: absolute; top: 3px; left: 3px; width: 14px; height: 14px; border-radius: 50%; background: #fff; opacity: .65; transition: transform .3s cubic-bezier(.25, 1, .5, 1), opacity .3s; }
+.lyplus-amll-settings input[type=checkbox]:checked { background: #ffffff4d; }
+.lyplus-amll-settings input[type=checkbox]:checked::before { transform: translateX(14px); opacity: 1; }
+.lyplus-amll-settings-actions { min-width: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; font-size: 13px; }
+.lyplus-amll-settings-actions button { width: 100%; }
 .lyplus-amll-settings p { margin: 0; font-size: 12px; opacity: .7; }
-.lyplus-amll-queue { margin: 0; padding-left: 24px; }
-.lyplus-amll-queue li { padding: 8px 0; opacity: .65; }
-.lyplus-amll-queue li[aria-current] { opacity: 1; }
-.lyplus-amll-queue strong, .lyplus-amll-queue small { display: block; }
+.lyplus-amll-import-hint { text-align: center; text-wrap: pretty; }
+.lyplus-amll-settings .lyplus-amll-native-button { background: transparent; color: #ffffffa6; font-size: 13px; }
+.lyplus-amll-settings .lyplus-amll-native-button:hover { color: #fff; background: #ffffff0b; }
+.lyplus-amll-feedback, .lyplus-amll-source-status {
+  box-sizing: border-box; min-width: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px;
+  padding: 10px 12px; border: 0; border-radius: 12px; background: #ffffff0b;
+  color: #ffffffa6; font-size: 12px; line-height: 1.45;
+}
+.lyplus-amll-feedback span { min-width: 0; flex: 1 1 180px; overflow-wrap: anywhere; }
+.lyplus-amll-feedback button { flex: 0 0 auto; min-height: 32px; padding: 4px 10px; }
+.lyplus-amll-source-status { display: grid; gap: 4px; padding: 0; border: 0; background: none; }
+.lyplus-amll-source-status span { min-width: 0; overflow-wrap: anywhere; }
+.lyplus-amll-advanced { min-width: 0; border-top: 1px solid #ffffff14; padding-top: 6px; }
+.lyplus-amll-advanced summary { padding: 8px 0; display: flex; align-items: center; list-style: none; cursor: pointer; font-size: 13px; font-weight: 500; color: #ffffffa6; }
+.lyplus-amll-advanced summary::-webkit-details-marker { display: none; }
+.lyplus-amll-advanced summary::after { content: ''; width: 6px; height: 6px; margin-inline-start: auto; margin-inline-end: 6px; border-right: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor; transform: rotate(45deg); }
+.lyplus-amll-advanced[open] summary::after { transform: rotate(225deg); }
+.lyplus-amll-advanced summary:focus-visible { outline: 2px solid #fff; outline-offset: 4px; border-radius: 4px; }
+.lyplus-amll-advanced-content { display: grid; gap: 12px; padding-top: 4px; }
+.lyplus-amll-queue { min-width: 0; margin: 0; padding: 0; list-style: none; display: grid; gap: 6px; }
+.lyplus-amll-settings .lyplus-amll-queue-item { width: 100%; display: grid; grid-template-columns: 44px minmax(0, 1fr) 24px; align-items: center; gap: 12px; min-height: 64px; padding: 8px 10px; text-align: start; background: transparent; border-color: transparent; }
+.lyplus-amll-settings .lyplus-amll-queue-item:hover { background: #ffffff15; }
+.lyplus-amll-queue li[aria-current] .lyplus-amll-queue-item { background: #ffffff15; }
+.lyplus-amll-queue li[aria-current] .lyplus-amll-queue-marker { color: #fff; }
+.lyplus-amll-queue-cover { position: relative; width: 44px; height: 44px; display: grid; place-items: center; overflow: hidden; border-radius: 6px; background: #ffffff15; color: #ffffff60; font-size: 23px; }
+.lyplus-amll-queue-cover img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.lyplus-amll-queue-marker { text-align: center; color: #fff9; font-size: 12px; font-variant-numeric: tabular-nums; }
+.lyplus-amll-queue-marker svg { width: 12px; height: 12px; }
+.lyplus-amll-queue-info { min-width: 0; }
+.lyplus-amll-queue strong, .lyplus-amll-queue small { display: block; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.lyplus-amll-queue strong { font-size: 15px; font-weight: 500; }
+.lyplus-amll-queue small { margin-top: 3px; color: #fffa; font-size: 12px; }
+.lyplus-amll-sr-only { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 .lyplus-amll-empty {
   position: absolute; z-index: 2; left: 52%; right: 8%; top: 20%; bottom: 16%;
   display: flex; align-items: center; justify-content: center; text-align: center;
@@ -63,5 +211,30 @@
 @media (max-aspect-ratio: 1/1) {
   .lyplus-amll-empty { left: 6%; right: 6%; top: 42%; bottom: 9%; }
   .lyplus-amll-plain { font-size: clamp(24px, 6vw, 38px); }
-  .lyplus-amll-settings { right: 16px; }
+}
+@media (max-width: 600px) {
+  .lyplus-amll-settings { border-radius: 22px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .lyplus-amll-settings button, .lyplus-amll-settings input[type=checkbox], .lyplus-amll-settings input[type=checkbox]::before,
+  .lyplus-amll-select-chevron, .lyplus-amll-select-option, .lyplus-amll-select-check { transition: none; }
+  .lyplus-amll-panel-layer[data-state="open"] { animation: lyplus-amll-layer-in 1ms linear both; }
+  .lyplus-amll-panel-layer[data-state="open"] .lyplus-amll-settings { animation: lyplus-amll-card-fade-in 1ms linear both; }
+  .lyplus-amll-panel-layer[data-state="closing"] { animation: lyplus-amll-layer-out 1ms linear both; }
+  .lyplus-amll-panel-layer[data-state="closing"] .lyplus-amll-settings { animation: lyplus-amll-card-fade-out 1ms linear both; }
+  .lyplus-amll-select[data-open="true"] .lyplus-amll-select-options,
+  .lyplus-amll-select[data-open="true"][data-side="top"] .lyplus-amll-select-options { animation: lyplus-amll-select-fade-in 1ms linear both; }
+}
+@keyframes lyplus-amll-card-fade-in { from { opacity: 0; transform: none; } to { opacity: 1; transform: none; } }
+@keyframes lyplus-amll-card-fade-out { from { opacity: 1; transform: none; } to { opacity: 0; transform: none; } }
+@keyframes lyplus-amll-select-fade-in { from { opacity: 0; transform: none; } to { opacity: 1; transform: none; } }
+@media (max-width: 360px) {
+  .lyplus-amll-settings label, .lyplus-amll-settings .lyplus-amll-setting-row { grid-template-columns: minmax(0, 7.5em) minmax(0, 1fr); gap: 8px; }
+  .lyplus-amll-settings-actions { gap: 8px; }
+  .lyplus-amll-settings-actions button { padding-inline: 8px; }
+}
+@media (max-width: 280px) {
+  .lyplus-amll-settings label, .lyplus-amll-settings .lyplus-amll-setting-row { grid-template-columns: minmax(0, 1fr); gap: 6px; }
+  .lyplus-amll-settings label:has(input[type=checkbox]) { grid-template-columns: minmax(0, 1fr) auto; }
+  .lyplus-amll-settings-actions { grid-template-columns: minmax(0, 1fr); }
 }

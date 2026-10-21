@@ -627,6 +627,16 @@ export const PrebuiltLyricPlayer: FC<PrebuiltLyricPlayerProps> = ({
 		(verticalCoverLayout === VerticalCoverLayout.Auto
 			? musicCoverIsVideo && isVertical
 			: verticalCoverLayout === VerticalCoverLayout.ForceImmersive);
+	const smallMusicInfo = (
+		<PrebuiltMusicInfo
+			className={classNames(
+				styles.smallMusicInfo,
+				hideLyricView && styles.hideLyric,
+			)}
+		/>
+	);
+	const showSmallFullscreen =
+		showBottomControl && !hideLyricView && !!fullscreenButtonSlot;
 
 	return (
 		<LayoutGroup>
@@ -647,12 +657,16 @@ export const PrebuiltLyricPlayer: FC<PrebuiltLyricPlayerProps> = ({
 				}
 				thumbSlot={<ControlThumb onClick={onClickControlThumb} />}
 				smallControlsSlot={
-					<PrebuiltMusicInfo
-						className={classNames(
-							styles.smallMusicInfo,
-							hideLyricView && styles.hideLyric,
-						)}
-					/>
+					showSmallFullscreen ? (
+						<div className={styles.smallControlsRow}>
+							{smallMusicInfo}
+							<div className={styles.smallFullscreenButton}>
+								{fullscreenButtonSlot}
+							</div>
+						</div>
+					) : (
+						smallMusicInfo
+					)
 				}
 				backgroundSlot={
 					resolvedBackgroundRenderer === CSS_BACKGROUND_RENDERER_ID ? (
@@ -700,6 +714,7 @@ export const PrebuiltLyricPlayer: FC<PrebuiltLyricPlayerProps> = ({
 									justifyContent: "space-evenly",
 								}}
 							>
+								{hideLyricView && fullscreenButtonSlot}
 								<PrebuiltToggleIconButton
 									type={PrebuiltToggleIconButtonType.Lyrics}
 									checked={!hideLyricView}

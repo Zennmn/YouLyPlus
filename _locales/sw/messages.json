@@ -4,52 +4,20 @@
     "description": "Extension name"
   },
   "extensionDescription": {
-    "message": "Vipengele vya hali ya juu vya mashairi ya YouTube Music, Apple Music na Tidal, vikiwa na usawazishaji wa mstari kwa mstari na neno kwa neno.",
+    "message": "AMLL lyrics player for Apple Music with Apple-provided translations, local TTML and optional machine translation",
     "description": "Extension description"
   },
   "popupTitle": {
     "message": "Mipangilio ya YouLy+",
     "description": "Title shown in the popup header and page title"
   },
-  "tabGeneral": {
-    "message": "Jumla",
-    "description": "General tab label"
-  },
-  "tabAppearance": {
-    "message": "Muonekano",
-    "description": "Appearance tab label"
-  },
-  "tabAdvanced": {
-    "message": "Iliyoboreshwa",
-    "description": "Advanced tab label"
-  },
-  "sectionCoreFeatures": {
-    "message": "Vipengele vya Msingi",
-    "description": "Section title in popup General tab"
-  },
   "settingEnableExtension": {
     "message": "Washa YouLy+",
     "description": "Label for the master enable toggle"
   },
-  "sectionDataSources": {
-    "message": "Vyanzo vya Data",
-    "description": "Section title in popup General tab"
-  },
   "settingPrimaryProvider": {
     "message": "Mtoa Huduma Mkuu wa Mashairi",
     "description": "Label for lyrics provider dropdown"
-  },
-  "settingIntegrateSponsorBlock": {
-    "message": "Unganisha SponsorBlock",
-    "description": "Label for SponsorBlock toggle in popup"
-  },
-  "sectionReadability": {
-    "message": "Usomekaji",
-    "description": "Section title in popup Appearance tab"
-  },
-  "sectionDisplaySettings": {
-    "message": "Mipangilio ya Kuonyesha",
-    "description": "Section title in popup Appearance tab"
   },
   "settingLightweightMode": {
     "message": "Hali Nyepesi",
@@ -58,10 +26,6 @@
   "settingWordByWord": {
     "message": "Uangaziaji wa Neno kwa Neno",
     "description": "Label for word-by-word highlighting toggle"
-  },
-  "sectionPerformance": {
-    "message": "Utendaji",
-    "description": "Section title in popup Advanced tab"
   },
   "sectionDataManagement": {
     "message": "Usimamizi wa Data",
@@ -88,7 +52,7 @@
     "description": "Link to full settings page"
   },
   "msgSettingsSaved": {
-    "message": "Mipangilio imehifadhiwa! Pakia upya ukurasa wa YouTube ili kutumia mabadiliko.",
+    "message": "Settings saved. Apple Music lyrics will refresh automatically.",
     "description": "Snackbar message after saving settings in popup"
   },
   "msgErrorSavingSettings": {
@@ -119,59 +83,9 @@
     "message": "Mipangilio ya YouLy+",
     "description": "Title shown in full settings page header and nav drawer"
   },
-  "navGeneral": {
-    "message": "Jumla",
-    "description": "Navigation drawer label"
-  },
-  "navSources": {
-    "message": "Vyanzo",
-    "description": "Navigation drawer label"
-  },
-  "navAppearance": {
-    "message": "Muonekano",
-    "description": "Navigation drawer label"
-  },
-  "navTranslation": {
-    "message": "Tafsiri",
-    "description": "Navigation drawer label"
-  },
-  "navCache": {
-    "message": "Cache",
-    "description": "Navigation drawer label"
-  },
   "navLocalLyrics": {
     "message": "Mashairi ya Ndani",
     "description": "Navigation drawer label"
-  },
-  "navAbout": {
-    "message": "Kuhusu",
-    "description": "Navigation drawer label"
-  },
-  "msgSettingsSavedRestart": {
-    "message": "Mipangilio imehifadhiwa. Anzisha upya kichupo chako cha muziki ili kutumia mabadiliko.",
-    "description": "Notification text when no platform tabs are found"
-  },
-  "msgSettingsSavedRestartPlatform": {
-    "message": "Mipangilio imehifadhiwa. Anzisha upya $PLATFORMS$ ili kutumia mabadiliko.",
-    "description": "Notification text with platform names",
-    "placeholders": {
-      "PLATFORMS": {
-        "content": "$1",
-        "example": "YouTube Music & Apple Music"
-      }
-    }
-  },
-  "buttonRestart": {
-    "message": "Anzisha upya",
-    "description": "Restart button text"
-  },
-  "buttonRestartTabs": {
-    "message": "Anzisha upya Vikichupo",
-    "description": "Restart button text for multiple tabs"
-  },
-  "categoryCoreFunc": {
-    "message": "Utendaji wa Msingi",
-    "description": "Settings category title"
   },
   "descEnableExtension": {
     "message": "Washa au zima kiendelezi ulimwenguni kote.",
@@ -181,101 +95,17 @@
     "message": "Washa uangaziaji wa karaoke wa neno kwa neno inapopatikana.",
     "description": "Description for word-by-word toggle"
   },
-  "categoryYouTubeMusic": {
-    "message": "Mipangilio ya YouTube Music",
-    "description": "Settings category title"
-  },
-  "settingFullscreenSongInfo": {
-    "message": "Onyesha maelezo ya wimbo kwenye skrini nzima",
-    "description": "Label for fullscreen song info toggle"
-  },
-  "descFullscreenSongInfo": {
-    "message": "Huonyesha maelezo ya wimbo ikiwa ni pamoja na bar ya maendeleo, tarehe ya kutolewa, kichwa na msanii katika hali ya skrini nzima.",
-    "description": "Description for fullscreen song info"
-  },
-  "settingDisableSongInfoSeekbar": {
-    "message": "Zima upau wa maendeleo ya maelezo ya wimbo",
-    "description": "Label for disabling seekbar in fullscreen song info"
-  },
-  "descDisableSongInfoSeekbar": {
-    "message": "Ficha upau wa maendeleo kutoka kwenye onyesho la skrini nzima la maelezo ya wimbo.",
-    "description": "Description for disabling seekbar in fullscreen song info"
-  },
-  "settingUseSponsorBlock": {
-    "message": "Tumia API ya SponsorBlock",
-    "description": "Label for SponsorBlock toggle in settings"
-  },
-  "descUseSponsorBlock": {
-    "message": "Ruka sehemu zisizo za muziki kama vile utangulizi (intro), sehemu za mwisho (outro) au sehemu za matangazo.",
-    "description": "Description for SponsorBlock toggle"
-  },
-  "settingPreferUnisonVideo": {
-    "description": "Label for prefer Unison video toggle in settings",
-    "message": "Pendelea Unison kwa Video"
-  },
-  "descPreferUnisonVideo": {
-    "description": "Description for prefer Unison video toggle",
-    "message": "Ikiwa imewezeshwa, weka kipaumbele huduma ya Unison kwa maudhui ya video na upuuze sehemu za SponsorBlock wakati Unison inatoa maneno ya nyimbo."
-  },
   "categoryAppleMusic": {
     "message": "Mipangilio ya Apple Music",
     "description": "Settings category title"
-  },
-  "settingPreferExternal": {
-    "message": "Pendelea mashairi ya nje kwa usawazishaji wa mstari kwa mstari",
-    "description": "Label for Apple Music bypass toggle"
-  },
-  "descPreferExternal": {
-    "message": "Ikiwashwa, programu itatumia vyanzo vya nje vya mashairi ikiwa Apple Music inatoa usawazishaji wa mstari kwa mstari pekee.",
-    "description": "Description for Apple Music bypass toggle"
-  },
-  "sectionSources": {
-    "message": "Vyanzo",
-    "description": "Sources section title"
-  },
-  "categoryLyricsProvider": {
-    "message": "Mtoa Huduma wa Mashairi",
-    "description": "Category title"
   },
   "labelProviderOrder": {
     "message": "Mpangilio wa Mtoa Huduma wa Nyimbo",
     "description": "Label for provider order configuration"
   },
-  "helperProviderOrder": {
-    "message": "Buruta na udondoshe ili kutoa kipaumbele kwa mtoa huduma anayekaguliwa kwanza. Mtoa huduma wa juu hufanya kazi kama njia ya haraka.",
-    "description": "Helper text for provider ordering"
-  },
-  "labelAvailableProviders": {
-    "message": "Watoa Huduma Wanaopatikana",
-    "description": "Label for available providers dropdown"
-  },
   "buttonAddProvider": {
     "message": "Ongeza Mtoa Huduma",
     "description": "Add provider button text"
-  },
-  "labelCustomKpoeUrl": {
-    "message": "URL ya Seva ya KPoe Maalum",
-    "description": "Label for custom server URL input"
-  },
-  "helperCustomKpoeUrl": {
-    "message": "Weka bado URL ya mwanzo ya seva ya KPoe unayojimiliki mwenyewe.",
-    "description": "Helper text for custom KPoe URL"
-  },
-  "labelSourceOrder": {
-    "message": "Mpangilio wa Vyanzo vya Lyrics+",
-    "description": "Label for configuration"
-  },
-  "helperSourceOrder": {
-    "message": "Buruta na uachie ili kupanga vyanzo kwa ajili ya Lyrics+.",
-    "description": "Helper text for source ordering"
-  },
-  "labelAvailableSources": {
-    "message": "Vyanzo Vinavyopatikana",
-    "description": "Label for available sources dropdown"
-  },
-  "buttonAddSource": {
-    "message": "Ongeza Chanzo",
-    "description": "Add source button text"
   },
   "msgAllSourcesAdded": {
     "message": "Vyanzo vyote tayari vimeongezwa",
@@ -315,10 +145,6 @@
       }
     }
   },
-  "sectionLocalLyrics": {
-    "message": "Mashairi ya Ndani",
-    "description": "Local lyrics section title"
-  },
   "categoryManageLocalLyrics": {
     "message": "Dhibiti Mashairi Yaliyopakiwa",
     "description": "Category title"
@@ -330,60 +156,6 @@
   "buttonRefreshList": {
     "message": "Rejesha upya Orodha",
     "description": "Refresh local lyrics list button"
-  },
-  "titleAddLocalLyrics": {
-    "message": "Ongeza Mashairi Mapya ya Ndani",
-    "description": "FAB tooltip"
-  },
-  "modalUploadTitle": {
-    "message": "Pakia Mashairi Mapya ya Ndani",
-    "description": "Modal dialog title"
-  },
-  "labelSongTitle": {
-    "message": "Kichwa cha Wimbo",
-    "description": "Input label"
-  },
-  "labelArtistName": {
-    "message": "Jina la Msanii",
-    "description": "Input label"
-  },
-  "labelAlbumName": {
-    "message": "Jina la Albamu (hiari)",
-    "description": "Input label"
-  },
-  "labelLyricsFile": {
-    "message": "Faili la Mashairi",
-    "description": "File input label"
-  },
-  "helperLyricsFile": {
-    "message": "Pakia faili la LRC, ELRC, Apple TTML au JSON.",
-    "description": "Helper text for lyrics file input"
-  },
-  "buttonUploadLyrics": {
-    "message": "Pakia Mashairi",
-    "description": "Upload button text"
-  },
-  "msgUploadRequired": {
-    "message": "Kichwa, msanii na faili vinahitajika.",
-    "description": "Error when required fields are missing"
-  },
-  "msgUploading": {
-    "message": "Inapakia mashairi...",
-    "description": "Status during upload"
-  },
-  "msgUploadSuccess": {
-    "message": "Mashairi yamepakiwa kwa mafanikio!",
-    "description": "Status after successful upload"
-  },
-  "msgUploadError": {
-    "message": "Hitilafu wakati wa kupakia: $ERROR$",
-    "description": "Error during upload",
-    "placeholders": {
-      "ERROR": {
-        "content": "$1",
-        "example": "Invalid format"
-      }
-    }
   },
   "msgFileReadError": {
     "message": "Hitilafu ya kusoma faili.",
@@ -422,10 +194,6 @@
         "example": "Storage error"
       }
     }
-  },
-  "sectionTranslation": {
-    "message": "Tafsiri",
-    "description": "Translation section title"
   },
   "categoryTranslationService": {
     "message": "Huduma ya Tafsiri",
@@ -603,10 +371,6 @@
     "message": "Binafsisha agizo linalotumwa kwa AI kwa ajili ya uandishi wa Kilatini.",
     "description": "Helper text"
   },
-  "sectionAppearance": {
-    "message": "Muonekano",
-    "description": "Appearance section title"
-  },
   "categoryTextDisplay": {
     "message": "Maonyesho ya Maandishi",
     "description": "Category title"
@@ -631,105 +395,9 @@
     "message": "Ficha kiotomatiki mwongozo wa matamshi ikiwa mashairi tayari yako katika herufi za Kilatini.",
     "description": "Description"
   },
-  "settingDynamicBkgVocal": {
-    "message": "Njia ya Sauti ya Chinichini ya Dynamic",
-    "description": "Toggle label"
-  },
-  "descDynamicBkgVocal": {
-    "message": "Sauti za chinichini zinazoanza kabla ya mistari mikuu zitaonyeshwa juu.",
-    "description": "Description"
-  },
-  "categoryPerformance": {
-    "message": "Utendaji na Utangamano",
-    "description": "Category title"
-  },
   "descLightweightMode": {
     "message": "Inapunguza uhuishaji (animations) na athari za kuona kwa utendaji bora kwenye vifaa vya zamani.",
     "description": "Description"
-  },
-  "settingHideOffscreen": {
-    "message": "Ficha mashairi yaliyo nje ya skrini",
-    "description": "Toggle label"
-  },
-  "descHideOffscreen": {
-    "message": "Huficha na kuondoa mistari yote yenye uhuishaji ambayo haionekani kwa sasa. Inapendekezwa kwa vifaa vyenye uwezo mdogo.",
-    "description": "Description"
-  },
-  "categoryVisualEffects": {
-    "message": "Athari za Kuona",
-    "description": "Category title"
-  },
-  "settingBlurInactive": {
-    "message": "Fanya mistari isiyo na shughuli iwe na ukungu (blur)",
-    "description": "Toggle label"
-  },
-  "descBlurInactive": {
-    "message": "Hutumia athari ya ukungu kwenye mistari ambayo haiimbwi kwa sasa, sawa na Apple Music.",
-    "description": "Description"
-  },
-  "settingDynamicBackground": {
-    "message": "Washa mandhari ya dynamic (Muonekano wa Kicbezeo)",
-    "description": "Toggle label"
-  },
-  "descDynamicBackground": {
-    "message": "Hutumia mandhari ya albamu yenye uhuishaji wakati kichezeo kimepanuliwa. Mpangilio huu haufanyi kazi katika hali ya skrini nzima.",
-    "description": "Description"
-  },
-  "settingAudioBeatSync": {
-    "message": "Usawazishaji wa midundo ya sauti (Mandhari ya Dynamic)",
-    "description": "Toggle label"
-  },
-  "descAudioBeatSync": {
-    "message": "Hufanya tabaka za mandhari ya dynamic kuitikia midundo ya sauti. Inapaswa kuzimwa ikiwa unatumia Better Lyrics Shaders.",
-    "description": "Description"
-  },
-  "settingRelaxScroll": {
-    "message": "Usogezaji wa Utulivu",
-    "description": "Label for relax scrolling toggle"
-  },
-  "descRelaxScroll": {
-    "message": "Uhuishaji wa polepole wa kusogeza na kulemaza uhuishaji wa kubadilisha ukubwa wa maandishi ya nyimbo.",
-    "description": "Description for relax scrolling toggle"
-  },
-  "settingSongPaletteFullscreen": {
-    "message": "Tumia palette ya wimbo kwa mashairi ya skrini nzima",
-    "description": "Toggle label"
-  },
-  "descSongPaletteFullscreen": {
-    "message": "Hutumia rangi za albamu kwenye mashairi katika hali ya skrini nzima ya video.",
-    "description": "Description"
-  },
-  "settingSongPaletteAll": {
-    "message": "Tumia palette ya wimbo kwa maandishi katika njia zote",
-    "description": "Toggle label"
-  },
-  "descSongPaletteAll": {
-    "message": "Hutumia rangi za albamu kwenye mashairi katika hali zote za kuonyesha.",
-    "description": "Description"
-  },
-  "labelOverridePaletteColor": {
-    "message": "Badilisha rangi ya palette",
-    "description": "Input label"
-  },
-  "helperOverridePaletteColor": {
-    "message": "Badilisha rangi ya mashairi kuwa rangi maalum (maandishi pekee, si mandhari) (acha wazi kwa chaguo-msingi).",
-    "description": "Helper text"
-  },
-  "categoryCustomStyling": {
-    "message": "Mtindo Maalum",
-    "description": "Category title"
-  },
-  "labelCustomCSS": {
-    "message": "CSS Maalum",
-    "description": "Textarea label"
-  },
-  "helperCustomCSS": {
-    "message": "Tumia mitindo yako mwenyewe kwa onyesho la mashairi. Tumia kwa tahadhari.",
-    "description": "Helper text"
-  },
-  "sectionCache": {
-    "message": "Cache",
-    "description": "Cache section title"
   },
   "labelCacheStrategy": {
     "message": "Mkakati wa Cache",
@@ -740,11 +408,11 @@
     "description": "Description"
   },
   "optionAggressive": {
-    "message": "Imara (Masaa 2)",
+    "message": "Aggressive (24 hours)",
     "description": "Cache strategy option"
   },
   "optionModerate": {
-    "message": "Wastani (Saa 1)",
+    "message": "Moderate (12 hours)",
     "description": "Cache strategy option"
   },
   "optionNone": {
@@ -755,12 +423,8 @@
     "message": "Matumizi ya sasa ya cache",
     "description": "Label for cache usage display"
   },
-  "sectionAbout": {
-    "message": "Kuhusu",
-    "description": "About section"
-  },
   "aboutDescription": {
-    "message": "Kiendelezi hiki kilizaliwa kutokana na wazo rahisi: kusikiliza muziki kunapaswa kuwa uzoefu wa kuvutia, si tu shughuli ya chinichini. Tulichoshwa na mashairi ya kawaida ya YouTube na violesura vilivyopitwa na wakati, kwa hiyo tuliamua kujenga kichezeo tulichokuwa tunakitaka kila wakati. Lengo letu ni kufanya vipindi vyako vya muziki kuwa vyema zaidi, vyenye mwingiliano, na vya kufurahisha. youly+ ni chanzo wazi (open source) kwa fahari. Ukipata hitilafu au una wazo, tungependa kusikia kutoka kwako.",
+    "message": "YouLy+ brings AMLL lyrics and Apple-provided translations to Apple Music, with local TTML and optional machine translation.",
     "description": "About page description text"
   },
   "categoryLinksSupport": {
@@ -830,10 +494,6 @@
         "example": "Invalid JSON"
       }
     }
-  },
-  "msgNoActiveTabs": {
-    "message": "Hakuna vichupo vya muziki vilivyotumika viliyoonekana. Tafadhali rejesha upya kwa mkono.",
-    "description": "Alert when no music tabs found for restart"
   },
   "titleShowHideApiKey": {
     "message": "Onyesha/Ficha ufunguo wa API",
@@ -967,106 +627,6 @@
     "message": "Ufunguo wako wa API umehifadhiwa ndani ya kifaa chako. Funguo za mpango wa bure kwa kawaida huishia na :fx",
     "description": "Helper text"
   },
-  "sourceNameLyricsPlus": {
-    "message": "Lyrics+ (Michango ya Watumiaji)",
-    "description": "Display name for lyricsplus source"
-  },
-  "sourceNameApple": {
-    "message": "Apple Music",
-    "description": "Display name for apple source"
-  },
-  "sourceNameQQ": {
-    "message": "QQ Music",
-    "description": "Display name for qq source"
-  },
-  "sourceNameSpotify": {
-    "message": "Musixmatch (Spotify)",
-    "description": "Display name for spotify source"
-  },
-  "sourceNameMusixmatch": {
-    "message": "Musixmatch (Moja kwa moja)",
-    "description": "Display name for musixmatch source"
-  },
-  "sourceNameMusixmatchWord": {
-    "message": "Musixmatch (Neno)",
-    "description": "Display name for musixmatch-word source"
-  },
-  "sourceNameLyricsPlusProvider": {
-    "message": "Lyrics+",
-    "description": "Provider generic name"
-  },
-  "sourceNameCustomKpoe": {
-    "message": "Seva ya KPoe Maalum",
-    "description": "Provider generic name for custom KPoe server"
-  },
-  "sourceNameLRCLib": {
-    "message": "LRCLIB",
-    "description": "LRCLIB provider name"
-  },
-  "sourceNameUnison": {
-    "message": "Unison (BetterLyrics)",
-    "description": "Unison provider name"
-  },
-  "sourceNameLrcred": {
-    "message": "lrc.red",
-    "description": "lrc.red provider name"
-  },
-  "navCatInterface": {
-    "message": "Interface",
-    "description": "Navigation category for interface settings"
-  },
-  "navCatLyricsSources": {
-    "message": "Lyrics Sources",
-    "description": "Navigation category for lyrics sources"
-  },
-  "navCatStorageData": {
-    "message": "Storage & Data",
-    "description": "Navigation category for storage & data"
-  },
-  "navCatApplication": {
-    "message": "Application",
-    "description": "Navigation category for application info"
-  },
-  "navSubtitleAppearance": {
-    "message": "Visual effects, theme, typography",
-    "description": "Subtitle for Appearance navigation item"
-  },
-  "navSubtitleGeneral": {
-    "message": "Core features, YTM & Apple Music",
-    "description": "Subtitle for General navigation item"
-  },
-  "navSubtitleSources": {
-    "message": "Lyrics providers & order",
-    "description": "Subtitle for Sources navigation item"
-  },
-  "navSubtitleTranslation": {
-    "message": "AI models, prompts, romanization",
-    "description": "Subtitle for Translation navigation item"
-  },
-  "navSubtitleCache": {
-    "message": "Storage usage & caching policy",
-    "description": "Subtitle for Cache navigation item"
-  },
-  "navSubtitleLocalLyrics": {
-    "message": "Manage uploaded LRC & TTML files",
-    "description": "Subtitle for Local Lyrics navigation item"
-  },
-  "navSubtitleAbout": {
-    "message": "Version, backup, export & links",
-    "description": "Subtitle for About navigation item"
-  },
-  "categoryCustomKpoe": {
-    "message": "Custom KPoe",
-    "description": "Category title for Custom KPoe settings"
-  },
-  "categoryUnison": {
-    "message": "Unison",
-    "description": "Category title for Unison settings"
-  },
-  "categoryLyricsPlus": {
-    "message": "Lyrics+",
-    "description": "Category title for Lyrics+ settings"
-  },
   "categoryCacheConfig": {
     "message": "Cache Configuration & Storage",
     "description": "Category title for cache settings"
@@ -1074,10 +634,6 @@
   "labelFastPath": {
     "message": "Fast Path",
     "description": "Label indicator for primary fast path provider"
-  },
-  "placeholderCustomKpoeUrl": {
-    "message": "https://example.com/api",
-    "description": "Placeholder for custom KPoe server URL input"
   },
   "placeholderOpenRouterModel": {
     "message": "google/gemini-2.0-flash-001",
@@ -1094,14 +650,6 @@
   "placeholderCustomRomanizationPrompt": {
     "message": "Custom romanization prompt...",
     "description": "Placeholder for custom romanization prompt textarea"
-  },
-  "placeholderCustomCSS": {
-    "message": "/* Custom CSS */",
-    "description": "Placeholder for custom CSS textarea"
-  },
-  "placeholderPaletteColor": {
-    "message": "#ffb5a0",
-    "description": "Placeholder for override palette color"
   },
   "labelCacheUsageFormat": {
     "message": "$SIZE$ MB used ($COUNT$ songs cached)",
@@ -1123,17 +671,9 @@
     "message": "Cache info unavailable.",
     "description": "Message when cache info is unavailable"
   },
-  "placeholderSelectProvider": {
-    "message": "Chagua mtoa huduma...",
-    "description": "Select a Provider on settings menu"
-  },
   "placeholderSelectSource": {
     "message": "Chagua chanzo...",
     "description": "Select a Source on settings menu"
-  },
-  "msgAllProvidersAdded": {
-    "message": "Watoa huduma wote wameongezwa",
-    "description": "User added All providers on settings menu"
   },
   "noteDeepLSupportedLangs": {
     "message": "DeepL inasaidia lugha 33 rasmi. Ikiwa lugha isiyotumika itaombwa, tafsiri itarudi kiotomatiki kwa Google Translate.",
@@ -1222,5 +762,512 @@
         "content": "$2"
       }
     }
+  },
+  "navPlaybackAppearance": {
+    "message": "Playback & appearance"
+  },
+  "navSubtitlePlaybackAppearance": {
+    "message": "Player, text, title correction, font"
+  },
+  "navLyricsSourcesApple": {
+    "message": "Lyrics sources"
+  },
+  "navSubtitleLyricsSourcesApple": {
+    "message": "AMLL, LunaBeat, AmLyrics, Apple native"
+  },
+  "navCatLibrary": {
+    "message": "Library"
+  },
+  "navSubtitleLocalLyricsApple": {
+    "message": "Manage locally imported TTML"
+  },
+  "navCatConfiguration": {
+    "message": "Configuration"
+  },
+  "navTranslationTransliteration": {
+    "message": "Translation & transliteration"
+  },
+  "navSubtitleTranslationTransliteration": {
+    "message": "Providers, prompts, dictionaries"
+  },
+  "navStorageAdvanced": {
+    "message": "Storage & advanced"
+  },
+  "navSubtitleStorageAdvanced": {
+    "message": "Cache, backup, help and license"
+  },
+  "navCatAppleMusicService": {
+    "message": "Apple Music"
+  },
+  "msgAppleRestart": {
+    "message": "Apple Music needs a reload to apply this change."
+  },
+  "buttonReloadAppleMusic": {
+    "message": "Reload Apple Music"
+  },
+  "categoryApplePlayer": {
+    "message": "Apple Music player"
+  },
+  "settingUseAMLLPlayer": {
+    "message": "Use AMLL lyrics player"
+  },
+  "descUseAMLLPlayer": {
+    "message": "Show Apple Music lyrics in the original AMLL player. Turn this off to use Apple's native lyrics view."
+  },
+  "settingAnimatedLyricsBackground": {
+    "message": "Animated lyrics background"
+  },
+  "descAnimatedLyricsBackground": {
+    "message": "Keep the AMLL album background and its original animation."
+  },
+  "labelLyricsDisplayMode": {
+    "message": "Lyrics display mode"
+  },
+  "descLyricsDisplayMode": {
+    "message": "Defaults for translation and transliteration; the player menu offers the same choices."
+  },
+  "optionDisplayOriginal": {
+    "message": "Original lyrics"
+  },
+  "optionDisplayTranslation": {
+    "message": "Translation"
+  },
+  "optionDisplayTransliteration": {
+    "message": "Transliteration"
+  },
+  "optionDisplayBoth": {
+    "message": "Translation + transliteration"
+  },
+  "categoryPlayerFont": {
+    "message": "Player font"
+  },
+  "sourcesAppleOnlyNote": {
+    "message": "YouLy+ now supports Apple Music only. This source order applies to every song."
+  },
+  "categoryAppleSourceOrder": {
+    "message": "Apple Music lyrics source order"
+  },
+  "descAppleSourceOrder": {
+    "message": "AMLL is tried first by default, then LunaBeat, AmLyrics, and Apple Music's native lyrics. Apple Music always stays last."
+  },
+  "sourceNativePinned": {
+    "message": "Always used as the final fallback"
+  },
+  "msgSourceOrderSaved": {
+    "message": "Lyrics source order saved."
+  },
+  "msgSourceOrderSaveFailed": {
+    "message": "Could not save the lyrics source order."
+  },
+  "localLyricsImportGuideTitle": {
+    "message": "Import TTML from the song player"
+  },
+  "localLyricsImportStep1": {
+    "message": "Open the current Apple Music song in the fullscreen lyrics player."
+  },
+  "localLyricsImportStep2": {
+    "message": "Open the player menu and choose Import TTML."
+  },
+  "localLyricsImportStep3": {
+    "message": "The file is saved for that song and filled in automatically on later loads."
+  },
+  "localLyricsOverrideNote": {
+    "message": "Local TTML takes priority for the matching song. Delete it here to return to automatic sources."
+  },
+  "categoryLocalLyricsLibrary": {
+    "message": "Local TTML library"
+  },
+  "translationApplePolicyNote": {
+    "message": "Machine translation runs only for Apple Music's original lyrics when a track has no built-in translation. Apple-provided translations are preserved."
+  },
+  "msgPlaybackSettingsSaved": {
+    "message": "Playback settings saved and applied to Apple Music."
+  },
+  "msgTranslationSettingsSaved": {
+    "message": "Translation settings saved and applied to the Apple Music player."
+  },
+  "msgAdvancedSettingsSaved": {
+    "message": "Settings saved."
+  },
+  "msgSettingsSaveFailed": {
+    "message": "Could not save settings. Try again."
+  },
+  "msgTargetResetForDeepL": {
+    "message": "Target language reset to Auto because DeepL does not support the previous selection."
+  },
+  "msgPlayerFontImported": {
+    "message": "Font imported and applied to the Apple Music player."
+  },
+  "msgPlayerFontReset": {
+    "message": "Default player font restored."
+  },
+  "buttonShowKey": {
+    "message": "Show"
+  },
+  "buttonHideKey": {
+    "message": "Hide"
+  },
+  "msgDictionaryUnavailable": {
+    "message": "Unavailable"
+  },
+  "msgDictionaryDownloadFailed": {
+    "message": "Download failed"
+  },
+  "msgDictionaryDownloadFailedDetail": {
+    "message": "Could not download the offline dictionary. Try again."
+  },
+  "msgDictionaryDeleteFailed": {
+    "message": "Could not delete the offline dictionary. Try again."
+  },
+  "msgLocalLyricsRefreshed": {
+    "message": "Local TTML library refreshed."
+  },
+  "msgImportNoValidSettings": {
+    "message": "This file contains no supported YouLy+ settings."
+  },
+  "labelBackupRestore": {
+    "message": "Backup and restore settings"
+  },
+  "categoryHelpSources": {
+    "message": "Help & source"
+  },
+  "linkIssues": {
+    "message": "Issues & help"
+  },
+  "aboutAppleDescription": {
+    "message": "Apple Music lyrics with the original AMLL player, Apple-provided translations, local TTML, and optional machine translation."
+  },
+  "upstreamAttribution": {
+    "message": "Built on AMLL and open-source lyric sources. Upstream acknowledgements and the AGPL-3.0-only license are available in the repository."
+  },
+  "footerAppleOnly": {
+    "message": "YouLy+ · Apple Music lyrics"
+  },
+  "linkTTMLTranslationGuide": {
+    "message": "TTML translation guide"
+  },
+  "tabPlayback": {
+    "message": "Playback"
+  },
+  "tabStorage": {
+    "message": "Cache & storage"
+  },
+  "popupAppleDescription": {
+    "message": "Apple Music lyrics, appearance and cache."
+  },
+  "popupFullSettingsHint": {
+    "message": "Sources, local TTML, translation, fonts and advanced options are in the full settings page."
+  },
+  "playerClose": {
+    "message": "Close"
+  },
+  "playerSettings": {
+    "message": "Lyrics settings"
+  },
+  "playerDisplay": {
+    "message": "Display"
+  },
+  "playerOriginal": {
+    "message": "Original"
+  },
+  "playerTranslation": {
+    "message": "Translation"
+  },
+  "playerRomanization": {
+    "message": "Romanization"
+  },
+  "playerTranslationAndRomanization": {
+    "message": "Translation + romanization"
+  },
+  "playerTranslationLoading": {
+    "message": "Loading translation…"
+  },
+  "playerTranslationUnavailable": {
+    "message": "Translation is unavailable from the current lyrics source"
+  },
+  "playerTranslationError": {
+    "message": "Unable to load translation from the current lyrics source"
+  },
+  "playerRomanizationLoading": {
+    "message": "Loading romanization…"
+  },
+  "playerRomanizationUnavailable": {
+    "message": "Romanization is unavailable from the current lyrics source"
+  },
+  "playerRomanizationError": {
+    "message": "Unable to load romanization from the current lyrics source"
+  },
+  "playerLyricsSource": {
+    "message": "Lyrics source"
+  },
+  "playerAutomatic": {
+    "message": "Automatic"
+  },
+  "playerSourcePreference": {
+    "message": "Preferred source"
+  },
+  "playerCurrentSource": {
+    "message": "Current source"
+  },
+  "playerSourceUnavailable": {
+    "message": "currently unavailable"
+  },
+  "playerLyricsOffset": {
+    "message": "Lyrics offset (ms)"
+  },
+  "playerAnimatedBackground": {
+    "message": "Animated background"
+  },
+  "playerResetOffset": {
+    "message": "Reset offset"
+  },
+  "playerReloadLyrics": {
+    "message": "Reload lyrics"
+  },
+  "playerNativePlayer": {
+    "message": "Native player"
+  },
+  "playerConnecting": {
+    "message": "Connecting to Apple Music…"
+  },
+  "playerLoadingLyrics": {
+    "message": "Loading lyrics…"
+  },
+  "playerSongNotFound": {
+    "message": "No lyrics available"
+  },
+  "playerNotFoundError": {
+    "message": "Unable to load lyrics"
+  },
+  "playerPlaybackCommandFailed": {
+    "message": "Playback command failed"
+  },
+  "playerSettingsSaveFailed": {
+    "message": "Unable to save player settings"
+  },
+  "playerFontLoadFailed": {
+    "message": "Unable to load font; import it again in Settings"
+  },
+  "playerFullscreen": {
+    "message": "Fullscreen"
+  },
+  "playerExitFullscreen": {
+    "message": "Exit fullscreen"
+  },
+  "playerFullscreenChangeFailed": {
+    "message": "Unable to change fullscreen"
+  },
+  "playerExportFailed": {
+    "message": "Unable to export diagnostics"
+  },
+  "playerDownloadNativeTTML": {
+    "message": "Download AM native TTML"
+  },
+  "playerDownloadingNativeTTML": {
+    "message": "Fetching native TTML…"
+  },
+  "playerNativeTTMLUnavailable": {
+    "message": "No native TTML was retrieved for this song; try again later"
+  },
+  "playerNativeTTMLSongChanged": {
+    "message": "The song changed; download again"
+  },
+  "playerNativeTTMLFailed": {
+    "message": "Unable to download native TTML; try again"
+  },
+  "playerImportTTML": {
+    "message": "Import TTML"
+  },
+  "playerImportingTTML": {
+    "message": "Importing TTML…"
+  },
+  "playerImportTTMLHint": {
+    "message": "Saved for the current song across reloads (up to 2 MB)"
+  },
+  "playerImportTTMLSuccess": {
+    "message": "TTML imported and saved for this song"
+  },
+  "playerImportTTMLInvalid": {
+    "message": "Invalid TTML file or no lyrics to display"
+  },
+  "playerImportTTMLTooLarge": {
+    "message": "TTML files must be 2 MB or smaller"
+  },
+  "playerLocalTTMLSongChanged": {
+    "message": "The song changed; try again for the current song"
+  },
+  "playerImportTTMLFailed": {
+    "message": "Unable to import TTML; try again"
+  },
+  "playerRemoveLocalTTML": {
+    "message": "Remove imported TTML"
+  },
+  "playerRemovingLocalTTML": {
+    "message": "Removing…"
+  },
+  "playerRemoveLocalTTMLSuccess": {
+    "message": "Local lyrics removed; automatic fetching restored"
+  },
+  "playerRemoveLocalTTMLFailed": {
+    "message": "Unable to remove local lyrics; try again"
+  },
+  "playerAdvanced": {
+    "message": "Advanced"
+  },
+  "playerDiagnose": {
+    "message": "Diagnose stutter (20 seconds)"
+  },
+  "playerDiagnosing": {
+    "message": "Recording stutter data; keep playing…"
+  },
+  "playerDiagnosticReady": {
+    "message": "Recording finished; export the report"
+  },
+  "playerDiagnosticStopped": {
+    "message": "Recording stopped; export the report"
+  },
+  "playerDiagnosticNeedsPlayback": {
+    "message": "Play a song and wait for lyrics first"
+  },
+  "playerDiagnosticRate": {
+    "message": "Page callback rate"
+  },
+  "playerDiagnosticSlow": {
+    "message": "Long intervals (>50ms)"
+  },
+  "playerExportDiagnostics": {
+    "message": "Export diagnostic report"
+  },
+  "playerQueue": {
+    "message": "Up next"
+  },
+  "playerQueueLoading": {
+    "message": "Refreshing queue…"
+  },
+  "playerQueueEmpty": {
+    "message": "The queue is empty"
+  },
+  "playerQueueLoadFailed": {
+    "message": "Unable to load the queue"
+  },
+  "playerQueueRetry": {
+    "message": "Retry"
+  },
+  "playerOffsetSaveFailed": {
+    "message": "Could not save lyrics offset. Try again."
+  },
+  "playerModeSaveFailed": {
+    "message": "Could not save display mode. Try again."
+  },
+  "playerSourceSwitched": {
+    "message": "Switched lyrics source to $NAME$",
+    "placeholders": {
+      "NAME": {
+        "content": "$1",
+        "example": "AMLL TTML DB"
+      }
+    }
+  },
+  "playerSourceSwitchFailed": {
+    "message": "Could not switch lyrics source"
+  },
+  "playerLocalLyrics": {
+    "message": "Local TTML"
+  },
+  "settingTitleCorrection": {
+    "message": "Song Title Correction",
+    "description": "Label for the Apple Music song title correction setting"
+  },
+  "descTitleCorrection": {
+    "message": "When enabled, the AMLL player shows the song title, artist, and album as they appear in the selected region.",
+    "description": "Description for the Apple Music song title correction setting"
+  },
+  "titleCorrectionOff": {
+    "message": "Off",
+    "description": "Title correction option: disabled"
+  },
+  "titleCorrectionOriginal": {
+    "message": "Use the song's original region",
+    "description": "Title correction option: original region"
+  },
+  "titleCorrectionChina": {
+    "message": "Use mainland China",
+    "description": "Title correction option: mainland China"
+  },
+  "titleCorrectionJapan": {
+    "message": "Use Japan",
+    "description": "Title correction option: Japan"
+  },
+  "optionCustomLLM": {
+    "message": "Third-party LLM (Chat Completions)"
+  },
+  "categoryCustomLLM": {
+    "message": "Third-party LLM"
+  },
+  "labelCustomLLMUrl": {
+    "message": "API address"
+  },
+  "descCustomLLMUrl": {
+    "message": "Use a Chat Completions compatible base URL or full endpoint."
+  },
+  "descCustomLLMKey": {
+    "message": "Stored locally and sent only to your configured API address. Leave blank if no key is needed."
+  },
+  "labelCustomLLMModel": {
+    "message": "Model name"
+  },
+  "descCustomLLMModel": {
+    "message": "Enter the model ID provided by your service."
+  },
+  "buttonTestCustomLLM": {
+    "message": "Authorize address and test connection"
+  },
+  "msgCustomLLMModelRequired": {
+    "message": "Enter a model name first."
+  },
+  "msgCustomLLMExtensionRequired": {
+    "message": "Open the installed extension settings to authorize an API address."
+  },
+  "msgCustomLLMPermissionDenied": {
+    "message": "Access to this API address was not authorized."
+  },
+  "msgCustomLLMTesting": {
+    "message": "Testing connection..."
+  },
+  "msgCustomLLMTestSuccess": {
+    "message": "Connection successful:"
+  },
+  "msgCustomLLMTestFailed": {
+    "message": "Connection failed:"
+  },
+  "labelPlayerFont": {
+    "message": "Player font file"
+  },
+  "descPlayerFont": {
+    "message": "Import a TTF, OTF, WOFF or WOFF2 file to replace all player text. Stored locally in the extension; no system installation needed. Maximum 64 MB."
+  },
+  "buttonDefaultPlayerFont": {
+    "message": "Use default font"
+  },
+  "buttonImportPlayerFont": {
+    "message": "Import font file"
+  },
+  "msgPlayerFontDefault": {
+    "message": "Using default font"
+  },
+  "msgPlayerFontImporting": {
+    "message": "Importing font…"
+  },
+  "msgPlayerFontImportFailed": {
+    "message": "Unable to import this font. Choose a valid font file; the previous font is kept."
+  },
+  "msgPlayerFontSize": {
+    "message": "Choose a non-empty font file up to 64 MB."
+  },
+  "msgPlayerFontLoadFailed": {
+    "message": "Unable to load the font. Please import the file again."
+  },
+  "cacheScopeExplanation": {
+    "message": "Aggressive keeps lyric and translation results for 24 hours; Moderate keeps them for 12 hours. With caching off, results are not stored, while provider indexes may still refresh when online. Clearing caches removes results only: local TTML, lyric offsets, source preferences and fonts are kept. Provider indexes are not cleared or included in the sizes above."
   }
 }

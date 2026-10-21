@@ -8,150 +8,90 @@
     <link href="../lib/material3.css" rel="stylesheet" />
     <link rel="stylesheet" type="text/css" href="ui.css">
     <script src="../lib/i18n.js" defer></script>
-    <script src="../modules/lyrics/settings.js" defer></script>
 </head>
 
 <body>
     <aside class="navigation-drawer">
         <header class="drawer-header">
-            <svg class="icon-svg logo-icon" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960"
-                width="24px" fill="currentColor">
-                <path
-                    d="M96-96v-696q0-29.7 21.15-50.85Q138.3-864 168-864h432q29.7 0 50.85 21.15Q672-821.7 672-792v26q-23 13-41 31.5T600-693v-99H168v522l42-42h390v-195q13 23 31.44 41.6Q649.88-446.79 672-434v122q0 29.7-21.15 50.85Q629.7-240 600-240H240L96-96Zm144-288h144v-72H240v72Zm528-96q-50 0-85-35t-35-85q0-50 35-85t85-35q10 0 20.5 2.5T816-710v-202h144v72h-72v240q0 50-35 85t-85 35Zm-528-36h288v-72H240v72Zm0-132h288v-72H240v72Zm-72 337v-480 480Z" />
+            <svg class="icon-svg logo-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="M12 3v10.55A4 4 0 1 0 14 17V7h5V3h-7Z" />
             </svg>
             <h1 class="drawer-title" data-i18n="settingsTitle">YouLy+ Settings</h1>
         </header>
         <nav class="drawer-nav">
-            <div class="nav-category" data-i18n="navCatInterface">Interface</div>
-            <a href="#" class="nav-item active" data-section="appearance">
+            <div class="nav-category" data-i18n="navCatAppleMusicService">Apple Music</div>
+            <a href="#" class="nav-item active" data-section="playback">
                 <div class="nav-item-icon-container">
-                    <svg class="icon-svg nav-icon nav-icon-outlined" xmlns="http://www.w3.org/2000/svg"
-                        viewBox="0 -960 960 960" aria-hidden="true">
-                        <path
-                            d="M480-96q-79 0-149-30t-122.5-82.5Q156-261 126-331T96-480q0-80 30.5-149.5t84-122Q264-804 335.5-834T488-864q78 0 146.5 27T754-763q51 47 80.5 110T864-518q0 96-67 163t-163 67h-68q-8 0-14 5t-6 13q0 15 15 25t15 53q0 37-27 66.5T480-96Zm0-384Zm-173.5 18.5Q324-479 324-504t-17.5-42.5Q289-564 264-564t-42.5 17.5Q204-529 204-504t17.5 42.5Q239-444 264-444t42.5-17.5Zm120-144Q444-623 444-648t-17.5-42.5Q409-708 384-708t-42.5 17.5Q324-673 324-648t17.5 42.5Q359-588 384-588t42.5-17.5Zm192 0Q636-623 636-648t-17.5-42.5Q601-708 576-708t-42.5 17.5Q516-673 516-648t17.5 42.5Q551-588 576-588t42.5-17.5Zm120 144Q756-479 756-504t-17.5-42.5Q721-564 696-564t-42.5 17.5Q636-529 636-504t17.5 42.5Q671-444 696-444t42.5-17.5ZM480-168q11 0 17.5-8.5T504-192q0-16-15-28t-15-50q0-38 26.5-64t64.5-26h69q66 0 112-46t46-112q0-115-88.5-194.5T488-792q-134 0-227 91t-93 221q0 130 91 221t221 91Z" />
+                    <svg class="icon-svg nav-icon nav-icon-outlined" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18Zm0 4a5 5 0 1 1 0 10 5 5 0 0 1 0-10Zm0 3a2 2 0 1 0 0 4 2 2 0 0 0 0-4Z" />
                     </svg>
-                    <svg class="icon-svg nav-icon nav-icon-filled" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
-                        aria-hidden="true">
-                        <path
-                            d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9c.83 0 1.5-.67 1.5-1.5 0-.39-.15-.74-.39-1.01-.23-.26-.38-.61-.38-.99 0-.83.67-1.5 1.5-1.5H16c2.76 0 5-2.24 5-5 0-4.42-4.03-8-9-8zm-5.5 9c-.83 0-1.5-.67-1.5-1.5S5.67 9 6.5 9 8 9.67 8 10.5 7.33 12 6.5 12zm3-4C8.67 8 8 7.33 8 6.5S8.67 5 9.5 5s1.5.67 1.5 1.5S10.33 8 9.5 8zm5 0c-.83 0-1.5-.67-1.5-1.5S13.67 5 14.5 5s1.5.67 1.5 1.5S15.33 8 14.5 8zm3 4c-.83 0-1.5-.67-1.5-1.5S16.67 9 17.5 9s1.5.67 1.5 1.5-.67 1.5-1.5 1.5z" />
+                    <svg class="icon-svg nav-icon nav-icon-filled" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18Zm0 4a5 5 0 1 1 0 10 5 5 0 0 1 0-10Z" />
                     </svg>
                 </div>
                 <div class="nav-item-text">
-                    <span class="nav-item-title" data-i18n="navAppearance">Appearance</span>
-                    <span class="nav-item-subtitle" data-i18n="navSubtitleAppearance">Visual effects, theme, typography</span>
+                    <span class="nav-item-title" data-i18n="navPlaybackAppearance">Playback &amp; appearance</span>
+                    <span class="nav-item-subtitle" data-i18n="navSubtitlePlaybackAppearance">Player, text, title correction, font</span>
                 </div>
             </a>
-            <a href="#" class="nav-item" data-section="general">
-                <div class="nav-item-icon-container">
-                    <svg class="icon-svg nav-icon nav-icon-outlined" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
-                        aria-hidden="true">
-                        <path
-                            d="M3 17v2h6v-2H3zM3 5v2h10V5H3zm10 16v-2h8v-2h-8v-2h-2v6h2zM7 9v2H3v2h4v2h2V9H7zm14 4v-2H11v2h10v-2zm-6-4h2V7h4V5h-4V3h-2v6z" />
-                    </svg>
-                    <svg class="icon-svg nav-icon nav-icon-filled" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
-                        aria-hidden="true">
-                        <path
-                            d="M3 17v2h6v-2H3zM3 5v2h10V5H3zm10 16v-2h8v-2h-8v-2h-2v6h2zM7 9v2H3v2h4v2h2V9H7zm14 4v-2H11v2h10v-2zm-6-4h2V7h4V5h-4V3h-2v6z" />
-                    </svg>
-                </div>
-                <div class="nav-item-text">
-                    <span class="nav-item-title" data-i18n="navGeneral">General</span>
-                    <span class="nav-item-subtitle" data-i18n="navSubtitleGeneral">Core features, YTM & Apple Music</span>
-                </div>
-            </a>
-
-            <div class="nav-category" data-i18n="navCatLyricsSources">Lyrics Sources</div>
             <a href="#" class="nav-item" data-section="sources">
                 <div class="nav-item-icon-container">
-                    <svg class="icon-svg nav-icon nav-icon-outlined" xmlns="http://www.w3.org/2000/svg"
-                        viewBox="0 -960 960 960" aria-hidden="true">
-                        <path
-                            d="M500-360q42 0 71-29t29-71v-220h120v-80H560v220q-13-10-28-15t-32-5q-42 0-71 29t-29 71q0 42 29 71t71 29ZM320-240q-33 0-56.5-23.5T240-320v-480q0-33 23.5-56.5T320-880h480q33 0 56.5 23.5T880-800v480q0 33-23.5 56.5T800-240H320Zm0-80h480v-480H320v480ZM160-80q-33 0-56.5-23.5T80-160v-560h80v560h560v80H160Zm160-720v480-480Z" />
+                    <svg class="icon-svg nav-icon nav-icon-outlined" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M4 5h16v3H4V5Zm0 5.5h10v3H4v-3ZM4 16h16v3H4v-3Z" />
                     </svg>
-                    <svg class="icon-svg nav-icon nav-icon-filled" xmlns="http://www.w3.org/2000/svg"
-                        viewBox="0 -960 960 960" aria-hidden="true">
-                        <path
-                            d="M500-360q42 0 71-29t29-71v-220h120v-80H560v220q-13-10-28-15t-32-5q-42 0-71 29t-29 71q0 42 29 71t71 29ZM320-240q-33 0-56.5-23.5T240-320v-480q0-33 23.5-56.5T320-880h480q33 0 56.5 23.5T880-800v480q0 33-23.5 56.5T800-240H320ZM160-80q-33 0-56.5-23.5T80-160v-560h80v560h560v80H160Z" />
+                    <svg class="icon-svg nav-icon nav-icon-filled" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M4 5h16v3H4V5Zm0 5.5h10v3H4v-3ZM4 16h16v3H4v-3Z" />
                     </svg>
                 </div>
                 <div class="nav-item-text">
-                    <span class="nav-item-title" data-i18n="navSources">Sources</span>
-                    <span class="nav-item-subtitle" data-i18n="navSubtitleSources">Lyrics providers & order</span>
-                </div>
-            </a>
-            <a href="#" class="nav-item" data-section="translation">
-                <div class="nav-item-icon-container">
-                    <svg class="icon-svg nav-icon nav-icon-outlined" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
-                        aria-hidden="true">
-                        <path
-                            d="M12.87 15.07l-2.54-2.51.03-.03c1.74-1.94 2.98-4.17 3.71-6.53H17V4h-7V2H8v2H1v1.99h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11.76-2.04zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2l-4.5-12zm-2.62 7l1.62-4.33L19.12 17h-3.24z" />
-                    </svg>
-                    <svg class="icon-svg nav-icon nav-icon-filled" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
-                        aria-hidden="true">
-                        <path
-                            d="M12.87 15.07l-2.54-2.51.03-.03c1.74-1.94 2.98-4.17 3.71-6.53H17V4h-7V2H8v2H1v1.99h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11.76-2.04zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2l-4.5-12zm-2.62 7l1.62-4.33L19.12 17h-3.24z" />
-                    </svg>
-                </div>
-                <div class="nav-item-text">
-                    <span class="nav-item-title" data-i18n="navTranslation">Translation</span>
-                    <span class="nav-item-subtitle" data-i18n="navSubtitleTranslation">AI models, prompts, romanization</span>
+                    <span class="nav-item-title" data-i18n="navLyricsSourcesApple">Lyrics sources</span>
+                    <span class="nav-item-subtitle" data-i18n="navSubtitleLyricsSourcesApple">AMLL, LunaBeat, AmLyrics, Apple native</span>
                 </div>
             </a>
 
-            <div class="nav-category" data-i18n="navCatStorageData">Storage & Data</div>
-            <a href="#" class="nav-item" data-section="cache">
-                <div class="nav-item-icon-container">
-                    <svg class="icon-svg nav-icon nav-icon-outlined" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
-                        aria-hidden="true">
-                        <path
-                            d="M19 8l-4 4h3c0 3.31-2.69 6-6 6-1.01 0-1.97-.25-2.8-.7l-1.46 1.46C8.97 19.54 10.43 20 12 20c4.42 0 8-3.58 8-8h3l-4-4zM6 12c0-3.31 2.69-6 6-6 1.01 0 1.97.25 2.8.7l1.46-1.46C15.03 4.46 13.57 4 12 4c-4.42 0-8 3.58-8 8H1l4 4 4-4H6z" />
-                    </svg>
-                    <svg class="icon-svg nav-icon nav-icon-filled" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
-                        aria-hidden="true">
-                        <path
-                            d="M19 8l-4 4h3c0 3.31-2.69 6-6 6-1.01 0-1.97-.25-2.8-.7l-1.46 1.46C8.97 19.54 10.43 20 12 20c4.42 0 8-3.58 8-8h3l-4-4zM6 12c0-3.31 2.69-6 6-6 1.01 0 1.97.25 2.8.7l1.46-1.46C15.03 4.46 13.57 4 12 4c-4.42 0-8 3.58-8 8H1l4 4 4-4H6z" />
-                    </svg>
-                </div>
-                <div class="nav-item-text">
-                    <span class="nav-item-title" data-i18n="navCache">Cache</span>
-                    <span class="nav-item-subtitle" data-i18n="navSubtitleCache">Storage usage & caching policy</span>
-                </div>
-            </a>
+            <div class="nav-category" data-i18n="navCatLibrary">Library</div>
             <a href="#" class="nav-item" data-section="local-lyrics">
                 <div class="nav-item-icon-container">
-                    <svg class="icon-svg nav-icon nav-icon-outlined" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
-                        aria-hidden="true">
-                        <path
-                            d="M20 6h-8l-2-2H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm0 12H4V8h16v10z" />
+                    <svg class="icon-svg nav-icon nav-icon-outlined" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M4 4h7l2 2h7v14H4V4Zm3 7v2h10v-2H7Zm0 4v2h7v-2H7Z" />
                     </svg>
-                    <svg class="icon-svg nav-icon nav-icon-filled" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
-                        aria-hidden="true">
-                        <path d="M20 6h-8l-2-2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2z" />
+                    <svg class="icon-svg nav-icon nav-icon-filled" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M4 4h7l2 2h7v14H4V4Z" />
                     </svg>
                 </div>
                 <div class="nav-item-text">
-                    <span class="nav-item-title" data-i18n="navLocalLyrics">Local Lyrics</span>
-                    <span class="nav-item-subtitle" data-i18n="navSubtitleLocalLyrics">Manage uploaded LRC & TTML files</span>
+                    <span class="nav-item-title" data-i18n="navLocalLyrics">Local lyrics</span>
+                    <span class="nav-item-subtitle" data-i18n="navSubtitleLocalLyricsApple">Manage locally imported TTML</span>
                 </div>
             </a>
 
-            <div class="nav-category" data-i18n="navCatApplication">Application</div>
-            <a href="#" class="nav-item" data-section="about">
+            <div class="nav-category" data-i18n="navCatConfiguration">Configuration</div>
+            <a href="#" class="nav-item" data-section="translation">
                 <div class="nav-item-icon-container">
-                    <svg class="icon-svg nav-icon nav-icon-outlined" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
-                        aria-hidden="true">
-                        <path
-                            d="M11 7h2v2h-2V7zm0 4h2v6h-2v-6zm1-9C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z" />
+                    <svg class="icon-svg nav-icon nav-icon-outlined" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M4 5h10v3h3v11H4V5Zm2 5v2h2v2h2v-2h2v-2H6Zm9 5v-2h-2v-2h-2v2H9v2h2v2h2v-2h2Z" />
                     </svg>
-                    <svg class="icon-svg nav-icon nav-icon-filled" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
-                        aria-hidden="true">
-                        <path
-                            d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z" />
+                    <svg class="icon-svg nav-icon nav-icon-filled" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M4 5h10v3h3v11H4V5Zm3 5v2h6v-2H7Z" />
                     </svg>
                 </div>
                 <div class="nav-item-text">
-                    <span class="nav-item-title" data-i18n="navAbout">About</span>
-                    <span class="nav-item-subtitle" data-i18n="navSubtitleAbout">Version, backup, export & links</span>
+                    <span class="nav-item-title" data-i18n="navTranslationTransliteration">Translation &amp; transliteration</span>
+                    <span class="nav-item-subtitle" data-i18n="navSubtitleTranslationTransliteration">Providers, prompts, dictionaries</span>
+                </div>
+            </a>
+            <a href="#" class="nav-item" data-section="advanced">
+                <div class="nav-item-icon-container">
+                    <svg class="icon-svg nav-icon nav-icon-outlined" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8Zm8.4 4a8.4 8.4 0 0 0-.1-1l2-1.55-2-3.46-2.35.95a8 8 0 0 0-1.72-1L15.85 3h-4l-.38 2.94a8 8 0 0 0-1.72 1l-2.35-.95-2 3.46 2 1.55a8.4 8.4 0 0 0 0 2l-2 1.55 2 3.46 2.35-.95a8 8 0 0 0 1.72 1L11.85 21h4l.38-2.94a8 8 0 0 0 1.72-1l2.35.95 2-3.46-2-1.55c.07-.33.1-.66.1-1Z" />
+                    </svg>
+                    <svg class="icon-svg nav-icon nav-icon-filled" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8Zm7.7 3.32 2.3 1.79-2 3.46-2.7-1.1a7.8 7.8 0 0 1-1.73 1L15.85 21h-4l-.38-2.94a7.8 7.8 0 0 1-1.73-1l-2.7 1.1-2-3.46 2.3-1.79a8.4 8.4 0 0 1 0-2L5.04 8.12l2-3.46 2.7 1.1a7.8 7.8 0 0 1 1.73-1L11.85 3h4l.38 2.94a7.8 7.8 0 0 1 1.73 1l2.7-1.1 2 3.46-2.3 1.79a8.4 8.4 0 0 1 0 2Z" />
+                    </svg>
+                </div>
+                <div class="nav-item-text">
+                    <span class="nav-item-title" data-i18n="navStorageAdvanced">Storage &amp; advanced</span>
+                    <span class="nav-item-subtitle" data-i18n="navSubtitleStorageAdvanced">Cache, backup, help and license</span>
                 </div>
             </a>
         </nav>
@@ -161,7 +101,7 @@
 
     <main class="content-area">
         <header class="mobile-header">
-            <button id="mobile-menu-button" class="m3-button icon">
+            <button id="mobile-menu-button" class="m3-button icon" aria-label="Menu">
                 <svg class="icon-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true">
                     <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z" />
                 </svg>
@@ -169,30 +109,148 @@
             <h1 class="mobile-title" data-i18n="settingsTitle">YouLy+ Settings</h1>
         </header>
 
-        <div id="reload-notification" class="reload-notification">
-            <span id="notification-text" data-i18n="msgSettingsSavedRestart">Settings saved. Restart your music tabs for
-                changes to take effect.</span>
+        <div id="reload-notification" class="reload-notification" role="status">
+            <span id="notification-text" data-i18n="msgAppleRestart">The Apple Music player needs a reload for this change.</span>
             <button id="reload-button" class="m3-button tonal">
-                <svg class="icon-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true">
-                    <path
-                        d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z" />
-                </svg>
-                <span id="reload-button-text" data-i18n="buttonRestart">Restart</span>
+                <span id="reload-button-text" data-i18n="buttonReloadAppleMusic">Reload Apple Music</span>
             </button>
         </div>
 
         <div class="scroll-area">
-
-            <section class="settings-card active" id="appearance">
-                <h2 class="card-title" data-i18n="navAppearance">Appearance</h2>
+            <section class="settings-card active" id="playback">
+                <h2 class="card-title" data-i18n="navPlaybackAppearance">Playback &amp; appearance</h2>
 
                 <div class="settings-category">
-                    <h3 class="category-title">Apple Music</h3>
+                    <h3 class="category-title" data-i18n="categoryApplePlayer">Apple Music player</h3>
+                    <div class="settings-group">
+                        <div class="setting-item has-switch">
+                            <div class="setting-info">
+                                <span class="setting-title" data-i18n="settingEnableExtension">Enable YouLy+</span>
+                                <span class="setting-description" data-i18n="descEnableExtension">Globally enable or disable the extension.</span>
+                            </div>
+                            <div class="setting-control">
+                                <label class="m3-switch">
+                                    <input type="checkbox" id="enabled">
+                                    <div class="track"><div class="handle"></div></div>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="setting-item has-switch">
+                            <div class="setting-info">
+                                <span class="setting-title" data-i18n="settingUseAMLLPlayer">Use AMLL lyrics player</span>
+                                <span class="setting-description" data-i18n="descUseAMLLPlayer">Show Apple Music lyrics in the original AMLL player. Turn this off to use Apple's native lyrics view.</span>
+                            </div>
+                            <div class="setting-control">
+                                <label class="m3-switch">
+                                    <input type="checkbox" id="apple-music-amll">
+                                    <div class="track"><div class="handle"></div></div>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="setting-item has-switch">
+                            <div class="setting-info">
+                                <span class="setting-title" data-i18n="settingAnimatedLyricsBackground">Animated lyrics background</span>
+                                <span class="setting-description" data-i18n="descAnimatedLyricsBackground">Keep the AMLL album background and its original animation.</span>
+                            </div>
+                            <div class="setting-control">
+                                <label class="m3-switch">
+                                    <input type="checkbox" id="apple-music-background">
+                                    <div class="track"><div class="handle"></div></div>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="setting-item">
+                            <div class="setting-info">
+                                <span class="setting-title" data-i18n="labelLyricsDisplayMode">Lyrics display mode</span>
+                                <span class="setting-description" data-i18n="descLyricsDisplayMode">Default for translation and transliteration. The player menu offers the same choice.</span>
+                            </div>
+                            <div class="setting-control">
+                                <select id="apple-music-display-mode" class="native-select">
+                                    <option value="none" data-i18n="optionDisplayOriginal">Original lyrics</option>
+                                    <option value="translate" data-i18n="optionDisplayTranslation">Translation</option>
+                                    <option value="romanize" data-i18n="optionDisplayTransliteration">Transliteration</option>
+                                    <option value="both" data-i18n="optionDisplayBoth">Translation + transliteration</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="setting-item">
+                            <div class="setting-info">
+                                <span class="setting-title" data-i18n="settingTitleCorrection">Song title correction</span>
+                                <span class="setting-description" data-i18n="descTitleCorrection">Show the title, artist, and album in the selected Apple Music region.</span>
+                            </div>
+                            <div class="setting-control">
+                                <select id="apple-title-correction" class="native-select">
+                                    <option value="off" data-i18n="titleCorrectionOff">Off</option>
+                                    <option value="original" data-i18n="titleCorrectionOriginal">Use the song's original region</option>
+                                    <option value="cn" data-i18n="titleCorrectionChina">Use mainland China</option>
+                                    <option value="jp" data-i18n="titleCorrectionJapan">Use Japan</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="settings-category">
+                    <h3 class="category-title" data-i18n="categoryTextDisplay">Text display</h3>
+                    <div class="settings-group">
+                        <div class="setting-item has-switch">
+                            <div class="setting-info">
+                                <span class="setting-title" data-i18n="settingWordByWord">Word-by-word highlighting</span>
+                                <span class="setting-description" data-i18n="descWordByWord">Use karaoke-style word highlighting when the lyrics include word timing.</span>
+                            </div>
+                            <div class="setting-control">
+                                <label class="m3-switch">
+                                    <input type="checkbox" id="wordByWord">
+                                    <div class="track"><div class="handle"></div></div>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="setting-item">
+                            <div class="setting-info">
+                                <span class="setting-title" data-i18n="labelLargerTextMode">Larger text: pronunciation or lyrics</span>
+                                <span class="setting-description" data-i18n="descLargerTextMode">Choose which line becomes visually larger when lyrics and pronunciation are both shown.</span>
+                            </div>
+                            <div class="setting-control">
+                                <select id="larger-text-mode" class="native-select">
+                                    <option value="lyrics" data-i18n="optionLyrics">Lyrics</option>
+                                    <option value="romanization" data-i18n="optionPronunciation">Pronunciation</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="setting-item has-switch">
+                            <div class="setting-info">
+                                <span class="setting-title" data-i18n="settingHideLatinPronunciation">Hide Latin pronunciation</span>
+                                <span class="setting-description" data-i18n="descHideLatinPronunciation">Hide phonetic guides when the lyrics already use the Latin alphabet.</span>
+                            </div>
+                            <div class="setting-control">
+                                <label class="m3-switch">
+                                    <input type="checkbox" id="hide-phoneticdup">
+                                    <div class="track"><div class="handle"></div></div>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="setting-item has-switch">
+                            <div class="setting-info">
+                                <span class="setting-title" data-i18n="settingLightweightMode">Lightweight mode</span>
+                                <span class="setting-description" data-i18n="descLightweightMode">Reduce background animation and visual effects on slower devices.</span>
+                            </div>
+                            <div class="setting-control">
+                                <label class="m3-switch">
+                                    <input type="checkbox" id="lightweight">
+                                    <div class="track"><div class="handle"></div></div>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="settings-category">
+                    <h3 class="category-title" data-i18n="categoryPlayerFont">Player font</h3>
                     <div class="settings-group">
                         <div class="setting-item player-font-setting">
                             <div class="setting-info">
-                                <label class="setting-title" for="player-font-file" data-i18n="labelPlayerFont">Player font</label>
-                                <span class="setting-description" data-i18n="descPlayerFont">Apply an installed font to all player text. Leave blank to use the default. Separate fallback font names with commas.</span>
+                                <label class="setting-title" for="player-font-file" data-i18n="labelPlayerFont">Player font file</label>
+                                <span class="setting-description" data-i18n="descPlayerFont">Apply one font to all Apple Music player text. The file stays in extension storage.</span>
                             </div>
                             <div class="setting-control player-font-control">
                                 <input type="file" id="player-font-file" accept=".ttf,.otf,.woff,.woff2" hidden>
@@ -204,613 +262,695 @@
                         </div>
                     </div>
                 </div>
-
-                <div class="settings-category">
-                    <h3 class="category-title" data-i18n="categoryTextDisplay">Text Display</h3>
-                    <div class="settings-group">
-                        <div class="setting-item">
-                            <div class="setting-info">
-                                <span class="setting-title" data-i18n="labelLargerTextMode">Larger Text: Pronunciation Or Lyrics</span>
-                                <span class="setting-description" data-i18n="descLargerTextMode">Choose whether lyrics or pronunciation appears larger when both are displayed.</span>
-                            </div>
-                            <div class="setting-control">
-                                <div class="form-group margin-0">
-                                    <select id="larger-text-mode" placeholder=" ">
-                                        <option value="" disabled selected></option>
-                                        <option value="lyrics" data-i18n="optionLyrics">Lyrics</option>
-                                        <option value="romanization" data-i18n="optionPronunciation">Pronunciation</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="setting-item has-switch">
-                            <div class="setting-info">
-                                <span class="setting-title" data-i18n="settingHideLatinPronunciation">Hide Latin Pronunciation</span>
-                                <span class="setting-description" data-i18n="descHideLatinPronunciation">Automatically hide phonetic guides if the lyrics are already written in the Latin alphabet.</span>
-                            </div>
-                            <div class="setting-control">
-                                <label class="m3-switch">
-                                    <input type="checkbox" id="hide-phoneticdup">
-                                    <div class="track">
-                                        <div class="handle"></div>
-                                    </div>
-                                </label>
-                            </div>
-                        </div>
-                        <div class="setting-item has-switch">
-                            <div class="setting-info">
-                                <span class="setting-title" data-i18n="settingDynamicBkgVocal">Dynamic Background Vocal Positioning</span>
-                                <span class="setting-description" data-i18n="descDynamicBkgVocal">Background lyrics that start before main lyrics will be displayed on top.</span>
-                            </div>
-                            <div class="setting-control">
-                                <label class="m3-switch">
-                                    <input type="checkbox" id="bkg-overlap">
-                                    <div class="track">
-                                        <div class="handle"></div>
-                                    </div>
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="settings-category">
-                    <h3 class="category-title" data-i18n="categoryPerformance">Performance & Compatibility</h3>
-                    <div class="settings-group">
-                        <div class="setting-item has-switch">
-                            <div class="setting-info">
-                                <span class="setting-title" data-i18n="settingLightweightMode">Lightweight Mode</span>
-                                <span class="setting-description" data-i18n="descLightweightMode">Reduces animations and visual effects for better performance on older devices.</span>
-                            </div>
-                            <div class="setting-control">
-                                <label class="m3-switch">
-                                    <input type="checkbox" id="lightweight">
-                                    <div class="track">
-                                        <div class="handle"></div>
-                                    </div>
-                                </label>
-                            </div>
-                        </div>
-                        <div class="setting-item has-switch">
-                            <div class="setting-info">
-                                <span class="setting-title" data-i18n="settingHideOffscreen">Hide Off-screen Lyrics Line</span>
-                                <span class="setting-description" data-i18n="descHideOffscreen">Hides & removes animation lyrics lines that are not currently visible on the screen.</span>
-                            </div>
-                            <div class="setting-control">
-                                <label class="m3-switch">
-                                    <input type="checkbox" id="hide-offscreen">
-                                    <div class="track">
-                                        <div class="handle"></div>
-                                    </div>
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="settings-category">
-                    <h3 class="category-title" data-i18n="categoryVisualEffects">Visual Effects</h3>
-                    <div class="settings-group">
-                        <div class="setting-item has-switch">
-                            <div class="setting-info">
-                                <span class="setting-title" data-i18n="settingBlurInactive">Blur Inactive Lyrics</span>
-                                <span class="setting-description" data-i18n="descBlurInactive">Applies a blur effect to lyrics not currently being sung, similar to Apple Music.</span>
-                            </div>
-                            <div class="setting-control">
-                                <label class="m3-switch">
-                                    <input type="checkbox" id="blur-inactive">
-                                    <div class="track">
-                                        <div class="handle"></div>
-                                    </div>
-                                </label>
-                            </div>
-                        </div>
-                        <div class="setting-item has-switch">
-                            <div class="setting-info">
-                                <span class="setting-title" data-i18n="settingDynamicBackground">Enable Dynamic Background (Player View)</span>
-                                <span class="setting-description" data-i18n="descDynamicBackground">Applies animated album backgrounds when the player is expanded.</span>
-                            </div>
-                            <div class="setting-control">
-                                <label class="m3-switch">
-                                    <input type="checkbox" id="dynamic-player">
-                                    <div class="track">
-                                        <div class="handle"></div>
-                                    </div>
-                                </label>
-                            </div>
-                        </div>
-                        <div class="setting-item has-switch">
-                            <div class="setting-info">
-                                <span class="setting-title" data-i18n="settingAudioBeatSync">Audio-based Beat Pulse for Dynamic Background</span>
-                                <span class="setting-description" data-i18n="descAudioBeatSync">Makes the dynamic background layers pulse to the beat of the audio.</span>
-                            </div>
-                            <div class="setting-control">
-                                <label class="m3-switch">
-                                    <input type="checkbox" id="audio-beat-sync">
-                                    <div class="track">
-                                        <div class="handle"></div>
-                                    </div>
-                                </label>
-                            </div>
-                        </div>
-                        <div class="setting-item has-switch">
-                            <div class="setting-info">
-                                <span class="setting-title" data-i18n="settingRelaxScroll">Relax Scrolling</span>
-                                <span class="setting-description" data-i18n="descRelaxScroll">Slower scrolling animation & disable text resizing animation for the lyrics.</span>
-                            </div>
-                            <div class="setting-control">
-                                <label class="m3-switch">
-                                    <input type="checkbox" id="relax-scroll">
-                                    <div class="track">
-                                        <div class="handle"></div>
-                                    </div>
-                                </label>
-                            </div>
-                        </div>
-                        <div class="setting-item has-switch">
-                            <div class="setting-info">
-                                <span class="setting-title" data-i18n="settingSongPaletteFullscreen">Use song palette for lyrics color in fullscreen video-mode</span>
-                                <span class="setting-description" data-i18n="descSongPaletteFullscreen">Uses the song's color palette for the lyrics when in video music fullscreen mode.</span>
-                            </div>
-                            <div class="setting-control">
-                                <label class="m3-switch">
-                                    <input type="checkbox" id="useSongPaletteFullscreen">
-                                    <div class="track">
-                                        <div class="handle"></div>
-                                    </div>
-                                </label>
-                            </div>
-                        </div>
-                        <div class="setting-item has-switch">
-                            <div class="setting-info">
-                                <span class="setting-title" data-i18n="settingSongPaletteAll">Use song palette for lyrics color in all modes</span>
-                                <span class="setting-description" data-i18n="descSongPaletteAll">Uses the song's color palette for the lyrics in all display modes.</span>
-                            </div>
-                            <div class="setting-control">
-                                <label class="m3-switch">
-                                    <input type="checkbox" id="useSongPaletteAllModes">
-                                    <div class="track">
-                                        <div class="handle"></div>
-                                    </div>
-                                </label>
-                            </div>
-                        </div>
-                        <div class="setting-item">
-                            <div class="setting-info">
-                                <span class="setting-title" data-i18n="labelOverridePaletteColor">Override palette color</span>
-                                <span class="setting-description" data-i18n="helperOverridePaletteColor">Override the song palette color with a custom one (e.g. #ffb5a0). Leave empty for default.</span>
-                            </div>
-                            <div class="setting-control">
-                                <div class="form-group margin-0">
-                                    <input type="text" id="overridePaletteColor" placeholder="#ffb5a0" data-i18n-placeholder="placeholderPaletteColor">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="settings-category">
-                    <h3 class="category-title" data-i18n="categoryCustomStyling">Custom Styling</h3>
-                    <div class="settings-group">
-                        <div class="setting-item full-width">
-                            <div class="setting-info">
-                                <span class="setting-title" data-i18n="labelCustomCSS">Custom CSS</span>
-                                <span class="setting-description" data-i18n="helperCustomCSS">Apply your own styles to the lyrics display. Use with caution.</span>
-                            </div>
-                            <div class="setting-control full-width">
-                                <div class="form-group margin-0">
-                                    <textarea id="custom-css" placeholder="/* Custom CSS */" data-i18n-placeholder="placeholderCustomCSS" rows="5"></textarea>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <p id="appearance-save-status" class="status-message"></p>
-            </section>
-
-            <section class="settings-card" id="general">
-                <h2 class="card-title" data-i18n="navGeneral">General</h2>
-
-                <div class="settings-category">
-                    <h3 class="category-title" data-i18n="categoryCoreFunc">Core Functionality</h3>
-                    <div class="settings-group">
-                        <div class="setting-item has-switch">
-                            <div class="setting-info">
-                                <span class="setting-title" data-i18n="settingEnableExtension">Enable YouLy+</span>
-                                <span class="setting-description" data-i18n="descEnableExtension">Globally enable or disable the extension.</span>
-                            </div>
-                            <div class="setting-control">
-                                <label class="m3-switch">
-                                    <input type="checkbox" id="enabled" checked>
-                                    <div class="track">
-                                        <div class="handle"></div>
-                                    </div>
-                                </label>
-                            </div>
-                        </div>
-                        <div class="setting-item has-switch">
-                            <div class="setting-info">
-                                <span class="setting-title" data-i18n="settingWordByWord">Word-by-Word Highlighting</span>
-                                <span class="setting-description" data-i18n="descWordByWord">Enable karaoke-style word highlighting if available.</span>
-                            </div>
-                            <div class="setting-control">
-                                <label class="m3-switch">
-                                    <input type="checkbox" id="wordByWord">
-                                    <div class="track">
-                                        <div class="handle"></div>
-                                    </div>
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="settings-category">
-                    <h3 class="category-title" data-i18n="categoryYouTubeMusic">YouTube Music Settings</h3>
-                    <div class="settings-group">
-                        <div class="setting-item has-switch">
-                            <div class="setting-info">
-                                <span class="setting-title" data-i18n="settingFullscreenSongInfo">Enable Fullscreen Song Info</span>
-                                <span class="setting-description" data-i18n="descFullscreenSongInfo">Display song details in fullscreen mode, including progress bar, release date, title, and artist.</span>
-                            </div>
-                            <div class="setting-control">
-                                <label class="m3-switch">
-                                    <input type="checkbox" id="ytsonginfo">
-                                    <div class="track">
-                                        <div class="handle"></div>
-                                    </div>
-                                </label>
-                            </div>
-                        </div>
-                        <div class="setting-item has-switch" id="ytsonginfo-disableseekbar-group" style="display: none;">
-                            <div class="setting-info">
-                                <span class="setting-title" data-i18n="settingDisableSongInfoSeekbar">Disable Song Info Seekbar</span>
-                                <span class="setting-description" data-i18n="descDisableSongInfoSeekbar">Hide the progress bar from the fullscreen song information display.</span>
-                            </div>
-                            <div class="setting-control">
-                                <label class="m3-switch">
-                                    <input type="checkbox" id="ytsonginfo-disableseekbar">
-                                    <div class="track">
-                                        <div class="handle"></div>
-                                    </div>
-                                </label>
-                            </div>
-                        </div>
-                        <div class="setting-item has-switch">
-                            <div class="setting-info">
-                                <span class="setting-title" data-i18n="settingUseSponsorBlock">Use SponsorBlock API</span>
-                                <span class="setting-description" data-i18n="descUseSponsorBlock">Skip non-music sections like intros, outros, or sponsor segments.</span>
-                            </div>
-                            <div class="setting-control">
-                                <label class="m3-switch">
-                                    <input type="checkbox" id="sponsor-block">
-                                    <div class="track">
-                                        <div class="handle"></div>
-                                    </div>
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="settings-category">
-                    <h3 class="category-title" data-i18n="categoryAppleMusic">Apple Music Settings</h3>
-                    <div class="settings-group">
-                        <div class="setting-item has-switch">
-                            <div class="setting-info">
-                                <span class="setting-title" data-i18n="settingPreferExternal">Prefer External Lyrics for Line-Synced Tracks</span>
-                                <span class="setting-description" data-i18n="descPreferExternal">When enabled, use an external lyrics source if Apple Music only provides line-by-line synchronization instead of word-by-word.</span>
-                            </div>
-                            <div class="setting-control">
-                                <label class="m3-switch">
-                                    <input type="checkbox" id="bypass-apple">
-                                    <div class="track">
-                                        <div class="handle"></div>
-                                    </div>
-                                </label>
-                            </div>
-                        <div class="setting-item">
-                            <div class="setting-info">
-                                <span class="setting-title" data-i18n="settingTitleCorrection">Song Title Correction</span>
-                                <span class="setting-description" data-i18n="descTitleCorrection">When enabled, the AMLL player shows the song title, artist, and album as they appear in the selected region.</span>
-                            </div>
-                            <div class="setting-control">
-                                <div class="form-group margin-0">
-                                    <select id="apple-title-correction" placeholder=" ">
-                                        <option value="" disabled selected></option>
-                                        <option value="off" data-i18n="titleCorrectionOff">Off</option>
-                                        <option value="original" data-i18n="titleCorrectionOriginal">Use the song's original region</option>
-                                        <option value="cn" data-i18n="titleCorrectionChina">Use mainland China</option>
-                                        <option value="jp" data-i18n="titleCorrectionJapan">Use Japan</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-                        </div>
-                    </div>
-                </div>
-                <p id="general-save-status" class="status-message"></p>
+                <p id="playback-save-status" class="status-message" role="status" aria-live="polite"></p>
             </section>
 
             <section class="settings-card" id="sources">
-                <h2 class="card-title" data-i18n="navSources">Sources</h2>
-                <div class="settings-group">
-                    <div class="setting-item">
-                        <div class="setting-info"><span class="setting-title" data-i18n="labelSourcePlatform">Music platform</span></div>
-                        <div class="setting-control"><div class="form-group margin-0">
-                            <select id="source-platform"><option value="applemusic">Apple Music</option><option value="other">YouTube Music / Tidal</option></select>
-                        </div></div>
-                    </div>
-                </div>
+                <h2 class="card-title" data-i18n="navLyricsSourcesApple">Lyrics sources</h2>
+                <p class="section-intro" data-i18n="sourcesAppleOnlyNote">YouLy+ now supports Apple Music only. This source order applies to every song.</p>
 
                 <div class="settings-category">
-                    <h3 class="category-title" data-i18n="categoryLyricsProvider">Primary Lyrics Provider</h3>
+                    <h3 class="category-title" data-i18n="categoryAppleSourceOrder">Apple Music lyrics source order</h3>
                     <div class="settings-group">
-                        <div class="setting-item full-width" id="setting-provider-order">
+                        <div class="setting-item full-width">
                             <div class="setting-info">
-                                <span class="setting-title" data-i18n="labelProviderOrder">Lyrics Provider Order</span>
-                                <span class="setting-description" data-i18n="helperProviderOrder">Drag and drop to prioritize which provider is checked first. The top provider acts as the fast-path choice.</span>
+                                <span class="setting-title" data-i18n="labelProviderOrder">Lyrics source priority</span>
+                                <span class="setting-description" data-i18n="descAppleSourceOrder">AMLL is tried first by default, then LunaBeat, AmLyrics, and Apple Music's native lyrics. Apple Music always stays last.</span>
                             </div>
                             <div class="setting-control full-width">
                                 <div class="source-order-container">
-                                    <div id="provider-order-draggable" class="draggable-list">
-                                    </div>
+                                    <div id="provider-order-draggable" class="draggable-list"></div>
                                     <div class="add-source-container">
-                                        <div class="form-group margin-0 grow-1">
-                                            <select id="available-providers-dropdown" placeholder=" ">
-                                            </select>
-                                        </div>
-                                        <button class="m3-button tonal" id="add-provider-button" type="button">
-                                            <svg class="icon-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
-                                                aria-hidden="true">
-                                                <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
-                                            </svg>
-                                            <span data-i18n="buttonAddProvider">Add Provider</span>
-                                        </button>
+                                        <select id="available-providers-dropdown" class="native-select grow-1" aria-label="Available lyrics sources">
+                                        </select>
+                                        <button class="m3-button tonal" id="add-provider-button" type="button" data-i18n="buttonAddProvider">Add source</button>
                                     </div>
-                                    <span id="add-provider-status" class="status-message"></span>
+                                    <p id="add-provider-status" class="status-message" role="status"></p>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
+                <p id="source-order-status" class="status-message" role="status" aria-live="polite"></p>
+            </section>
 
-                <div class="settings-category" id="custom-kpoe-category">
-                    <h3 class="category-title" data-i18n="categoryCustomKpoe">Custom KPoe</h3>
-                    <div class="settings-group">
-                        <div class="setting-item" id="custom-kpoe-url-group" style="display: none;">
-                            <div class="setting-info">
-                                <span class="setting-title" data-i18n="labelCustomKpoeUrl">Custom KPoe Server URL</span>
-                                <span class="setting-description" data-i18n="helperCustomKpoeUrl">Enter the base URL for your self-hosted KPoe server.</span>
-                            </div>
-                            <div class="setting-control">
-                                <div class="form-group margin-0">
-                                    <input type="text" id="custom-kpoe-url" placeholder="https://example.com/api" data-i18n-placeholder="placeholderCustomKpoeUrl">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+            <section class="settings-card" id="local-lyrics">
+                <h2 class="card-title" data-i18n="navLocalLyrics">Local lyrics</h2>
+
+                <div class="info-panel">
+                    <strong data-i18n="localLyricsImportGuideTitle">Import TTML from the song player</strong>
+                    <ol class="guide-list">
+                        <li data-i18n="localLyricsImportStep1">Open the current Apple Music song in the fullscreen lyrics player.</li>
+                        <li data-i18n="localLyricsImportStep2">Open the player menu and choose Import TTML.</li>
+                        <li data-i18n="localLyricsImportStep3">The file is saved for that song and filled in automatically on later loads.</li>
+                    </ol>
+                    <p data-i18n="localLyricsOverrideNote">Local TTML takes priority for the matching song. Delete it here to return to automatic sources.</p>
+                    <a class="inline-link" href="https://github.com/Zennmn/YouLyPlus/blob/main/docs/ttml-translation.md" target="_blank" rel="noopener noreferrer" data-i18n="linkTTMLTranslationGuide">TTML translation guide</a>
                 </div>
 
                 <div class="settings-category">
-                    <h3 class="category-title" data-i18n="categoryUnison" id="legacy-unison-title">Unison</h3>
-                    <div class="settings-group">
-                        <div class="setting-item has-switch">
-                            <div class="setting-info">
-                                <span class="setting-title" data-i18n="settingPreferUnisonVideo">Prefer Unison for Videos</span>
-                                <span class="setting-description" data-i18n="descPreferUnisonVideo">When enabled, prioritize the Unison service for video content and ignore SponsorBlock segments.</span>
-                            </div>
-                            <div class="setting-control">
-                                <label class="m3-switch">
-                                    <input type="checkbox" id="prefer-unison-video">
-                                    <div class="track">
-                                        <div class="handle"></div>
-                                    </div>
-                                </label>
-                            </div>
-                        </div>
+                    <h3 class="category-title" data-i18n="categoryLocalLyricsLibrary">Local TTML library</h3>
+                    <div id="local-lyrics-list" class="draggable-list">
+                        <p class="helper-text" id="no-local-lyrics-message" data-i18n="msgNoLocalLyrics">No local TTML imports yet.</p>
                     </div>
-                </div>
-
-                <div class="settings-category" id="setting-source-order">
-                    <h3 class="category-title" data-i18n="categoryLyricsPlus">Lyrics+</h3>
-                    <div class="settings-group">
-                        <div class="setting-item full-width" id="kpoe-sources-group">
-                            <div class="setting-info">
-                                <span class="setting-title" data-i18n="labelSourceOrder">Lyrics+ Source Order</span>
-                                <span class="setting-description" data-i18n="helperSourceOrder">Drag and drop to reorder the sources for Lyrics+.</span>
-                            </div>
-                            <div class="setting-control full-width">
-                                <div class="source-order-container">
-                                    <div id="lyrics-source-order-draggable" class="draggable-list">
-                                    </div>
-                                    <div class="add-source-container">
-                                        <div class="form-group margin-0 grow-1">
-                                            <select id="available-sources-dropdown" placeholder=" ">
-                                                <option value="" disabled selected></option>
-                                            </select>
-                                        </div>
-                                        <button id="add-source-button" class="m3-button tonal" type="button">
-                                            <svg class="icon-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
-                                                aria-hidden="true">
-                                                <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
-                                            </svg>
-                                            <span data-i18n="buttonAddSource">Add Source</span>
-                                        </button>
-                                    </div>
-                                    <p id="add-source-status" class="status-message"></p>
-                                </div>
-                            </div>
-                        </div>
+                    <div class="card-actions">
+                        <button id="refresh-local-lyrics-list" class="m3-button outlined" type="button">
+                            <span data-i18n="buttonRefreshList">Refresh list</span>
+                        </button>
                     </div>
+                    <p id="local-lyrics-status" class="status-message" role="status" aria-live="polite"></p>
                 </div>
             </section>
 
             <section class="settings-card" id="translation">
-                <h2 class="card-title" data-i18n="navTranslation">Translation</h2>
+                <h2 class="card-title" data-i18n="navTranslationTransliteration">Translation &amp; transliteration</h2>
+                <p class="section-intro" data-i18n="translationApplePolicyNote">Machine translation runs only for Apple Music's original lyrics when a track has no built-in translation. Apple-provided translations are preserved.</p>
 
                 <div class="settings-category">
-                    <h3 class="category-title" data-i18n="categoryTranslationService">Translation Service</h3>
+                    <h3 class="category-title" data-i18n="categoryTranslationService">Translation service</h3>
                     <div class="settings-group">
                         <div class="setting-item">
                             <div class="setting-info">
-                                <span class="setting-title" data-i18n="labelTranslationProvider">Translation Provider</span>
-                                <span class="setting-description" data-i18n="descTranslationProvider">Select the service for translating lyrics.</span>
+                                <span class="setting-title" data-i18n="labelTranslationProvider">Translation provider</span>
+                                <span class="setting-description" data-i18n="descTranslationProvider">Choose the service that translates lyrics when Apple Music does not provide a translation.</span>
                             </div>
                             <div class="setting-control">
-                                <div class="form-group margin-0">
-                                    <select id="translation-provider" placeholder=" ">
-                                        <option value="" disabled selected></option>
-                                        <option value="google" data-i18n="optionGoogleTranslate">Google Translate</option>
-                                        <option value="gemini" data-i18n="optionGeminiAI">Gemini AI</option>
-                                        <option value="openrouter" data-i18n="optionOpenRouter">OpenRouter (LLM)</option>
-                                        <option value="customllm" data-i18n="optionCustomLLM">Third-party LLM (Chat Completions)</option>
-                                        <option value="deepl" data-i18n="optionDeepL">DeepL</option>
-                                        <option value="deepl-keyless" data-i18n="optionDeepLKeyless">DeepL (Keyless)</option>
-                                    </select>
+                                <select id="translation-provider" class="native-select">
+                                    <option value="google" data-i18n="optionGoogleTranslate">Google Translate</option>
+                                    <option value="gemini" data-i18n="optionGeminiAI">Gemini AI</option>
+                                    <option value="openrouter" data-i18n="optionOpenRouter">OpenRouter (LLM)</option>
+                                    <option value="customllm" data-i18n="optionCustomLLM">Third-party LLM (Chat Completions)</option>
+                                    <option value="deepl" data-i18n="optionDeepL">DeepL</option>
+                                    <option value="deepl-keyless" data-i18n="optionDeepLKeyless">DeepL (Keyless)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="setting-item full-width">
+                            <div class="setting-info">
+                                <span class="setting-title" data-i18n="labelCustomTranslateTarget">Target language</span>
+                                <span class="setting-description" data-i18n="descOverrideTranslateTarget">Choose the target language for machine translation. Auto follows the browser UI language.</span>
+                            </div>
+                            <div class="setting-control full-width">
+                                <div class="form-group margin-0 target-language-select">
+                                        <select id="custom-translate-target" placeholder=" ">
+
+                                                                                <option value="" data-i18n="optionTargetLangAuto">Auto</option>
+
+                                                                                <option value="ab">Abkhaz (Аҧсуа)</option>
+
+                                                                                <option value="ace">Acehnese (Basa Acèh)</option>
+
+                                                                                <option value="ach">Acholi</option>
+
+                                                                                <option value="aa">Afar (Qafaraf)</option>
+
+                                                                                <option value="af">Afrikaans</option>
+
+                                                                                <option value="ak">Akan / Twi</option>
+
+                                                                                <option value="sq">Albanian (Shqip)</option>
+
+                                                                                <option value="alz">Alur</option>
+
+                                                                                <option value="am">Amharic (አማርኛ)</option>
+
+                                                                                <option value="ar">Arabic (العربية)</option>
+
+                                                                                <option value="hy">Armenian (Հայերեն)</option>
+
+                                                                                <option value="as">Assamese (অসমীয়া)</option>
+
+                                                                                <option value="av">Avar (Авар)</option>
+
+                                                                                <option value="awa">Awadhi (अवधी)</option>
+
+                                                                                <option value="ay">Aymara</option>
+
+                                                                                <option value="az">Azerbaijani (Azərbaycan)</option>
+
+                                                                                <option value="ban">Balinese (Basa Bali)</option>
+
+                                                                                <option value="bal">Baluchi (بلوچی)</option>
+
+                                                                                <option value="bm">Bambara</option>
+
+                                                                                <option value="bci">Baoulé</option>
+
+                                                                                <option value="ba">Bashkir (Башҡорт)</option>
+
+                                                                                <option value="eu">Basque (Euskara)</option>
+
+                                                                                <option value="btx">Batak Karo</option>
+
+                                                                                <option value="bts">Batak Simalungun</option>
+
+                                                                                <option value="bbc">Batak Toba</option>
+
+                                                                                <option value="be">Belarusian (Беларуская)</option>
+
+                                                                                <option value="bem">Bemba</option>
+
+                                                                                <option value="bn">Bengali (বাংলা)</option>
+
+                                                                                <option value="bew">Betawi (Basa Betawi)</option>
+
+                                                                                <option value="bho">Bhojpuri (भोजपुरी)</option>
+
+                                                                                <option value="bik">Bikol</option>
+
+                                                                                <option value="bs">Bosnian (Bosanski)</option>
+
+                                                                                <option value="br">Breton (Brezhoneg)</option>
+
+                                                                                <option value="bg">Bulgarian (Български)</option>
+
+                                                                                <option value="bua">Buryat (Буряад)</option>
+
+                                                                                <option value="yue">Cantonese (粵語)</option>
+
+                                                                                <option value="ca">Catalan (Català)</option>
+
+                                                                                <option value="ceb">Cebuano</option>
+
+                                                                                <option value="ch">Chamorro</option>
+
+                                                                                <option value="ce">Chechen (Нохчийн)</option>
+
+                                                                                <option value="ny">Chichewa / Nyanja</option>
+
+                                                                                <option value="zh-CN">Chinese Simplified (简体中文)</option>
+
+                                                                                <option value="zh-TW">Chinese Traditional (繁體中文)</option>
+
+                                                                                <option value="chk">Chuukese</option>
+
+                                                                                <option value="cv">Chuvash (Чӑвашла)</option>
+
+                                                                                <option value="co">Corsican (Corsu)</option>
+
+                                                                                <option value="crh">Crimean Tatar (Qırımtatarca)</option>
+
+                                                                                <option value="hr">Croatian (Hrvatski)</option>
+
+                                                                                <option value="cs">Czech (Čeština)</option>
+
+                                                                                <option value="da">Danish (Dansk)</option>
+
+                                                                                <option value="fa-AF">Dari (دری)</option>
+
+                                                                                <option value="dv">Dhivehi (ދިވެހި)</option>
+
+                                                                                <option value="din">Dinka</option>
+
+                                                                                <option value="doi">Dogri (डोगरी)</option>
+
+                                                                                <option value="dov">Dombe</option>
+
+                                                                                <option value="nl">Dutch (Nederlands)</option>
+
+                                                                                <option value="dyu">Dyula</option>
+
+                                                                                <option value="dz">Dzongkha (རྫོང་ཁ)</option>
+
+                                                                                <option value="en">English</option>
+
+                                                                                <option value="eo">Esperanto</option>
+
+                                                                                <option value="et">Estonian (Eesti)</option>
+
+                                                                                <option value="ee">Ewe (Eʋegbe)</option>
+
+                                                                                <option value="fo">Faroese (Føroyskt)</option>
+
+                                                                                <option value="fj">Fijian (Na Vosa Vakaviti)</option>
+
+                                                                                <option value="tl">Filipino / Tagalog</option>
+
+                                                                                <option value="fi">Finnish (Suomi)</option>
+
+                                                                                <option value="fon">Fon</option>
+
+                                                                                <option value="fr">French (Français)</option>
+
+                                                                                <option value="fy">Frisian (Frysk)</option>
+
+                                                                                <option value="fur">Friulian (Furlan)</option>
+
+                                                                                <option value="ff">Fulani / Peul (Fulfulde)</option>
+
+                                                                                <option value="gaa">Ga</option>
+
+                                                                                <option value="gl">Galician (Galego)</option>
+
+                                                                                <option value="ka">Georgian (ქართული)</option>
+
+                                                                                <option value="de">German (Deutsch)</option>
+
+                                                                                <option value="el">Greek (Ελληνικά)</option>
+
+                                                                                <option value="gn">Guarani</option>
+
+                                                                                <option value="gu">Gujarati (ગુજરાતી)</option>
+
+                                                                                <option value="ht">Haitian Creole (Kreyòl Ayisyen)</option>
+
+                                                                                <option value="cnh">Hakha Chin</option>
+
+                                                                                <option value="ha">Hausa</option>
+
+                                                                                <option value="haw">Hawaiian (ʻŌlelo Hawaiʻi)</option>
+
+                                                                                <option value="he">Hebrew (עברית)</option>
+
+                                                                                <option value="hil">Hiligaynon</option>
+
+                                                                                <option value="hi">Hindi (हिन्दी)</option>
+
+                                                                                <option value="hmn">Hmong</option>
+
+                                                                                <option value="hu">Hungarian (Magyar)</option>
+
+                                                                                <option value="hrx">Hunsrik</option>
+
+                                                                                <option value="iba">Iban</option>
+
+                                                                                <option value="is">Icelandic (Íslenska)</option>
+
+                                                                                <option value="ig">Igbo</option>
+
+                                                                                <option value="ilo">Ilocano</option>
+
+                                                                                <option value="id">Indonesian (Bahasa Indonesia)</option>
+
+                                                                                <option value="ga">Irish (Gaeilge)</option>
+
+                                                                                <option value="it">Italian (Italiano)</option>
+
+                                                                                <option value="jam">Jamaican Patois</option>
+
+                                                                                <option value="ja">Japanese (日本語)</option>
+
+                                                                                <option value="jv">Javanese (Basa Jawa)</option>
+
+                                                                                <option value="kac">Jingpo / Kachin</option>
+
+                                                                                <option value="kl">Kalaallisut / Greenlandic</option>
+
+                                                                                <option value="kn">Kannada (ಕನ್ನಡ)</option>
+
+                                                                                <option value="knc">Kanuri</option>
+
+                                                                                <option value="pam">Kapampangan</option>
+
+                                                                                <option value="kk">Kazakh (Қазақша)</option>
+
+                                                                                <option value="kha">Khasi</option>
+
+                                                                                <option value="km">Khmer (ភាសាខ្មែរ)</option>
+
+                                                                                <option value="cgg">Kiga</option>
+
+                                                                                <option value="kg">Kikongo</option>
+
+                                                                                <option value="rw">Kinyarwanda</option>
+
+                                                                                <option value="ktu">Kituba</option>
+
+                                                                                <option value="trp">Kokborok</option>
+
+                                                                                <option value="kv">Komi (Коми)</option>
+
+                                                                                <option value="gom">Konkani (कोंकणी)</option>
+
+                                                                                <option value="ko">Korean (한국어)</option>
+
+                                                                                <option value="kri">Krio</option>
+
+                                                                                <option value="ku">Kurdish Kurmanji (Kurdî)</option>
+
+                                                                                <option value="ckb">Kurdish Sorani (کوردی)</option>
+
+                                                                                <option value="ky">Kyrgyz (Кыргызча)</option>
+
+                                                                                <option value="lo">Lao (ພາສາລາວ)</option>
+
+                                                                                <option value="ltg">Latgalian</option>
+
+                                                                                <option value="la">Latin (Latina)</option>
+
+                                                                                <option value="lv">Latvian (Latviešu)</option>
+
+                                                                                <option value="lij">Ligurian</option>
+
+                                                                                <option value="li">Limburgish</option>
+
+                                                                                <option value="ln">Lingala</option>
+
+                                                                                <option value="lt">Lithuanian (Lietuvių)</option>
+
+                                                                                <option value="lmo">Lombard</option>
+
+                                                                                <option value="lg">Luganda</option>
+
+                                                                                <option value="luo">Luo</option>
+
+                                                                                <option value="lb">Luxembourgish (Lëtzebuergesch)</option>
+
+                                                                                <option value="mk">Macedonian (Македонски)</option>
+
+                                                                                <option value="mad">Madurese (Basa Madhurâ)</option>
+
+                                                                                <option value="mai">Maithili (मैथिली)</option>
+
+                                                                                <option value="mak">Makassarese (Basa Mangkasara)</option>
+
+                                                                                <option value="mg">Malagasy</option>
+
+                                                                                <option value="ms">Malay (Bahasa Melayu)</option>
+
+                                                                                <option value="ms-Arab">Malay Jawi (بهاس ملايو)</option>
+
+                                                                                <option value="ml">Malayalam (മലയാളം)</option>
+
+                                                                                <option value="mt">Maltese (Malti)</option>
+
+                                                                                <option value="mam">Mam</option>
+
+                                                                                <option value="gv">Manx (Gaelg)</option>
+
+                                                                                <option value="mi">Maori (Te Reo Māori)</option>
+
+                                                                                <option value="mr">Marathi (मराठी)</option>
+
+                                                                                <option value="mh">Marshallese (Kajin M̧ajeļ)</option>
+
+                                                                                <option value="mwr">Marwadi (मारवाड़ी)</option>
+
+                                                                                <option value="mfe">Mauritian Creole (Morisien)</option>
+
+                                                                                <option value="mhr">Meadow Mari (Марий)</option>
+
+                                                                                <option value="mni-Mtei">Meiteilon / Manipuri (মৈতৈলোন্)</option>
+
+                                                                                <option value="min">Minang (Baso Minangkabau)</option>
+
+                                                                                <option value="lus">Mizo</option>
+
+                                                                                <option value="mn">Mongolian (Монгол)</option>
+
+                                                                                <option value="my">Myanmar / Burmese (မြန်မာ)</option>
+
+                                                                                <option value="nah">Nahuatl</option>
+
+                                                                                <option value="ndc">Ndau</option>
+
+                                                                                <option value="nr">Ndebele South (isiNdebele)</option>
+
+                                                                                <option value="new">Nepalbhasa / Newari (नेपालभाषा)</option>
+
+                                                                                <option value="ne">Nepali (नेपाली)</option>
+
+                                                                                <option value="nqo">NKo</option>
+
+                                                                                <option value="nso">Northern Sotho / Sepedi</option>
+
+                                                                                <option value="no">Norwegian (Norsk)</option>
+
+                                                                                <option value="nus">Nuer</option>
+
+                                                                                <option value="oc">Occitan</option>
+
+                                                                                <option value="or">Odia / Oriya (ଓଡ଼ିଆ)</option>
+
+                                                                                <option value="om">Oromo</option>
+
+                                                                                <option value="os">Ossetian (Ирон)</option>
+
+                                                                                <option value="pag">Pangasinan</option>
+
+                                                                                <option value="pap">Papiamento</option>
+
+                                                                                <option value="ps">Pashto (پښتو)</option>
+
+                                                                                <option value="fa">Persian (فارسی)</option>
+
+                                                                                <option value="pl">Polish (Polski)</option>
+
+                                                                                <option value="pt">Portuguese (Português)</option>
+
+                                                                                <option value="pa">Punjabi (ਪੰਜਾਬੀ)</option>
+
+                                                                                <option value="pa-Arab">Punjabi Shahmukhi (پنجابی)</option>
+
+                                                                                <option value="qu">Quechua</option>
+
+                                                                                <option value="kek">Qʼeqchiʼ</option>
+
+                                                                                <option value="rom">Romani</option>
+
+                                                                                <option value="ro">Romanian (Română)</option>
+
+                                                                                <option value="rn">Rundi / Kirundi</option>
+
+                                                                                <option value="ru">Russian (Русский)</option>
+
+                                                                                <option value="se">Sami North (Davvisámegiella)</option>
+
+                                                                                <option value="sm">Samoan (Gagana Sāmoa)</option>
+
+                                                                                <option value="sg">Sango</option>
+
+                                                                                <option value="sa">Sanskrit (संस्कृतम्)</option>
+
+                                                                                <option value="sat">Santali (ᱥᱟᱱᱛᱟᱲᱤ)</option>
+
+                                                                                <option value="gd">Scots Gaelic (Gàidhlig)</option>
+
+                                                                                <option value="sr">Serbian (Српски)</option>
+
+                                                                                <option value="st">Sesotho</option>
+
+                                                                                <option value="crs">Seychellois Creole</option>
+
+                                                                                <option value="shn">Shan (ၵႂၢမ်းတႆး)</option>
+
+                                                                                <option value="sn">Shona</option>
+
+                                                                                <option value="scn">Sicilian (Sicilianu)</option>
+
+                                                                                <option value="szl">Silesian (Ślōnskŏ)</option>
+
+                                                                                <option value="sd">Sindhi (سنڌي)</option>
+
+                                                                                <option value="si">Sinhala (සිංහල)</option>
+
+                                                                                <option value="sk">Slovak (Slovenčina)</option>
+
+                                                                                <option value="sl">Slovenian (Slovenščina)</option>
+
+                                                                                <option value="so">Somali (Soomaali)</option>
+
+                                                                                <option value="es">Spanish (Español)</option>
+
+                                                                                <option value="su">Sundanese (Basa Sunda)</option>
+
+                                                                                <option value="sus">Susu</option>
+
+                                                                                <option value="sw">Swahili (Kiswahili)</option>
+
+                                                                                <option value="ss">Swati / Swazi (SiSwati)</option>
+
+                                                                                <option value="sv">Swedish (Svenska)</option>
+
+                                                                                <option value="ty">Tahitian (Reo Tahiti)</option>
+
+                                                                                <option value="tg">Tajik (Тоҷикӣ)</option>
+
+                                                                                <option value="zgh">Tamazight (ⵜⴰⵎⴰⵣⵉⵖⵜ)</option>
+
+                                                                                <option value="ta">Tamil (தமிழ்)</option>
+
+                                                                                <option value="tt">Tatar (Татарча)</option>
+
+                                                                                <option value="te">Telugu (తెలుగు)</option>
+
+                                                                                <option value="tet">Tetum</option>
+
+                                                                                <option value="th">Thai (ไทย)</option>
+
+                                                                                <option value="bo">Tibetan (བོད་སྐད་)</option>
+
+                                                                                <option value="ti">Tigrinya (ትግርኛ)</option>
+
+                                                                                <option value="tiv">Tiv</option>
+
+                                                                                <option value="tpi">Tok Pisin</option>
+
+                                                                                <option value="to">Tongan (Lea Faka-Tonga)</option>
+
+                                                                                <option value="ts">Tsonga (Xitsonga)</option>
+
+                                                                                <option value="tn">Tswana (Setswana)</option>
+
+                                                                                <option value="tcy">Tulu (ತುಳು)</option>
+
+                                                                                <option value="tum">Tumbuka</option>
+
+                                                                                <option value="tr">Turkish (Türkçe)</option>
+
+                                                                                <option value="tk">Turkmen (Türkmençe)</option>
+
+                                                                                <option value="tyv">Tuvan (Тыва дыл)</option>
+
+                                                                                <option value="udm">Udmurt (Удмурт)</option>
+
+                                                                                <option value="uk">Ukrainian (Українська)</option>
+
+                                                                                <option value="ur">Urdu (اردو)</option>
+
+                                                                                <option value="ug">Uyghur (ئۇيغۇرچە)</option>
+
+                                                                                <option value="uz">Uzbek (Oʻzbekcha)</option>
+
+                                                                                <option value="ve">Venda (Tshivenḓa)</option>
+
+                                                                                <option value="vec">Venetian</option>
+
+                                                                                <option value="vi">Vietnamese (Tiếng Việt)</option>
+
+                                                                                <option value="war">Waray</option>
+
+                                                                                <option value="cy">Welsh (Cymraeg)</option>
+
+                                                                                <option value="wo">Wolof</option>
+
+                                                                                <option value="xh">Xhosa (isiXhosa)</option>
+
+                                                                                <option value="sah">Yakut / Sakha (Саха тыла)</option>
+
+                                                                                <option value="yi">Yiddish (ייִדיש)</option>
+
+                                                                                <option value="yo">Yoruba (Èdè Yorùbá)</option>
+
+                                                                                <option value="yua">Yucatec Maya</option>
+
+                                                                                <option value="zap">Zapotec</option>
+
+                                                                                <option value="zu">Zulu (isiZulu)</option>
+
+                                                                            </select>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="settings-category" id="gemini-settings-category" style="display: none;">
-                    <h3 class="category-title" data-i18n="categoryGeminiSettings">Gemini AI Settings</h3>
+                <div class="settings-category" id="gemini-settings-category" hidden>
+                    <h3 class="category-title" data-i18n="categoryGeminiSettings">Gemini AI settings</h3>
                     <div class="settings-group">
-                        <div class="setting-item" id="gemini-api-key-group">
+                        <div class="setting-item">
                             <div class="setting-info">
-                                <span class="setting-title" data-i18n="labelGeminiApiKey">Gemini AI API Key</span>
-                                <span class="setting-description" data-i18n="helperGeminiApiKey">Your API key is stored locally and never sent to external servers.</span>
+                                <span class="setting-title" data-i18n="labelGeminiApiKey">Gemini AI API key</span>
+                                <span class="setting-description" data-i18n="helperGeminiApiKey">Your API key stays in local extension storage.</span>
                             </div>
                             <div class="setting-control">
                                 <div class="input-with-button">
-                                    <div class="form-group margin-0">
-                                        <input type="password" id="gemini-api-key" placeholder=" " autocomplete="off">
-                                    </div>
-                                    <button type="button" id="toggle-gemini-api-key-visibility" class="m3-button icon"
-                                        data-i18n-title="titleShowHideApiKey" title="Show/Hide API Key">
-                                        <svg class="icon-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
-                                            aria-hidden="true">
-                                            <path
-                                                d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z" />
-                                        </svg>
-                                    </button>
+                                    <input type="password" id="gemini-api-key" class="native-input" placeholder="API key" autocomplete="off">
+                                    <button type="button" id="toggle-gemini-api-key-visibility" class="m3-button icon" data-i18n="buttonShowKey" data-i18n-title="titleShowHideApiKey" title="Show/Hide API Key">Show</button>
                                 </div>
                             </div>
                         </div>
-                        <div class="setting-item" id="gemini-model-group">
+                        <div class="setting-item" id="gemini-translation-model-group">
                             <div class="setting-info">
-                                <span class="setting-title" data-i18n="labelGeminiModel">Gemini AI Model</span>
-                                <span class="setting-description" data-i18n="descGeminiModel">Choose the Gemini AI model for translations.</span>
+                                <span class="setting-title" data-i18n="labelGeminiModel">Gemini AI model</span>
+                                <span class="setting-description" data-i18n="descGeminiModel">Choose the Gemini model for translations.</span>
                             </div>
                             <div class="setting-control">
-                                <div class="form-group margin-0">
-                                    <select id="gemini-model" placeholder=" ">
-                                        <option value="" disabled selected></option>
-                                        <option value="gemini-flash-latest">Gemini Flash Latest</option>
-                                        <option value="gemini-flash-lite-latest">Gemini Flash-lite Latest</option>
-                                        <option value="gemini-3.1-pro-preview">Gemini 3.1 Pro Preview</option>
-                                        <option value="gemini-3.1-flash-lite">Gemini 3.1 Flash-Lite</option>
-                                        <option value="gemini-3-flash-preview">Gemini 3 Flash Preview</option>
-                                        <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
-                                        <option value="gemini-2.5-pro">Gemini 2.5 Pro</option>
-                                        <option value="gemini-2.5-flash-lite">Gemini 2.5 Flash-Lite</option>
-                                        <option value="gemini-2.0-flash">Gemini 2.0 Flash</option>
-                                        <option value="gemini-2.0-flash-lite">Gemini 2.0 Flash-Lite</option>
-                                        <option value="gemini-1.5-pro">Gemini 1.5 Pro</option>
-                                        <option value="gemini-1.5-flash">Gemini 1.5 Flash</option>
-                                        <option value="gemini-1.5-flash-8b">Gemini 1.5 Flash-8B</option>
-                                        <option value="gemma-4-31b-it">Gemma 4-31B</option>
-                                        <option value="gemma-4-26b-a4b-it">Gemma 4-26B MoE</option>
-                                    </select>
-                                </div>
+                                <select id="gemini-model" class="native-select">
+                                    <option value="gemini-flash-latest">Gemini Flash Latest</option>
+                                    <option value="gemini-flash-lite-latest">Gemini Flash-Lite Latest</option>
+                                    <option value="gemini-3.1-pro-preview">Gemini 3.1 Pro Preview</option>
+                                    <option value="gemini-3.1-flash-lite">Gemini 3.1 Flash-Lite</option>
+                                    <option value="gemini-3-flash-preview">Gemini 3 Flash Preview</option>
+                                    <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
+                                    <option value="gemini-2.5-pro">Gemini 2.5 Pro</option>
+                                    <option value="gemini-2.5-flash-lite">Gemini 2.5 Flash-Lite</option>
+                                    <option value="gemini-2.0-flash">Gemini 2.0 Flash</option>
+                                    <option value="gemini-2.0-flash-lite">Gemini 2.0 Flash-Lite</option>
+                                    <option value="gemini-1.5-pro">Gemini 1.5 Pro</option>
+                                    <option value="gemini-1.5-flash">Gemini 1.5 Flash</option>
+                                    <option value="gemini-1.5-flash-8b">Gemini 1.5 Flash-8B</option>
+                                    <option value="gemma-4-31b-it">Gemma 4-31B</option>
+                                    <option value="gemma-4-26b-a4b-it">Gemma 4-26B MoE</option>
+                                </select>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="settings-category" id="openrouter-settings-category" style="display: none;">
-                    <h3 class="category-title" data-i18n="categoryOpenRouterSettings">OpenRouter Settings</h3>
+                <div class="settings-category" id="openrouter-settings-category" hidden>
+                    <h3 class="category-title" data-i18n="categoryOpenRouterSettings">OpenRouter settings</h3>
                     <div class="settings-group">
                         <div class="setting-item">
                             <div class="setting-info">
-                                <span class="setting-title" data-i18n="labelOpenRouterApiKey">OpenRouter API Key</span>
-                                <span class="setting-description" data-i18n="helperOpenRouterApiKey">Your API key is stored locally.</span>
+                                <span class="setting-title" data-i18n="labelOpenRouterApiKey">OpenRouter API key</span>
+                                <span class="setting-description" data-i18n="helperOpenRouterApiKey">Your API key stays in local extension storage.</span>
                             </div>
                             <div class="setting-control">
                                 <div class="input-with-button">
-                                    <div class="form-group margin-0">
-                                        <input type="password" id="openrouter-api-key" placeholder=" " autocomplete="off">
-                                    </div>
-                                    <button type="button" id="toggle-openrouter-api-key-visibility" class="m3-button icon"
-                                        data-i18n-title="titleShowHideApiKey" title="Show/Hide API Key">
-                                        <svg class="icon-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
-                                            aria-hidden="true">
-                                            <path
-                                                d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z" />
-                                        </svg>
-                                    </button>
+                                    <input type="password" id="openrouter-api-key" class="native-input" placeholder="API key" autocomplete="off">
+                                    <button type="button" id="toggle-openrouter-api-key-visibility" class="m3-button icon" data-i18n="buttonShowKey" data-i18n-title="titleShowHideApiKey" title="Show/Hide API Key">Show</button>
                                 </div>
                             </div>
                         </div>
                         <div class="setting-item">
                             <div class="setting-info">
-                                <span class="setting-title" data-i18n="labelOpenRouterModel">OpenRouter Model</span>
-                                <span class="setting-description" data-i18n="helperOpenRouterModel">Specify the model ID from OpenRouter (e.g., google/gemini-2.0-flash-001).</span>
+                                <span class="setting-title" data-i18n="labelOpenRouterModel">OpenRouter model</span>
+                                <span class="setting-description" data-i18n="helperOpenRouterModel">Enter a model ID from OpenRouter.</span>
                             </div>
                             <div class="setting-control">
-                                <div class="form-group margin-0">
-                                    <input type="text" id="openrouter-model" placeholder="google/gemini-2.0-flash-001" data-i18n-placeholder="placeholderOpenRouterModel">
-                                </div>
+                                <input type="text" id="openrouter-model" class="native-input wide-input" placeholder="google/gemini-2.0-flash-001" autocomplete="off">
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="settings-category" id="custom-llm-settings-category" style="display: none;">
+                <div class="settings-category" id="custom-llm-settings-category" hidden>
                     <h3 class="category-title" data-i18n="categoryCustomLLM">Third-party LLM</h3>
                     <div class="settings-group">
                         <div class="setting-item">
                             <div class="setting-info"><span class="setting-title" data-i18n="labelCustomLLMUrl">API address</span><span class="setting-description" data-i18n="descCustomLLMUrl">Use a Chat Completions compatible base URL or full endpoint.</span></div>
-                            <div class="setting-control"><div class="form-group margin-0"><input type="url" id="custom-llm-url" placeholder="https://api.example.com/v1" autocomplete="off"></div></div>
+                            <div class="setting-control"><input type="url" id="custom-llm-url" class="native-input wide-input" placeholder="https://api.example.com/v1" autocomplete="off"></div>
                         </div>
                         <div class="setting-item">
-                            <div class="setting-info"><span class="setting-title">API Key</span><span class="setting-description" data-i18n="descCustomLLMKey">Stored locally and sent only to the API address you configure. Leave blank if the service needs no key.</span></div>
-                            <div class="setting-control"><div class="form-group margin-0"><input type="password" id="custom-llm-key" placeholder="API Key" autocomplete="off"></div></div>
+                            <div class="setting-info"><span class="setting-title">API key</span><span class="setting-description" data-i18n="descCustomLLMKey">Stored locally and sent only to the API address you configure. Leave blank if the service needs no key.</span></div>
+                            <div class="setting-control"><input type="password" id="custom-llm-key" class="native-input wide-input" placeholder="API key" autocomplete="off"></div>
                         </div>
                         <div class="setting-item">
                             <div class="setting-info"><span class="setting-title" data-i18n="labelCustomLLMModel">Model name</span><span class="setting-description" data-i18n="descCustomLLMModel">Enter the model ID provided by your service.</span></div>
-                            <div class="setting-control"><div class="form-group margin-0"><input type="text" id="custom-llm-model" placeholder="model-id" autocomplete="off"></div></div>
+                            <div class="setting-control"><input type="text" id="custom-llm-model" class="native-input wide-input" placeholder="model-id" autocomplete="off"></div>
                         </div>
                         <div class="setting-item full-width">
-                            <button type="button" class="m3-button tonal" id="test-custom-llm" data-i18n="buttonTestCustomLLM">Authorize address and test connection</button>
-                            <span class="status-message" id="custom-llm-status" role="status"></span>
+                            <div class="links-container">
+                                <button type="button" class="m3-button tonal" id="test-custom-llm" data-i18n="buttonTestCustomLLM">Authorize address and test connection</button>
+                                <span class="status-message" id="custom-llm-status" role="status"></span>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="settings-category" id="deepl-settings-category" style="display: none;">
-                    <h3 class="category-title" data-i18n="categoryDeepLSettings">DeepL Settings</h3>
+                <div class="settings-category" id="deepl-settings-category" hidden>
+                    <h3 class="category-title" data-i18n="categoryDeepLSettings">DeepL settings</h3>
                     <div class="settings-group">
                         <div class="setting-item">
                             <div class="setting-info">
-                                <span class="setting-title" data-i18n="labelDeepLApiKey">DeepL API Key</span>
-                                <span class="setting-description" data-i18n="helperDeepLApiKey">Your API key is stored locally.</span>
+                                <span class="setting-title" data-i18n="labelDeepLApiKey">DeepL API key</span>
+                                <span class="setting-description" data-i18n="helperDeepLApiKey">Your API key stays in local extension storage.</span>
                             </div>
                             <div class="setting-control">
                                 <div class="input-with-button">
-                                    <div class="form-group margin-0">
-                                        <input type="password" id="deepl-api-key" placeholder=" " autocomplete="off">
-                                    </div>
-                                    <button type="button" id="toggle-deepl-api-key-visibility" class="m3-button icon"
-                                        data-i18n-title="titleShowHideApiKey" title="Show/Hide API Key">
-                                        <svg class="icon-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
-                                            aria-hidden="true">
-                                            <path
-                                                d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z" />
-                                        </svg>
-                                    </button>
+                                    <input type="password" id="deepl-api-key" class="native-input" placeholder="API key" autocomplete="off">
+                                    <button type="button" id="toggle-deepl-api-key-visibility" class="m3-button icon" data-i18n="buttonShowKey" data-i18n-title="titleShowHideApiKey" title="Show/Hide API Key">Show</button>
                                 </div>
                             </div>
                         </div>
@@ -818,106 +958,89 @@
                 </div>
 
                 <div class="settings-category">
-                    <h3 class="category-title" data-i18n="categoryRomanization">Transliteration Service (Script Conversion)</h3>
+                    <h3 class="category-title" data-i18n="categoryRomanization">Transliteration and pronunciation</h3>
                     <div class="settings-group">
                         <div class="setting-item">
                             <div class="setting-info">
-                                <span class="setting-title" data-i18n="labelTransliterationTarget">Transliteration Target Script</span>
-                                <span class="setting-description" data-i18n="descTransliterationTarget">Convert lyrics into this script for pronunciation guides (e.g., English to Japanese Katakana). Non-Latin targets require Gemini or OpenRouter.</span>
+                                <span class="setting-title" data-i18n="labelRomanizationProvider">Transliteration provider</span>
+                                <span class="setting-description" data-i18n="descRomanizationProvider">Use local dictionaries where available, or generate transliteration with the selected service.</span>
                             </div>
                             <div class="setting-control">
-                                <div class="form-group margin-0">
-                                    <select id="transliteration-target" placeholder=" ">
-                                        <option value="" disabled selected></option>
-                                        <option value="latin" data-i18n="optionLatin">Latin (Romaji / Phonetic)</option>
-                                        <option value="japanese" data-i18n="optionJapanese">Japanese (Katakana)</option>
-                                        <option value="korean" data-i18n="optionKorean">Korean (Hangul)</option>
-                                        <option value="cyrillic" data-i18n="optionCyrillic">Cyrillic (Russian)</option>
-                                        <option value="devanagari" data-i18n="optionDevanagari">Devanagari (Hindi)</option>
-                                        <option value="arabic" data-i18n="optionArabic">Arabic</option>
-                                        <option value="hebrew" data-i18n="optionHebrew">Hebrew</option>
-                                        <option value="greek" data-i18n="optionGreek">Greek</option>
-                                        <option value="thai" data-i18n="optionThai">Thai</option>
-                                    </select>
-                                </div>
+                                <select id="romanization-provider" class="native-select">
+                                    <option value="offline" data-i18n="optionOfflineRomanizer">Local / Offline</option>
+                                    <option value="google" data-i18n="optionGoogleTranslate">Google Translate</option>
+                                    <option value="gemini" data-i18n="optionGeminiAI">Gemini AI</option>
+                                    <option value="openrouter" data-i18n="optionOpenRouter">OpenRouter (LLM)</option>
+                                </select>
                             </div>
-                            <div class="setting-note" id="transliteration-target-note" style="display: none;" data-i18n="noteTransliterationTargetDisabled">Google Translate only supports Latin (romaji) transliteration. Select Gemini or OpenRouter as the Transliteration Provider to enable other scripts.</div>
                         </div>
                         <div class="setting-item">
                             <div class="setting-info">
-                                <span class="setting-title" data-i18n="labelRomanizationProvider">Transliteration Provider</span>
-                                <span class="setting-description" data-i18n="descRomanizationProvider">Automatically fetches transliteration from the Lyrics+ API when available. If not provided by Lyrics+, it falls back to generating transliteration using the selected service.</span>
+                                <span class="setting-title" data-i18n="labelTransliterationTarget">Transliteration target script</span>
+                                <span class="setting-description" data-i18n="descTransliterationTarget">Convert lyrics into this script for pronunciation guides.</span>
                             </div>
                             <div class="setting-control">
-                                <div class="form-group margin-0">
-                                    <select id="romanization-provider" placeholder=" ">
-                                        <option value="" disabled selected></option>
-                                        <option value="offline" data-i18n="optionOfflineRomanizer">Local / Offline</option>
-                                        <option value="google" data-i18n="optionGoogleTranslate">Google Translate</option>
-                                        <option value="gemini" data-i18n="optionGeminiAI">Gemini AI</option>
-                                        <option value="openrouter" data-i18n="optionOpenRouter">OpenRouter (LLM)</option>
-                                    </select>
+                                <select id="transliteration-target" class="native-select">
+                                    <option value="latin" data-i18n="optionLatin">Latin (Romaji / Phonetic)</option>
+                                    <option value="japanese" data-i18n="optionJapanese">Japanese (Katakana)</option>
+                                    <option value="korean" data-i18n="optionKorean">Korean (Hangul)</option>
+                                    <option value="cyrillic" data-i18n="optionCyrillic">Cyrillic (Russian)</option>
+                                    <option value="devanagari" data-i18n="optionDevanagari">Devanagari (Hindi)</option>
+                                    <option value="arabic" data-i18n="optionArabic">Arabic</option>
+                                    <option value="hebrew" data-i18n="optionHebrew">Hebrew</option>
+                                    <option value="greek" data-i18n="optionGreek">Greek</option>
+                                    <option value="thai" data-i18n="optionThai">Thai</option>
+                                </select>
+                            </div>
+                            <div class="setting-note" id="transliteration-target-note" hidden data-i18n="noteTransliterationTargetDisabled">Google Translate supports Latin transliteration only. Select Gemini or OpenRouter to enable other scripts.</div>
+                        </div>
+                        <div class="setting-item" id="gemini-romanization-model-group" hidden>
+                            <div class="setting-info">
+                                <span class="setting-title" data-i18n="labelGeminiRomanizationModel">Gemini transliteration model</span>
+                                <span class="setting-description" data-i18n="descGeminiRomanizationModel">Choose the Gemini model for transliteration.</span>
+                            </div>
+                            <div class="setting-control">
+                                <select id="gemini-romanization-model" class="native-select">
+                                    <option value="gemini-flash-latest">Gemini Flash Latest</option>
+                                    <option value="gemini-flash-lite-latest">Gemini Flash-Lite Latest</option>
+                                    <option value="gemini-3-flash-preview">Gemini 3 Flash Preview</option>
+                                    <option value="gemini-3-pro-preview">Gemini 3 Pro Preview</option>
+                                    <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
+                                    <option value="gemini-2.5-pro">Gemini 2.5 Pro</option>
+                                    <option value="gemini-2.5-flash-lite">Gemini 2.5 Flash-Lite</option>
+                                    <option value="gemini-2.0-flash">Gemini 2.0 Flash</option>
+                                    <option value="gemini-2.0-flash-lite">Gemini 2.0 Flash-Lite</option>
+                                    <option value="gemini-1.5-pro">Gemini 1.5 Pro</option>
+                                    <option value="gemini-1.5-flash">Gemini 1.5 Flash</option>
+                                    <option value="gemini-1.5-flash-8b">Gemini 1.5 Flash-8B</option>
+                                    <option value="gemma-4-31b-it">Gemma 4-31B</option>
+                                    <option value="gemma-4-26b-a4b-it">Gemma 4-26B MoE</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="setting-item" id="offline-japanese-dict-group" hidden>
+                            <div class="setting-info">
+                                <span class="setting-title" data-i18n="labelOfflineJapaneseDict">Offline Japanese dictionary (Kuromoji)</span>
+                                <span class="setting-description" data-i18n="descOfflineJapaneseDict">Local morphological dictionary for accurate Japanese pronunciation.</span>
+                            </div>
+                            <div class="setting-control">
+                                <div class="dict-actions">
+                                    <span id="offline-japanese-dict-status" class="setting-status-badge">Checking…</span>
+                                    <button type="button" id="btn-download-japanese-dict" class="m3-button tonal"><span id="btn-download-japanese-dict-text" data-i18n="btnDownloadDict">Download</span></button>
+                                    <button type="button" id="btn-delete-japanese-dict" class="m3-button text error-text" hidden><span data-i18n="btnDeleteDict">Delete</span></button>
                                 </div>
                             </div>
                         </div>
-                        <div class="setting-item" id="gemini-romanization-model-group" style="display: none;">
+                        <div class="setting-item" id="offline-arabic-dict-group" hidden>
                             <div class="setting-info">
-                                <span class="setting-title" data-i18n="labelGeminiRomanizationModel">Gemini AI Transliteration Model</span>
-                                <span class="setting-description" data-i18n="descGeminiRomanizationModel">Choose the Gemini AI model for transliteration.</span>
+                                <span class="setting-title" data-i18n="labelOfflineArabicDict">Offline Arabic diacritizer model (CaTT)</span>
+                                <span class="setting-description" data-i18n="descOfflineArabicDict">Local neural model for restoring Arabic vowels and Tashkeel.</span>
                             </div>
                             <div class="setting-control">
-                                <div class="form-group margin-0">
-                                    <select id="gemini-romanization-model" placeholder=" ">
-                                        <option value="" disabled selected></option>
-                                        <option value="gemini-flash-latest">Gemini Flash Latest</option>
-                                        <option value="gemini-flash-lite-latest">Gemini Flash-lite Latest</option>
-                                        <option value="gemini-3-flash-preview">Gemini 3 Flash Preview</option>
-                                        <option value="gemini-3-pro-preview">Gemini 3 Pro Preview</option>
-                                        <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
-                                        <option value="gemini-2.5-pro">Gemini 2.5 Pro</option>
-                                        <option value="gemini-2.5-flash-lite">Gemini 2.5 Flash-Lite</option>
-                                        <option value="gemini-2.0-flash">Gemini 2.0 Flash</option>
-                                        <option value="gemini-2.0-flash-lite">Gemini 2.0 Flash-Lite</option>
-                                        <option value="gemini-1.5-pro">Gemini 1.5 Pro</option>
-                                        <option value="gemini-1.5-flash">Gemini 1.5 Flash</option>
-                                        <option value="gemini-1.5-flash-8b">Gemini 1.5 Flash-8B</option>
-                                        <option value="gemma-4-31b-it">Gemma 4-31B</option>
-                                        <option value="gemma-4-26b-a4b-it">Gemma 4-26B MoE</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="setting-item" id="offline-japanese-dict-group" style="display: none;">
-                            <div class="setting-info">
-                                <span class="setting-title" data-i18n="labelOfflineJapaneseDict">Offline Japanese Dictionary (Kuromoji)</span>
-                                <span class="setting-description" id="offline-japanese-dict-desc" data-i18n="descOfflineJapaneseDict">Morphological analyzer dictionary (~17 MB) for accurate Japanese pronunciation. Stored locally in browser.</span>
-                            </div>
-                            <div class="setting-control">
-                                <div class="dict-actions" style="display: flex; gap: 8px; align-items: center;">
-                                    <span id="offline-japanese-dict-status" class="setting-status-badge" style="font-size: 13px; opacity: 0.85;">Checking...</span>
-                                    <button type="button" id="btn-download-japanese-dict" class="m3-button tonal" style="height: 36px; padding: 0 16px; font-size: 13px;">
-                                        <span id="btn-download-japanese-dict-text" data-i18n="btnDownloadDict">Download</span>
-                                    </button>
-                                    <button type="button" id="btn-delete-japanese-dict" class="m3-button text" style="display: none; height: 36px; padding: 0 10px; color: var(--error-color, #ff5449); font-size: 13px;">
-                                        <span data-i18n="btnDeleteDict">Delete</span>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="setting-item" id="offline-arabic-dict-group" style="display: none;">
-                            <div class="setting-info">
-                                <span class="setting-title" data-i18n="labelOfflineArabicDict">Offline Arabic Diacritizer Model (CaTT)</span>
-                                <span class="setting-description" id="offline-arabic-dict-desc" data-i18n="descOfflineArabicDict">Neural diacritizer model (~74.3 MB) for restoring Tashkeel and accurate vowels in Arabic lyrics. Stored locally in browser.</span>
-                            </div>
-                            <div class="setting-control">
-                                <div class="dict-actions" style="display: flex; gap: 8px; align-items: center;">
-                                    <span id="offline-arabic-dict-status" class="setting-status-badge" style="font-size: 13px; opacity: 0.85;">Checking...</span>
-                                    <button type="button" id="btn-download-arabic-dict" class="m3-button tonal" style="height: 36px; padding: 0 16px; font-size: 13px;">
-                                        <span id="btn-download-arabic-dict-text" data-i18n="btnDownloadDict">Download</span>
-                                    </button>
-                                    <button type="button" id="btn-delete-arabic-dict" class="m3-button text" style="display: none; height: 36px; padding: 0 10px; color: var(--error-color, #ff5449); font-size: 13px;">
-                                        <span data-i18n="btnDeleteDict">Delete</span>
-                                    </button>
+                                <div class="dict-actions">
+                                    <span id="offline-arabic-dict-status" class="setting-status-badge">Checking…</span>
+                                    <button type="button" id="btn-download-arabic-dict" class="m3-button tonal"><span id="btn-download-arabic-dict-text" data-i18n="btnDownloadDict">Download</span></button>
+                                    <button type="button" id="btn-delete-arabic-dict" class="m3-button text error-text" hidden><span data-i18n="btnDeleteDict">Delete</span></button>
                                 </div>
                             </div>
                         </div>
@@ -925,588 +1048,145 @@
                 </div>
 
                 <div class="settings-category">
-                    <h3 class="category-title" data-i18n="categoryTranslationBehavior">Translation Behavior</h3>
+                    <h3 class="category-title" data-i18n="categoryAdvancedPrompting">Advanced prompting</h3>
                     <div class="settings-group">
-                        <div class="setting-item">
+                        <div class="setting-item has-switch" id="override-gemini-prompt-group" hidden>
                             <div class="setting-info">
-                                <span class="setting-title" data-i18n="labelCustomTranslateTarget">Target Language</span>
-                                <span class="setting-description" data-i18n="descOverrideTranslateTarget">Choose target language for lyrics translation (defaults to app/browser language).</span>
-                            </div>
-                            <div class="setting-control">
-                                <div class="form-group margin-0">
-                                    <select id="custom-translate-target" placeholder=" ">
-                                        <option value="" data-i18n="optionTargetLangAuto">Auto</option>
-                                        <option value="ab">Abkhaz (Аҧсуа)</option>
-                                        <option value="ace">Acehnese (Basa Acèh)</option>
-                                        <option value="ach">Acholi</option>
-                                        <option value="aa">Afar (Qafaraf)</option>
-                                        <option value="af">Afrikaans</option>
-                                        <option value="ak">Akan / Twi</option>
-                                        <option value="sq">Albanian (Shqip)</option>
-                                        <option value="alz">Alur</option>
-                                        <option value="am">Amharic (አማርኛ)</option>
-                                        <option value="ar">Arabic (العربية)</option>
-                                        <option value="hy">Armenian (Հայերեն)</option>
-                                        <option value="as">Assamese (অসমীয়া)</option>
-                                        <option value="av">Avar (Авар)</option>
-                                        <option value="awa">Awadhi (अवधी)</option>
-                                        <option value="ay">Aymara</option>
-                                        <option value="az">Azerbaijani (Azərbaycan)</option>
-                                        <option value="ban">Balinese (Basa Bali)</option>
-                                        <option value="bal">Baluchi (بلوچی)</option>
-                                        <option value="bm">Bambara</option>
-                                        <option value="bci">Baoulé</option>
-                                        <option value="ba">Bashkir (Башҡорт)</option>
-                                        <option value="eu">Basque (Euskara)</option>
-                                        <option value="btx">Batak Karo</option>
-                                        <option value="bts">Batak Simalungun</option>
-                                        <option value="bbc">Batak Toba</option>
-                                        <option value="be">Belarusian (Беларуская)</option>
-                                        <option value="bem">Bemba</option>
-                                        <option value="bn">Bengali (বাংলা)</option>
-                                        <option value="bew">Betawi (Basa Betawi)</option>
-                                        <option value="bho">Bhojpuri (भोजपुरी)</option>
-                                        <option value="bik">Bikol</option>
-                                        <option value="bs">Bosnian (Bosanski)</option>
-                                        <option value="br">Breton (Brezhoneg)</option>
-                                        <option value="bg">Bulgarian (Български)</option>
-                                        <option value="bua">Buryat (Буряад)</option>
-                                        <option value="yue">Cantonese (粵語)</option>
-                                        <option value="ca">Catalan (Català)</option>
-                                        <option value="ceb">Cebuano</option>
-                                        <option value="ch">Chamorro</option>
-                                        <option value="ce">Chechen (Нохчийн)</option>
-                                        <option value="ny">Chichewa / Nyanja</option>
-                                        <option value="zh-CN">Chinese Simplified (简体中文)</option>
-                                        <option value="zh-TW">Chinese Traditional (繁體中文)</option>
-                                        <option value="chk">Chuukese</option>
-                                        <option value="cv">Chuvash (Чӑвашла)</option>
-                                        <option value="co">Corsican (Corsu)</option>
-                                        <option value="crh">Crimean Tatar (Qırımtatarca)</option>
-                                        <option value="hr">Croatian (Hrvatski)</option>
-                                        <option value="cs">Czech (Čeština)</option>
-                                        <option value="da">Danish (Dansk)</option>
-                                        <option value="fa-AF">Dari (دری)</option>
-                                        <option value="dv">Dhivehi (ދިވެހި)</option>
-                                        <option value="din">Dinka</option>
-                                        <option value="doi">Dogri (डोगरी)</option>
-                                        <option value="dov">Dombe</option>
-                                        <option value="nl">Dutch (Nederlands)</option>
-                                        <option value="dyu">Dyula</option>
-                                        <option value="dz">Dzongkha (རྫོང་ཁ)</option>
-                                        <option value="en">English</option>
-                                        <option value="eo">Esperanto</option>
-                                        <option value="et">Estonian (Eesti)</option>
-                                        <option value="ee">Ewe (Eʋegbe)</option>
-                                        <option value="fo">Faroese (Føroyskt)</option>
-                                        <option value="fj">Fijian (Na Vosa Vakaviti)</option>
-                                        <option value="tl">Filipino / Tagalog</option>
-                                        <option value="fi">Finnish (Suomi)</option>
-                                        <option value="fon">Fon</option>
-                                        <option value="fr">French (Français)</option>
-                                        <option value="fy">Frisian (Frysk)</option>
-                                        <option value="fur">Friulian (Furlan)</option>
-                                        <option value="ff">Fulani / Peul (Fulfulde)</option>
-                                        <option value="gaa">Ga</option>
-                                        <option value="gl">Galician (Galego)</option>
-                                        <option value="ka">Georgian (ქართული)</option>
-                                        <option value="de">German (Deutsch)</option>
-                                        <option value="el">Greek (Ελληνικά)</option>
-                                        <option value="gn">Guarani</option>
-                                        <option value="gu">Gujarati (ગુજરાતી)</option>
-                                        <option value="ht">Haitian Creole (Kreyòl Ayisyen)</option>
-                                        <option value="cnh">Hakha Chin</option>
-                                        <option value="ha">Hausa</option>
-                                        <option value="haw">Hawaiian (ʻŌlelo Hawaiʻi)</option>
-                                        <option value="he">Hebrew (עברית)</option>
-                                        <option value="hil">Hiligaynon</option>
-                                        <option value="hi">Hindi (हिन्दी)</option>
-                                        <option value="hmn">Hmong</option>
-                                        <option value="hu">Hungarian (Magyar)</option>
-                                        <option value="hrx">Hunsrik</option>
-                                        <option value="iba">Iban</option>
-                                        <option value="is">Icelandic (Íslenska)</option>
-                                        <option value="ig">Igbo</option>
-                                        <option value="ilo">Ilocano</option>
-                                        <option value="id">Indonesian (Bahasa Indonesia)</option>
-                                        <option value="ga">Irish (Gaeilge)</option>
-                                        <option value="it">Italian (Italiano)</option>
-                                        <option value="jam">Jamaican Patois</option>
-                                        <option value="ja">Japanese (日本語)</option>
-                                        <option value="jv">Javanese (Basa Jawa)</option>
-                                        <option value="kac">Jingpo / Kachin</option>
-                                        <option value="kl">Kalaallisut / Greenlandic</option>
-                                        <option value="kn">Kannada (ಕನ್ನಡ)</option>
-                                        <option value="knc">Kanuri</option>
-                                        <option value="pam">Kapampangan</option>
-                                        <option value="kk">Kazakh (Қазақша)</option>
-                                        <option value="kha">Khasi</option>
-                                        <option value="km">Khmer (ភាសាខ្មែរ)</option>
-                                        <option value="cgg">Kiga</option>
-                                        <option value="kg">Kikongo</option>
-                                        <option value="rw">Kinyarwanda</option>
-                                        <option value="ktu">Kituba</option>
-                                        <option value="trp">Kokborok</option>
-                                        <option value="kv">Komi (Коми)</option>
-                                        <option value="gom">Konkani (कोंकणी)</option>
-                                        <option value="ko">Korean (한국어)</option>
-                                        <option value="kri">Krio</option>
-                                        <option value="ku">Kurdish Kurmanji (Kurdî)</option>
-                                        <option value="ckb">Kurdish Sorani (کوردی)</option>
-                                        <option value="ky">Kyrgyz (Кыргызча)</option>
-                                        <option value="lo">Lao (ພາສາລາວ)</option>
-                                        <option value="ltg">Latgalian</option>
-                                        <option value="la">Latin (Latina)</option>
-                                        <option value="lv">Latvian (Latviešu)</option>
-                                        <option value="lij">Ligurian</option>
-                                        <option value="li">Limburgish</option>
-                                        <option value="ln">Lingala</option>
-                                        <option value="lt">Lithuanian (Lietuvių)</option>
-                                        <option value="lmo">Lombard</option>
-                                        <option value="lg">Luganda</option>
-                                        <option value="luo">Luo</option>
-                                        <option value="lb">Luxembourgish (Lëtzebuergesch)</option>
-                                        <option value="mk">Macedonian (Македонски)</option>
-                                        <option value="mad">Madurese (Basa Madhurâ)</option>
-                                        <option value="mai">Maithili (मैथिली)</option>
-                                        <option value="mak">Makassarese (Basa Mangkasara)</option>
-                                        <option value="mg">Malagasy</option>
-                                        <option value="ms">Malay (Bahasa Melayu)</option>
-                                        <option value="ms-Arab">Malay Jawi (بهاس ملايو)</option>
-                                        <option value="ml">Malayalam (മലയാളം)</option>
-                                        <option value="mt">Maltese (Malti)</option>
-                                        <option value="mam">Mam</option>
-                                        <option value="gv">Manx (Gaelg)</option>
-                                        <option value="mi">Maori (Te Reo Māori)</option>
-                                        <option value="mr">Marathi (मराठी)</option>
-                                        <option value="mh">Marshallese (Kajin M̧ajeļ)</option>
-                                        <option value="mwr">Marwadi (मारवाड़ी)</option>
-                                        <option value="mfe">Mauritian Creole (Morisien)</option>
-                                        <option value="mhr">Meadow Mari (Марий)</option>
-                                        <option value="mni-Mtei">Meiteilon / Manipuri (মৈতৈলোন্)</option>
-                                        <option value="min">Minang (Baso Minangkabau)</option>
-                                        <option value="lus">Mizo</option>
-                                        <option value="mn">Mongolian (Монгол)</option>
-                                        <option value="my">Myanmar / Burmese (မြန်မာ)</option>
-                                        <option value="nah">Nahuatl</option>
-                                        <option value="ndc">Ndau</option>
-                                        <option value="nr">Ndebele South (isiNdebele)</option>
-                                        <option value="new">Nepalbhasa / Newari (नेपालभाषा)</option>
-                                        <option value="ne">Nepali (नेपाली)</option>
-                                        <option value="nqo">NKo</option>
-                                        <option value="nso">Northern Sotho / Sepedi</option>
-                                        <option value="no">Norwegian (Norsk)</option>
-                                        <option value="nus">Nuer</option>
-                                        <option value="oc">Occitan</option>
-                                        <option value="or">Odia / Oriya (ଓଡ଼ିଆ)</option>
-                                        <option value="om">Oromo</option>
-                                        <option value="os">Ossetian (Ирон)</option>
-                                        <option value="pag">Pangasinan</option>
-                                        <option value="pap">Papiamento</option>
-                                        <option value="ps">Pashto (پښتو)</option>
-                                        <option value="fa">Persian (فارسی)</option>
-                                        <option value="pl">Polish (Polski)</option>
-                                        <option value="pt">Portuguese (Português)</option>
-                                        <option value="pa">Punjabi (ਪੰਜਾਬੀ)</option>
-                                        <option value="pa-Arab">Punjabi Shahmukhi (پنجابی)</option>
-                                        <option value="qu">Quechua</option>
-                                        <option value="kek">Qʼeqchiʼ</option>
-                                        <option value="rom">Romani</option>
-                                        <option value="ro">Romanian (Română)</option>
-                                        <option value="rn">Rundi / Kirundi</option>
-                                        <option value="ru">Russian (Русский)</option>
-                                        <option value="se">Sami North (Davvisámegiella)</option>
-                                        <option value="sm">Samoan (Gagana Sāmoa)</option>
-                                        <option value="sg">Sango</option>
-                                        <option value="sa">Sanskrit (संस्कृतम्)</option>
-                                        <option value="sat">Santali (ᱥᱟᱱᱛᱟᱲᱤ)</option>
-                                        <option value="gd">Scots Gaelic (Gàidhlig)</option>
-                                        <option value="sr">Serbian (Српски)</option>
-                                        <option value="st">Sesotho</option>
-                                        <option value="crs">Seychellois Creole</option>
-                                        <option value="shn">Shan (ၵႂၢမ်းတႆး)</option>
-                                        <option value="sn">Shona</option>
-                                        <option value="scn">Sicilian (Sicilianu)</option>
-                                        <option value="szl">Silesian (Ślōnskŏ)</option>
-                                        <option value="sd">Sindhi (سنڌي)</option>
-                                        <option value="si">Sinhala (සිංහල)</option>
-                                        <option value="sk">Slovak (Slovenčina)</option>
-                                        <option value="sl">Slovenian (Slovenščina)</option>
-                                        <option value="so">Somali (Soomaali)</option>
-                                        <option value="es">Spanish (Español)</option>
-                                        <option value="su">Sundanese (Basa Sunda)</option>
-                                        <option value="sus">Susu</option>
-                                        <option value="sw">Swahili (Kiswahili)</option>
-                                        <option value="ss">Swati / Swazi (SiSwati)</option>
-                                        <option value="sv">Swedish (Svenska)</option>
-                                        <option value="ty">Tahitian (Reo Tahiti)</option>
-                                        <option value="tg">Tajik (Тоҷикӣ)</option>
-                                        <option value="zgh">Tamazight (ⵜⴰⵎⴰⵣⵉⵖⵜ)</option>
-                                        <option value="ta">Tamil (தமிழ்)</option>
-                                        <option value="tt">Tatar (Татарча)</option>
-                                        <option value="te">Telugu (తెలుగు)</option>
-                                        <option value="tet">Tetum</option>
-                                        <option value="th">Thai (ไทย)</option>
-                                        <option value="bo">Tibetan (བོད་སྐད་)</option>
-                                        <option value="ti">Tigrinya (ትግርኛ)</option>
-                                        <option value="tiv">Tiv</option>
-                                        <option value="tpi">Tok Pisin</option>
-                                        <option value="to">Tongan (Lea Faka-Tonga)</option>
-                                        <option value="ts">Tsonga (Xitsonga)</option>
-                                        <option value="tn">Tswana (Setswana)</option>
-                                        <option value="tcy">Tulu (ತುಳು)</option>
-                                        <option value="tum">Tumbuka</option>
-                                        <option value="tr">Turkish (Türkçe)</option>
-                                        <option value="tk">Turkmen (Türkmençe)</option>
-                                        <option value="tyv">Tuvan (Тыва дыл)</option>
-                                        <option value="udm">Udmurt (Удмурт)</option>
-                                        <option value="uk">Ukrainian (Українська)</option>
-                                        <option value="ur">Urdu (اردو)</option>
-                                        <option value="ug">Uyghur (ئۇيغۇرچە)</option>
-                                        <option value="uz">Uzbek (Oʻzbekcha)</option>
-                                        <option value="ve">Venda (Tshivenḓa)</option>
-                                        <option value="vec">Venetian</option>
-                                        <option value="vi">Vietnamese (Tiếng Việt)</option>
-                                        <option value="war">Waray</option>
-                                        <option value="cy">Welsh (Cymraeg)</option>
-                                        <option value="wo">Wolof</option>
-                                        <option value="xh">Xhosa (isiXhosa)</option>
-                                        <option value="sah">Yakut / Sakha (Саха тыла)</option>
-                                        <option value="yi">Yiddish (ייִדיש)</option>
-                                        <option value="yo">Yoruba (Èdè Yorùbá)</option>
-                                        <option value="yua">Yucatec Maya</option>
-                                        <option value="zap">Zapotec</option>
-                                        <option value="zu">Zulu (isiZulu)</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="settings-category">
-                    <h3 class="category-title" data-i18n="categoryAdvancedPrompting">Advanced Prompting (Gemini / OpenRouter)</h3>
-                    <div class="settings-group">
-                        <div class="setting-item has-switch" id="override-gemini-prompt-group" style="display: none;">
-                            <div class="setting-info">
-                                <span class="setting-title" data-i18n="settingOverrideAIPrompt">Override AI Translation Prompt</span>
-                                <span class="setting-description" data-i18n="descOverrideAIPrompt">Use a custom prompt for translations. Use <code>{targetLang}</code> and <code>{lyrics}</code> placeholders.</span>
+                                <span class="setting-title" data-i18n="settingOverrideAIPrompt">Override AI translation prompt</span>
+                                <span class="setting-description" data-i18n="descOverrideAIPrompt">Use a custom prompt for Gemini or OpenRouter. Available placeholders: {targetLang} and {lyrics}.</span>
                             </div>
                             <div class="setting-control">
                                 <label class="m3-switch">
                                     <input type="checkbox" id="override-gemini-prompt">
-                                    <div class="track">
-                                        <div class="handle"></div>
-                                    </div>
+                                    <div class="track"><div class="handle"></div></div>
                                 </label>
                             </div>
                         </div>
-                        <div class="setting-item full-width" id="custom-gemini-prompt-group" style="display: none;">
+                        <div class="setting-item full-width" id="custom-gemini-prompt-group" hidden>
                             <div class="setting-info">
-                                <span class="setting-title" data-i18n="labelCustomAIPrompt">Custom AI Translation Prompt</span>
+                                <span class="setting-title" data-i18n="labelCustomAIPrompt">Custom AI translation prompt</span>
                                 <span class="setting-description" data-i18n="helperCustomAIPrompt">Customize the prompt sent to the AI for translations.</span>
                             </div>
-                            <div class="setting-control full-width">
-                                <div class="form-group margin-0">
-                                    <textarea id="custom-gemini-prompt" placeholder="Custom translation prompt..." data-i18n-placeholder="placeholderCustomTranslationPrompt" rows="3"></textarea>
-                                </div>
-                            </div>
+                            <textarea id="custom-gemini-prompt" class="native-input" data-i18n-placeholder="placeholderCustomTranslationPrompt" placeholder="Custom translation prompt…" rows="3"></textarea>
                         </div>
-                        <div class="setting-item has-switch" id="override-gemini-romanize-prompt-group" style="display: none;">
+                        <div class="setting-item has-switch" id="override-gemini-romanize-prompt-group" hidden>
                             <div class="setting-info">
-                                <span class="setting-title" data-i18n="settingOverrideRomanizePrompt">Override AI Romanization Prompt</span>
-                                <span class="setting-description" data-i18n="descOverrideRomanizePrompt">Use a custom prompt for Gemini/OpenRouter romanization.</span>
+                                <span class="setting-title" data-i18n="settingOverrideRomanizePrompt">Override AI transliteration prompt</span>
+                                <span class="setting-description" data-i18n="descOverrideRomanizePrompt">Use a custom prompt for Gemini or OpenRouter transliteration.</span>
                             </div>
                             <div class="setting-control">
                                 <label class="m3-switch">
                                     <input type="checkbox" id="override-gemini-romanize-prompt">
-                                    <div class="track">
-                                        <div class="handle"></div>
-                                    </div>
+                                    <div class="track"><div class="handle"></div></div>
                                 </label>
                             </div>
                         </div>
-                        <div class="setting-item full-width" id="custom-gemini-romanize-prompt-group" style="display: none;">
+                        <div class="setting-item full-width" id="custom-gemini-romanize-prompt-group" hidden>
                             <div class="setting-info">
-                                <span class="setting-title" data-i18n="labelCustomRomanizePrompt">Custom AI Romanization Prompt</span>
-                                <span class="setting-description" data-i18n="helperCustomRomanizePrompt">Customize the prompt sent to the AI for romanization.</span>
+                                <span class="setting-title" data-i18n="labelCustomRomanizePrompt">Custom AI transliteration prompt</span>
+                                <span class="setting-description" data-i18n="helperCustomRomanizePrompt">Customize the prompt sent to the AI for transliteration.</span>
                             </div>
-                            <div class="setting-control full-width">
-                                <div class="form-group margin-0">
-                                    <textarea id="custom-gemini-romanize-prompt" placeholder="Custom romanization prompt..." data-i18n-placeholder="placeholderCustomRomanizationPrompt" rows="3"></textarea>
-                                </div>
-                            </div>
+                            <textarea id="custom-gemini-romanize-prompt" class="native-input" data-i18n-placeholder="placeholderCustomRomanizationPrompt" placeholder="Custom transliteration prompt…" rows="3"></textarea>
                         </div>
                     </div>
                 </div>
-
-                <p id="translation-save-status" class="status-message"></p>
+                <p id="translation-save-status" class="status-message" role="status" aria-live="polite"></p>
             </section>
 
-            <section class="settings-card" id="cache">
-                <h2 class="card-title" data-i18n="navCache">Cache</h2>
+            <section class="settings-card" id="advanced">
+                <h2 class="card-title" data-i18n="navStorageAdvanced">Storage &amp; advanced</h2>
 
                 <div class="settings-category">
-                    <h3 class="category-title" data-i18n="categoryCacheConfig">Cache Configuration & Storage</h3>
+                    <h3 class="category-title" data-i18n="categoryCacheConfig">Cache configuration and storage</h3>
                     <div class="settings-group">
                         <div class="setting-item">
                             <div class="setting-info">
-                                <span class="setting-title" data-i18n="labelCacheStrategy">Cache Strategy</span>
-                                <span class="setting-description" data-i18n="descCacheStrategy">Determines how long lyrics are stored locally to reduce loading times.</span>
+                                <span class="setting-title" data-i18n="labelCacheStrategy">Cache strategy</span>
+                                <span class="setting-description" data-i18n="descCacheStrategy">Set how long Apple Music lyrics and translations stay cached locally.</span>
                             </div>
                             <div class="setting-control">
-                                <div class="form-group margin-0">
-                                    <select id="cache-strategy" placeholder=" ">
-                                        <option value="" disabled selected></option>
-                                        <option value="aggressive" data-i18n="optionAggressive">Aggressive (2 hours)</option>
-                                        <option value="moderate" data-i18n="optionModerate">Moderate (1 hour)</option>
-                                        <option value="none" data-i18n="optionNone">None (no caching)</option>
-                                    </select>
-                                </div>
+                                <select id="cache-strategy" class="native-select">
+                                    <option value="aggressive" data-i18n="optionAggressive">Aggressive (24 hours)</option>
+                                    <option value="moderate" data-i18n="optionModerate">Moderate (12 hours)</option>
+                                    <option value="none" data-i18n="optionNone">None (no caching)</option>
+                                </select>
                             </div>
                         </div>
                         <div class="setting-item">
                             <div class="setting-info">
-                                <span class="setting-title" data-i18n="labelLyricsCache">Lyrics Cache</span>
+                                <span class="setting-title" data-i18n="labelLyricsCache">Lyrics cache</span>
                                 <span id="lyrics-cache-size" class="setting-description">0.00 MB used (0 songs cached)</span>
                             </div>
-                            <div class="setting-control">
-                                <button id="clear-lyrics-cache" class="m3-button outlined error">
-                                    <svg class="icon-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true">
-                                        <path
-                                            d="M15 16h4v2h-4zm0-8h7v2h-7zm0 4h6v2h-6zM3 18c0 1.1.9 2 2 2h6c1.1 0 2-.9 2-2V8H3v10zM14 5h-3l-1-1H6L5 5H2v2h12z" />
-                                    </svg>
-                                    <span data-i18n="buttonClearLyricsCache">Clear Lyrics Cache</span>
-                                </button>
-                            </div>
+                            <div class="setting-control"><button id="clear-lyrics-cache" class="m3-button outlined error" type="button" data-i18n="buttonClearLyricsCache">Clear Lyrics Cache</button></div>
                         </div>
                         <div class="setting-item">
                             <div class="setting-info">
-                                <span class="setting-title" data-i18n="labelTranslationCache">Translation Cache</span>
+                                <span class="setting-title" data-i18n="labelTranslationCache">Translation cache</span>
                                 <span id="translation-cache-size" class="setting-description">0.00 MB used (0 translations cached)</span>
                             </div>
-                            <div class="setting-control">
-                                <button id="clear-translation-cache" class="m3-button outlined error">
-                                    <svg class="icon-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true">
-                                        <path
-                                            d="M15 16h4v2h-4zm0-8h7v2h-7zm0 4h6v2h-6zM3 18c0 1.1.9 2 2 2h6c1.1 0 2-.9 2-2V8H3v10zM14 5h-3l-1-1H6L5 5H2v2h12z" />
-                                    </svg>
-                                    <span data-i18n="buttonClearTranslationCache">Clear Translation Cache</span>
-                                </button>
-                            </div>
+                            <div class="setting-control"><button id="clear-translation-cache" class="m3-button outlined error" type="button" data-i18n="buttonClearTranslationCache">Clear Translation Cache</button></div>
                         </div>
                         <div class="setting-item">
                             <div class="setting-info">
-                                <span class="setting-title" data-i18n="labelRomanizationCache">Transliteration Cache</span>
+                                <span class="setting-title" data-i18n="labelRomanizationCache">Transliteration cache</span>
                                 <span id="romanization-cache-size" class="setting-description">0.00 MB used (0 transliterations cached)</span>
                             </div>
-                            <div class="setting-control">
-                                <button id="clear-romanization-cache" class="m3-button outlined error">
-                                    <svg class="icon-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true">
-                                        <path
-                                            d="M15 16h4v2h-4zm0-8h7v2h-7zm0 4h6v2h-6zM3 18c0 1.1.9 2 2 2h6c1.1 0 2-.9 2-2V8H3v10zM14 5h-3l-1-1H6L5 5H2v2h12z" />
-                                    </svg>
-                                    <span data-i18n="buttonClearRomanizationCache">Clear Transliteration Cache</span>
-                                </button>
-                            </div>
+                            <div class="setting-control"><button id="clear-romanization-cache" class="m3-button outlined error" type="button" data-i18n="buttonClearRomanizationCache">Clear Transliteration Cache</button></div>
                         </div>
                         <div class="setting-item">
                             <div class="setting-info">
-                                <span class="setting-title" data-i18n="labelTotalCacheUsage">Total Cache Usage</span>
+                                <span class="setting-title" data-i18n="labelTotalCacheUsage">Total cache usage</span>
                                 <span id="cache-size" class="setting-description">0.00 MB used (0 items cached)</span>
                             </div>
-                            <div class="setting-control">
-                                <button id="clear-cache" class="m3-button outlined error">
-                                    <svg class="icon-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true">
-                                        <path
-                                            d="M15 16h4v2h-4zm0-8h7v2h-7zm0 4h6v2h-6zM3 18c0 1.1.9 2 2 2h6c1.1 0 2-.9 2-2V8H3v10zM14 5h-3l-1-1H6L5 5H2v2h12z" />
-                                    </svg>
-                                    <span data-i18n="buttonClearAllCache">Clear All Cache</span>
-                                </button>
-                            </div>
+                            <div class="setting-control"><button id="clear-cache" class="m3-button outlined error" type="button" data-i18n="buttonClearAllCache">Clear All Cache</button></div>
                         </div>
                     </div>
-                </div>
-            </section>
-
-            <section class="settings-card" id="local-lyrics">
-                <h2 class="card-title" data-i18n="navLocalLyrics">Local Lyrics</h2>
-
-                <div class="settings-category">
-                    <h3 class="category-title" data-i18n="categoryManageLocalLyrics">Manage Uploaded Lyrics</h3>
-                    <div id="local-lyrics-list" class="draggable-list">
-                        <p class="helper-text" id="no-local-lyrics-message" data-i18n="msgNoLocalLyrics">No local lyrics uploaded yet.</p>
-                    </div>
-                    <div class="card-actions">
-                        <button id="refresh-local-lyrics-list" class="m3-button outlined">
-                            <svg class="icon-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
-                                aria-hidden="true">
-                                <path
-                                    d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z" />
-                            </svg>
-                            <span data-i18n="buttonRefreshList">Refresh List</span>
-                        </button>
-                    </div>
-                    <p id="local-lyrics-status" class="status-message"></p>
-                </div>
-
-                <button class="fab" id="add-lyrics-fab" data-i18n-title="titleAddLocalLyrics"
-                    title="Add New Local Lyrics">
-                    <svg class="icon-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true">
-                        <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
-                    </svg>
-                </button>
-
-                <div id="upload-lyrics-modal" class="modal" style="display: none;">
-                    <div class="modal-scrim"></div>
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h2 class="modal-title" data-i18n="modalUploadTitle">Upload New Local Lyrics</h2>
-                            <button class="close-button m3-button icon">
-                                <svg class="icon-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
-                                    aria-hidden="true">
-                                    <path
-                                        d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
-                                </svg>
-                            </button>
-                        </div>
-                        <div class="form-group">
-                            <input type="text" id="modal-upload-song-title" placeholder=" ">
-                            <label for="modal-upload-song-title" data-i18n="labelSongTitle">Song Title</label>
-                        </div>
-                        <div class="form-group">
-                            <input type="text" id="modal-upload-artist-name" placeholder=" ">
-                            <label for="modal-upload-artist-name" data-i18n="labelArtistName">Artist Name</label>
-                        </div>
-                        <div class="form-group">
-                            <input type="text" id="modal-upload-album-name" placeholder=" ">
-                            <label for="modal-upload-album-name" data-i18n="labelAlbumName">Album Name (Optional)</label>
-                        </div>
-                        <div class="setting-item">
-                            <label for="modal-upload-lyrics-file" class="form-group-label"
-                                data-i18n="labelLyricsFile">Lyrics File</label>
-                            <input type="file" id="modal-upload-lyrics-file" accept=".lrc,.elrc,.ttml,.json">
-                            <p class="helper-text" data-i18n="helperLyricsFile">Upload your LRC, ELRC, Apple TTML, or JSON file.</p>
-                        </div>
-                        <div class="modal-actions">
-                            <button id="modal-upload-lyrics-button" class="m3-button filled">
-                                <svg class="icon-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
-                                    aria-hidden="true">
-                                    <path
-                                        d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm4 18H6V4h7v5h5v11zM8 15.01l1.41 1.41L11 14.84V19h2v-4.16l1.59 1.59L16 15.01 12.01 11z" />
-                                </svg>
-                                <span data-i18n="buttonUploadLyrics">Upload Lyrics</span>
-                            </button>
-                        </div>
-                        <p id="modal-upload-status" class="status-message"></p>
-                    </div>
-                </div>
-            </section>
-
-            <section class="settings-card" id="about">
-                <div class="about-header">
-                    <img src="../../icons/icon128.png" alt="YouLy+ Logo" class="about-logo">
-                    <div class="about-header-text">
-                        <h2 class="card-title no-border">YouLy+</h2>
-                        <p class="version">Version unknown</p>
-                    </div>
-                </div>
-                <div class="settings-group">
-                    <div class="setting-item full-width">
-                        <div class="setting-info">
-                            <p class="about-description" data-i18n="aboutDescription">
-                                This extension was born from a simple idea: listening to music should be an immersive experience, not just a background activity. We were tired of YouTube's static lyrics and dated interface, so we decided to build the player we've always wanted. Our goal is to make your music sessions more beautiful, engaging, and fun.
-                            </p>
-                        </div>
-                    </div>
+                    <p class="cache-explanation" data-i18n="cacheScopeExplanation">Aggressive keeps lyric and translation results for 24 hours; Moderate keeps them for 12 hours. With caching off, results are not stored, while provider indexes may still refresh when online. Clearing caches removes results only: local TTML, lyric offsets, source preferences and fonts are kept. The sizes above do not include provider indexes.</p>
                 </div>
 
                 <div class="settings-category">
-                    <h3 class="category-title" data-i18n="categoryLinksSupport">Links & Support</h3>
-                    <div class="settings-group">
-                        <div class="setting-item full-width">
-                            <div class="links-container">
-                                <a href="https://github.com/ibratabian17/youlyplus" target="_blank" rel="noopener noreferrer"
-                                    class="m3-button outlined">
-                                    <svg class="icon-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
-                                        aria-hidden="true">
-                                        <path
-                                            d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0l4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z" />
-                                    </svg>
-                                    <span data-i18n="linkSourceCode">Source Code</span>
-                                </a>
-                                <a href="https://github.com/ibratabian17/youlyplus/issues" target="_blank"
-                                    rel="noopener noreferrer" class="m3-button outlined">
-                                    <svg class="icon-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
-                                        aria-hidden="true">
-                                        <path
-                                            d="M20 8h-2.81c-.45-.78-1.07-1.45-1.82-1.96L17 4.41 15.59 3l-2.17 2.17C12.96 5.06 12.49 5 12 5c-.49 0-.96.06-1.41.17L8.41 3 7 4.41l1.62 1.63C7.88 6.55 7.26 7.22 6.81 8H4v2h2.09c-.05.33-.09.66-.09 1v1H4v2h2v1c0 .34.04.67.09 1H4v2h2.81c1.04 1.79 2.97 3 5.19 3s4.15-1.21 5.19-3H20v-2h-2.09c.05-.33.09-.66.09-1v-1h2v-2h-2v-1c0-.34-.04-.67-.09-1H20V8zm-6 8h-4v-2h4v2zm0-4h-4v-2h4v2z" />
-                                    </svg>
-                                    <span data-i18n="linkReportBug">Report a Bug</span>
-                                </a>
-                                <a href="https://patreon.com/ibratabian17" target="_blank" rel="noopener noreferrer"
-                                    class="m3-button outlined">
-                                    <svg class="icon-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
-                                        aria-hidden="true">
-                                        <path
-                                            d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
-                                    </svg>
-                                    <span data-i18n="linkPatreon">Support on Patreon</span>
-                                </a>
-                                <a href="https://ko-fi.com/ibratabian17" target="_blank" rel="noopener noreferrer"
-                                    class="m3-button outlined">
-                                    <svg class="icon-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
-                                        aria-hidden="true">
-                                        <path
-                                            d="M20 3H4v10c0 2.21 1.79 4 4 4h6c2.21 0 4-1.79 4-4v-3h2c1.11 0 2-.89 2-2V5c0-1.11-.89-2-2-2zm0 5h-2V5h2v3zM4 19h16v2H4z" />
-                                    </svg>
-                                    <span data-i18n="linkKofi">Support on Ko-fi</span>
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="settings-category">
-                    <h3 class="category-title" data-i18n="categoryConfigManagement">Configuration Management</h3>
+                    <h3 class="category-title" data-i18n="categoryConfigManagement">Configuration management</h3>
                     <div class="settings-group">
                         <div class="setting-item full-width">
                             <div class="setting-info">
-                                <span class="setting-title" data-i18n="categoryConfigManagement">Configuration Management</span>
-                                <span class="setting-description" data-i18n="descConfigManagement">Export your current settings to a JSON file, or import from a file to restore your configuration.</span>
+                                <span class="setting-title" data-i18n="labelBackupRestore">Backup and restore settings</span>
+                                <span class="setting-description" data-i18n="descConfigManagement">Export supported Apple Music settings to JSON, or restore them from a previous backup. Legacy and unsupported keys are ignored.</span>
                             </div>
-                            <div class="setting-control full-width">
-                                <div class="links-container">
-                                    <button id="export-settings-button" class="m3-button outlined">
-                                        <svg class="icon-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
-                                            aria-hidden="true">
-                                            <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z" />
-                                        </svg>
-                                        <span data-i18n="buttonExport">Export</span>
-                                    </button>
-                                    <button id="import-settings-button" class="m3-button outlined">
-                                        <svg class="icon-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
-                                            aria-hidden="true">
-                                            <path d="M9 16h6v-6h4l-7-7-7 7h4zm-4 2h14v2H5z" />
-                                        </svg>
-                                        <span data-i18n="buttonImport">Import</span>
-                                    </button>
-                                    <input type="file" id="import-settings-file" accept=".json" style="display: none;">
-                                </div>
-                                <p id="config-status" class="status-message"></p>
+                            <div class="links-container">
+                                <button id="export-settings-button" class="m3-button outlined" type="button" data-i18n="buttonExport">Export</button>
+                                <button id="import-settings-button" class="m3-button outlined" type="button" data-i18n="buttonImport">Import</button>
+                                <input type="file" id="import-settings-file" accept=".json" hidden>
+                            </div>
+                            <p id="config-status" class="status-message" role="status" aria-live="polite"></p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="settings-category">
+                    <h3 class="category-title" data-i18n="categoryHelpSources">Help and source</h3>
+                    <div class="settings-group">
+                        <div class="setting-item full-width about-apple-card">
+                            <div class="setting-info">
+                                <span class="setting-title">YouLy+ <span class="version">Version unknown</span></span>
+                                <span class="setting-description" data-i18n="aboutAppleDescription">Apple Music lyrics with the original AMLL player, Apple-provided translations, local TTML, and optional machine translation.</span>
+                                <span class="setting-description" data-i18n="upstreamAttribution">Built on AMLL and open-source lyric sources. Upstream acknowledgements and the AGPL-3.0-only license are available in the repository.</span>
+                            </div>
+                            <div class="links-container">
+                                <a href="https://github.com/Zennmn/YouLyPlus" target="_blank" rel="noopener noreferrer" class="m3-button outlined" data-i18n="linkSourceCode">Source code</a>
+                                <a href="https://github.com/Zennmn/YouLyPlus/issues" target="_blank" rel="noopener noreferrer" class="m3-button outlined" data-i18n="linkIssues">Issues &amp; help</a>
                             </div>
                         </div>
                     </div>
                 </div>
+                <p id="advanced-save-status" class="status-message" role="status" aria-live="polite"></p>
             </section>
 
             <footer class="content-footer">
-                <p data-i18n="footerMadeWithLove">Made with love</p>
+                <p data-i18n="footerAppleOnly">YouLy+ · Apple Music lyrics</p>
             </footer>
         </div>
     </main>
 
-    <script type="module" src="settingsManager.js"></script>
     <script type="module" src="ui.js"></script>
 </body>
 

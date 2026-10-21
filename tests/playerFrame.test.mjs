@@ -29,7 +29,7 @@ function harness(parentOrigin = 'https://music.apple.com') {
   vm.runInContext(read('src/modules/applemusic/framePlayer.js'), parentContext);
   const options = {
     settings: { lightweight: false, appleMusicAMLLBackground: true, appleMusicPlayerFont: 'SimSun', appleMusicPlayerFontFile: { id: 'font-id', name: 'example.ttf' }, customLLMApiKey: 'PRIVATE', mediaUserToken: 'TOKEN' },
-    translate: key => key === 'settings' ? '歌词设置' : '',
+    translate: key => key === 'playerSettings' ? '歌词设置' : '',
     onReady() { readyCount++; }, onFallback() { fallbackCount++; },
     sendCommand: async (...args) => { actions.push(['command', ...args]); return { accepted: true }; },
     onSettingsChange: async values => { actions.push(['settings', values]); },
@@ -67,7 +67,8 @@ test('separate-document startup coalesces cold ticks, preserves latest media sta
   assert.equal(h.calls.find(call => call[0] === 'updateCurrentTick')[1], 2399 / 240);
   assert.equal(h.calls.find(call => call[0] === 'updateSong')[1].appleId, '1');
   assert.doesNotMatch(JSON.stringify(h.sent), /PRIVATE|TOKEN|appleMusicTTML/);
-  assert.equal(h.childOptions().translate('settings'), '歌词设置');
+  assert.equal(h.childOptions().translate('playerSettings'), '歌词设置');
+  assert.equal(h.childOptions().translate('settings'), '');
   assert.equal(h.childOptions().settings.appleMusicPlayerFont, 'SimSun');
   assert.equal(h.childOptions().settings.appleMusicPlayerFontFile.id, 'font-id');
   h.api.updateSettings({ appleMusicPlayerFont: '' }); await settle();
@@ -101,7 +102,7 @@ test('lyric metadata and menu callbacks round-trip with original arguments and s
   h.api.dispose(); await settle();
 });
 
-test('frame bridge rejects foreign window/origin/channel and unknown methods; Escape closes parent modal', async () => {
+test('frame bridge rejects foreign window/origin/channel and unknown methods; Escape fallback closes parent modal', async () => {
   const h = harness(); await h.load();
   const channel = new URL(h.frame.src).searchParams.get('channel');
   const valid = { type: 'LYPLUS_FRAME', channel, kind: 'action', id: 400, action: 'command', args: ['next'] };
@@ -147,7 +148,7 @@ test('parent replay keeps background and offset after frame recreation instead o
   const displayed = [], writes = [], listeners = new Map();
   const context = vm.createContext({
     currentSongInfo: { appleId: '1' }, currentSettings: { isEnabled: true }, cachedLyricsArguments: null, cachedOffset: 0,
-    cachedLyricStatus: '', manualProviderSelected: false,
+    cachedLyricStatus: '', manualLyricsProvider: null,
     songIdentity: song => song?.appleId,
     amllPlayer: { displayLyrics: (...args) => displayed.push(structuredClone(args.map(value => typeof value === 'function' ? null : value))), updateSettings() {} },
     window: { addEventListener: (name, fn) => listeners.set(name, fn), initializeLyricsPlusPlatform() {} },

@@ -1,6 +1,6 @@
 /**
  * Dictionary Service for Offline Romanization.
- * Manages the offline Kuromoji morphological dictionary and Rawi model in IndexedDB.
+ * Manages the offline Kuromoji dictionary and CaTT Arabic model in IndexedDB.
  * Dictionaries are ONLY downloaded upon explicit user action in Settings.
  */
 

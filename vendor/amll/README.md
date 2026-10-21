@@ -20,10 +20,11 @@ translation, romanization and word annotations through extension enrichment.
 
 Local patch: PrebuiltLyricPlayer accepts a lyrics-only time correction,
 labels its media buttons, respects shuffle/repeat capability atoms, and accepts
-callbacks for its original playlist/AirPlay buttons. The horizontal layout's
-bottom controls also accept a fullscreen-button slot using the original
-ToggleIconButton styling and spacing. The extension toggles browser window
-fullscreen through the background windows API and restores its previous state.
+callbacks for its original playlist/AirPlay buttons. The horizontal bottom
+controls and both vertical control states accept a fullscreen-button slot using
+the original ToggleIconButton styling and spacing. The extension toggles
+browser window fullscreen through the background windows API and restores its
+previous state.
 The horizontal layout's
 controls below the cover occupy 25% of the player container height, including
 their top spacing. The square cover is enlarged to 60% of the container height

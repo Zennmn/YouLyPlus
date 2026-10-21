@@ -2,13 +2,13 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import vm from 'node:vm';
 import { readFileSync } from 'node:fs';
-import { normalizeAppleLyricsOrder } from '../src/lib/appleLyricsSources.js';
 import { playerFontFamily } from '../src/lib/playerFont.js';
+import { lyricsHarness, memory } from './appleLyricsServiceHarness.mjs';
 
 const read = file => readFileSync(new URL(`../${file}`, import.meta.url), 'utf8');
+const defaults = read('src/lib/defaultSettings.js');
 const manager = read('src/modules/lyrics/lyricsManager.js');
 const settings = read('src/modules/lyrics/settings.js');
-const backend = read('src/background/core/lyricsService.js');
 const main = read('ui/applemusic-player/main.jsx');
 const quiet = { log() {}, warn() {}, error() {} };
 const extract = (source, name, indent = '') => {
@@ -16,11 +16,6 @@ const extract = (source, name, indent = '') => {
   assert.ok(start >= 0, name);
   return source.slice(start, source.indexOf(`\n${indent}}`, start) + indent.length + 2);
 };
-function memory(initial = {}) {
-  const values = { ...initial };
-  return { values, get: async defaults => ({ ...defaults, ...Object.fromEntries(Object.keys(defaults).filter(k => k in values).map(k => [k, values[k]])) }),
-    set: async patch => { Object.assign(values, patch); } };
-}
 function page(storage, sendMessage = async () => ({ success: true })) {
   let storageChanged;
   const listeners = new Map();
@@ -29,14 +24,15 @@ function page(storage, sendMessage = async () => ({ success: true })) {
     dispatchEvent: event => { for (const fn of listeners.get(event.type) || []) fn(event); },
   };
   const context = vm.createContext({
-    window, console: quiet, setTimeout, clearTimeout, AudioContext: class {},
+    window, console: quiet, setTimeout, clearTimeout, AudioContext: class {}, currentSongInfo: null,
+    getAppleMusicLyricsLanguage: () => 'en',
     CustomEvent: class { constructor(type, options) { this.type = type; Object.assign(this, options); } },
     browser: { storage: { onChanged: { addListener(fn) { storageChanged = fn; } } }, runtime: { sendMessage } },
     storageLocalGet: storage.get, storageLocalSet: storage.set,
     document: { getElementById: () => ({ textContent: '', classList: { toggle() {} } }) },
     LyricsPlusAPI: {},
   });
-  vm.runInContext(`${settings}\n${manager}`, context);
+  vm.runInContext(`${defaults}\n${settings}\n${manager}`, context);
   const load = () => new Promise(resolve => context.loadSettings(resolve));
   return { context, load, storageChanged: patch => storageChanged(patch, 'local') };
 }
@@ -45,7 +41,7 @@ test('every display mode and background setting survives a new page session, inc
   const storage = memory();
   const first = page(storage);
   await first.load();
-  vm.runInContext('fetchAndDisplayLyrics=()=>{};', first.context);
+  vm.runInContext('currentSongInfo={appleId:"123"}; fetchAndDisplayLyrics=()=>{};', first.context);
   for (const mode of ['translate', 'romanize', 'both', 'none']) {
     first.context.setCurrentDisplayModeAndRender(mode, { appleId: '123' });
     await Promise.resolve();
@@ -84,51 +80,49 @@ test('every display mode and background setting survives a new page session, inc
   assert.equal(view.animated, false, 'failed write must restore the saved background');
 });
 
-function lyricsBackend(storage, resolver = async provider => ({ provider: provider || 'amll', data: [{ text: 'Lyric' }] }), oldOffsets = new Map()) {
-  const source = backend.slice(backend.indexOf('  static async getAppleMusicLyrics('), backend.indexOf('  static async getFromDB('));
-  const offsets = backend.slice(backend.indexOf('  static async getLyricsOffset('), backend.indexOf('  static async getAvailableProviders('));
-  const cache = new Map();
-  return vm.runInNewContext(`(class { static createCacheKey(song) { return 'apple-sources-v2-amll:'+song.appleId; } static cacheProviderLyrics() {} ${source} ${offsets} })`, {
-    SettingsManager: { get: storage.get, set: storage.set, getLyricsSettings: async () => ({}) },
-    state: { getCached: key => cache.get(key), setCached: (key, value) => cache.set(key, value) },
-    normalizeAppleLyricsOrder, appleMusicLyrics: { rememberNative() {}, provider: resolver, resolve: () => resolver(null) },
-    offsetsDB: { get: async key => oldOffsets.get(key) },
-  });
-}
-
-test('manual source is restored by song ID after a worker/page restart; auto clears only that song', async () => {
+test('manual source is restored by song ID after a worker/page restart; auto clears only that song', async t => {
   const storage = memory(), song = { appleId: '123', title: 'Song' };
-  let service = lyricsBackend(storage);
+  const backend = lyricsHarness({ storage });
+  t.after(backend.restore);
+  let service = backend.service;
   const manual = await service.getAppleMusicLyrics(song, false, 'amlyrics');
   assert.equal(manual.lyrics.provider, 'amlyrics');
-  service = lyricsBackend(storage);
+  backend.resetRuntime();
+  service = backend.service;
   assert.equal((await service.getAppleMusicLyrics({ ...song, title: 'Localized title' })).lyrics.provider, 'amlyrics');
   assert.equal((await service.getAppleMusicLyrics({ appleId: '456' })).lyrics.provider, 'amll');
   assert.equal((await service.getAppleMusicLyrics(song, false, 'auto')).lyrics.provider, 'amll');
-  service = lyricsBackend(storage);
+  backend.resetRuntime();
+  service = backend.service;
   assert.equal((await service.getAppleMusicLyrics(song)).lyrics.playerProviderPreference, 'auto');
 });
 
-test('unavailable saved source falls back without forgetting it; a failed manual switch does not overwrite memory', async () => {
+test('unavailable saved source falls back without forgetting it; a failed manual switch does not overwrite memory', async t => {
   const storage = memory({ lyplusApplePlayerProvider_123: 'lunabeat' });
-  const service = lyricsBackend(storage, async provider => provider ? null : { provider: 'amll', data: [{}] });
+  const backend = lyricsHarness({ storage, resolver: async provider => provider ? null : { provider: 'amll', data: [{}] } });
+  t.after(backend.restore);
+  const service = backend.service;
   assert.equal((await service.getAppleMusicLyrics({ appleId: '123' })).lyrics.provider, 'amll');
   assert.equal(storage.values.lyplusApplePlayerProvider_123, 'lunabeat');
   await assert.rejects(service.getAppleMusicLyrics({ appleId: '123' }, false, 'amlyrics'));
   assert.equal(storage.values.lyplusApplePlayerProvider_123, 'lunabeat');
 });
 
-test('offset memory migrates old cache keys, survives metadata/version changes and remembers a zero reset', async () => {
+test('offset memory migrates old cache keys, survives metadata/version changes and remembers a zero reset', async t => {
   const storage = memory();
   const old = new Map([['apple-sources-v1:123', { offsetMs: -350 }]]);
-  let service = lyricsBackend(storage, undefined, old);
+  const backend = lyricsHarness({ storage, oldOffsets: old });
+  t.after(backend.restore);
+  let service = backend.service;
   assert.equal(await service.getLyricsOffset({ appleId: '123', title: 'Song' }), -350);
   assert.equal(storage.values.lyplusApplePlayerOffset_123, -350);
   await service.saveLyricsOffset({ appleId: '123' }, 220);
-  service = lyricsBackend(storage, undefined, old);
+  backend.resetRuntime();
+  service = backend.service;
   assert.equal(await service.getLyricsOffset({ appleId: '123', title: 'Different' }), 220);
   await service.saveLyricsOffset({ appleId: '123' }, 0);
-  service = lyricsBackend(storage, undefined, old);
+  backend.resetRuntime();
+  service = backend.service;
   assert.equal(await service.getLyricsOffset({ appleId: '123' }), 0);
   assert.equal(await service.getLyricsOffset({ appleId: '456' }), 0);
 });
@@ -166,15 +160,18 @@ test('song preference writes and player-setting echoes cannot restart the previo
   instance.storageChanged({ appleMusicAMLLBackground: { newValue: false } });
 });
 
-test('a full fresh-page fetch restores the selected source, subtitle intent and offset together', async () => {
+test('a full fresh-page fetch restores the selected source, translation intent and offset together', async t => {
   const storage = memory({ appleMusicDisplayMode: 'both', appleMusicAMLLBackground: false });
   const song = { appleId: '123', title: 'Song', artist: 'Artist', album: 'Album' };
-  let service = lyricsBackend(storage, async provider => ({ provider: provider || 'amll', type: 'Line', data: [{
+  const backend = lyricsHarness({ storage, resolver: async provider => ({ provider: provider || 'amll', type: 'Line', data: [{
     text: 'Lyric', startTime: 1, endTime: 2, translation: { text: '歌词', lang: 'zh' }, romanizedText: 'roman',
-  }] }));
+  }] }) });
+  t.after(backend.restore);
+  let service = backend.service;
   await service.getAppleMusicLyrics(song, false, 'amlyrics');
   await service.saveLyricsOffset(song, 250);
-  service = lyricsBackend(storage); // worker memory/cache discarded
+  backend.resetRuntime();
+  service = backend.service; // worker memory/cache discarded
   const fresh = page(storage, async message => {
     if (message.type === 'GET_LYRICS_OFFSET') return { success: true, offsetMs: await service.getLyricsOffset(message.songInfo) };
     if (message.type === 'FETCH_LYRICS') return { success: true, ...await service.getAppleMusicLyrics(message.songInfo) };
@@ -184,7 +181,7 @@ test('a full fresh-page fetch restores the selected source, subtitle intent and 
   const renders = [];
   fresh.context.LyricsPlusAPI.cleanupLyrics = () => {};
   fresh.context.LyricsPlusAPI.displayLyrics = (...args) => renders.push(args);
-  vm.runInContext('applySubtitleRetiming=async()=>null;applySponsorBlock=async lyrics=>lyrics.data;', fresh.context);
+  vm.runInContext(`currentSongInfo=${JSON.stringify(song)};`, fresh.context);
   await fresh.context.fetchAndDisplayLyrics(song, true);
   const final = renders.at(-1);
   assert.equal(final[0].provider, 'amlyrics');

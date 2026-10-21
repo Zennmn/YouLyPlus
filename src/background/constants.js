@@ -16,13 +16,6 @@ export const CONFIG = {
     moderate: 12 * 60 * 60 * 1000
   },
 
-  KPOE_SERVERS: [
-    //plz dont stole lmao
-    "https://lyricsplus.prjktla.my.id", //youly's server
-    "https://lyricsplus.binimum.org", //binimum's server
-    "https://lyricsplus.prjktla.workers.dev", //ibra's cf worker
-  ],
-
   GEMINI: {
     MAX_RETRIES: 5,
     MIN_TEXT_SIMILARITY: 0.8
@@ -35,14 +28,6 @@ export const CONFIG = {
 };
 
 export const PROVIDERS = {
-  KPOE: 'kpoe',
-  CUSTOM_KPOE: 'customKpoe',
-  UNISON: 'unison',
-  LRCRED: 'lrcred',
-  BINILYRICS: 'lrcred',
-  LRCLIB: 'lrclib',
-  YTMUSIC: 'ytmusic',
-  SUBTITLES: 'subtitles',
   LOCAL: 'local',
   GEMINI: 'gemini',
   GOOGLE: 'google',
@@ -57,13 +42,11 @@ export const MESSAGE_TYPES = {
   RESET_CACHE: 'RESET_CACHE',
   GET_CACHED_SIZE: 'GET_CACHED_SIZE',
   TRANSLATE_LYRICS: 'TRANSLATE_LYRICS',
-  FETCH_SPONSOR_SEGMENTS: 'FETCH_SPONSOR_SEGMENTS',
   UPLOAD_LOCAL_LYRICS: 'UPLOAD_LOCAL_LYRICS',
   GET_LOCAL_LYRICS_LIST: 'GET_LOCAL_LYRICS_LIST',
   DELETE_LOCAL_LYRICS: 'DELETE_LOCAL_LYRICS',
   FETCH_LOCAL_LYRICS: 'FETCH_LOCAL_LYRICS',
   FETCH_IMAGE: 'FETCH_IMAGE',
-  FETCH_SUBTITLES: 'FETCH_SUBTITLES',
   SAVE_LYRICS_OFFSET: 'SAVE_LYRICS_OFFSET',
   GET_LYRICS_OFFSET: 'GET_LYRICS_OFFSET',
   SWITCH_LYRICS_PROVIDER: 'SWITCH_LYRICS_PROVIDER',

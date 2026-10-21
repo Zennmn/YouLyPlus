@@ -2,67 +2,38 @@
 // Settings Manager - Centralized storage and configuration management
 // ==========================================================================
 
+import './defaultSettings.js';
+
 export const pBrowser = typeof browser !== 'undefined'
     ? browser
     : (typeof chrome !== 'undefined' ? chrome : null);
 
-export const defaultSettings = {
-    lyricsProviderOrder: 'kpoe,lrcred,unison,lrclib',
-    appleMusicLyricsProviderOrder: 'amll,lunabeat,amlyrics,applemusic',
-    appleMusicAMLL: true,
-    appleMusicAMLLBackground: true,
-    appleMusicDisplayMode: 'none',
-    appleMusicTitleCorrection: 'off',
-    appleMusicPlayerFont: '',
-    appleMusicPlayerFontFile: null,
-    customLLMBaseUrl: '',
-    customLLMApiKey: '',
-    customLLMModel: '',
-    lyricsSourceOrder: 'apple,lyricsplus,qq,musixmatch,musixmatch-word',
-    wordByWord: true,
-    lightweight: false,
-    isEnabled: true,
-    useSponsorBlock: false,
-    autoHideLyrics: false,
-    cacheStrategy: 'aggressive',
-    fontSize: 16,
-    hideOffscreen: true,
-    blurInactive: false,
-    dynamicPlayer: false,
-    audioBeatSync: false,
-    relaxScroll: false,
-    customCSS: '',
-    translationProvider: 'google',
-    geminiApiKey: '',
-    geminiModel: 'gemini-flash-lite-latest',
-    overrideTranslateTarget: false,
-    customTranslateTarget: '',
-    overrideGeminiPrompt: false,
-    customGeminiPrompt: '',
-    overrideGeminiRomanizePrompt: false,
-    customGeminiRomanizePrompt: '',
-    romanizationProvider: 'offline',
-    transliterationTargetScript: 'latin',
-    geminiRomanizationModel: 'gemini-flash-latest',
-    useSongPaletteFullscreen: false,
-    useSongPaletteAllModes: false,
-    overridePaletteColor: '',
-    largerTextMode: 'lyrics', // 'lyrics' or 'romanization'
-    hidePhoneticDup: false,
-    bkgOverlap: true,
-    customKpoeUrl: '',
-    appleMusicTTMLBypass: false,
-    YTSongInfo: false,
-    YTSongInfoDisableSeekbar: false,
-    openRouterApiKey: '',
-    openRouterModel: 'google/gemma-3n-e2b-it:free',
-    deeplApiKey: '',
-    preferUnisonVideo: false
-};
+export const defaultSettings = globalThis.LYPLUS_DEFAULT_SETTINGS;
+
+export function pickSettings(values = {}) {
+    return Object.fromEntries(Object.entries(values).filter(([key]) => Object.hasOwn(defaultSettings, key)));
+}
 
 let currentSettings = { ...defaultSettings };
+let storedSettings = { ...defaultSettings };
+let pendingSettings = {};
+let saveQueue = Promise.resolve();
+let editRevision = 0;
+const pendingRevisions = new Map();
+const storageRevisions = new Map();
+const settingsListeners = new Set();
+
+function refreshCurrentSettings() {
+    const next = { ...storedSettings, ...pendingSettings };
+    const changed = Object.keys(defaultSettings).some(key => JSON.stringify(next[key]) !== JSON.stringify(currentSettings[key]));
+    currentSettings = next;
+    if (changed) for (const callback of settingsListeners) {
+        try { callback(getSettings()); } catch (error) { console.warn('YouLy+: could not refresh settings UI', error); }
+    }
+}
 
 export function storageLocalGet(keys) {
+    if (typeof browser !== 'undefined' && browser.storage?.local) return browser.storage.local.get(keys);
     return new Promise((resolve, reject) => {
         if (!pBrowser || !pBrowser.storage) {
             console.warn("YouLy+: pBrowser.storage not available. Using mock storage fallback.");
@@ -95,6 +66,7 @@ export function storageLocalGet(keys) {
 }
 
 export function storageLocalSet(items) {
+    if (typeof browser !== 'undefined' && browser.storage?.local) return browser.storage.local.set(items);
     return new Promise((resolve, reject) => {
         if (!pBrowser || !pBrowser.storage) {
             console.warn("YouLy+: pBrowser.storage not available. Using mock storage fallback.");
@@ -120,40 +92,52 @@ export function storageLocalSet(items) {
 }
 
 export function loadSettings(callback) {
+    const revisions = new Map(storageRevisions);
     return storageLocalGet(defaultSettings).then((items) => {
-        currentSettings = { ...defaultSettings, ...items };
-        injectCustomCSS(currentSettings.customCSS);
+        for (const [key, value] of Object.entries({ ...defaultSettings, ...pickSettings(items) })) {
+            if (storageRevisions.get(key) === revisions.get(key)) storedSettings[key] = value;
+        }
+        refreshCurrentSettings();
         if (callback) callback(currentSettings);
         return currentSettings;
     }).catch(error => {
         console.error("YouLy+: Error loading settings:", error);
-        currentSettings = { ...defaultSettings };
-        injectCustomCSS(currentSettings.customCSS);
+        refreshCurrentSettings();
         if (callback) callback(currentSettings);
         return currentSettings;
     });
 }
 
 export function saveSettings() {
-    return storageLocalSet(currentSettings).then(() => {
-        if (typeof window !== 'undefined' && typeof window.postMessage === 'function') {
-            window.postMessage({
-                type: 'UPDATE_SETTINGS',
-                settings: currentSettings
-            }, '*');
+    const operation = saveQueue.catch(() => {}).then(async () => {
+        const values = { ...pendingSettings };
+        if (!Object.keys(values).length) return getSettings();
+        const edits = new Map(pendingRevisions);
+        const revisions = new Map(storageRevisions);
+        await storageLocalSet(values);
+        for (const [key, value] of Object.entries(values)) {
+            // An onChanged event received during the write is newer than its snapshot.
+            if (storageRevisions.get(key) === revisions.get(key)) {
+                storedSettings[key] = value;
+                storageRevisions.set(key, (storageRevisions.get(key) || 0) + 1);
+            }
+            if (pendingRevisions.get(key) === edits.get(key)) {
+                delete pendingSettings[key];
+                pendingRevisions.delete(key);
+            }
         }
+        refreshCurrentSettings();
         return currentSettings;
-    }).catch(error => {
-        console.error("YouLy+: Error saving settings:", error);
-        throw error;
     });
+    saveQueue = operation;
+    return operation;
 }
 
 export function updateSettings(newSettings) {
-    currentSettings = { ...currentSettings, ...newSettings };
-    if (newSettings.customCSS !== undefined) {
-        injectCustomCSS(currentSettings.customCSS);
-    }
+    const values = pickSettings(newSettings);
+    for (const key of Object.keys(values)) pendingRevisions.set(key, ++editRevision);
+    currentSettings = { ...currentSettings, ...values };
+    pendingSettings = { ...pendingSettings, ...values };
     return currentSettings;
 }
 
@@ -286,33 +270,6 @@ export function clearCache(target = 'all') {
     });
 }
 
-export function uploadLocalLyrics(songInfo, jsonLyrics) {
-    return new Promise((resolve, reject) => {
-        if (pBrowser && pBrowser.runtime && typeof pBrowser.runtime.sendMessage === 'function') {
-            pBrowser.runtime.sendMessage({
-                type: 'UPLOAD_LOCAL_LYRICS',
-                songInfo,
-                jsonLyrics
-            }, (response) => {
-                if (pBrowser.runtime.lastError) {
-                    console.error("YouLy+: Error uploading local lyrics:", pBrowser.runtime.lastError.message);
-                    return reject(pBrowser.runtime.lastError.message);
-                }
-                if (response && response.success) {
-                    resolve(response);
-                } else {
-                    const err = response ? response.error : 'Unknown error';
-                    console.error("YouLy+: Error uploading local lyrics from response:", err);
-                    reject(err);
-                }
-            });
-        } else {
-            console.warn("YouLy+: pBrowser.runtime.sendMessage is not available. Skipping local lyrics upload.");
-            reject('Local lyrics upload feature is unavailable in this context.');
-        }
-    });
-}
-
 export function getLocalLyricsList() {
     return new Promise((resolve, reject) => {
         if (pBrowser && pBrowser.runtime && typeof pBrowser.runtime.sendMessage === 'function') {
@@ -417,13 +374,9 @@ export function deleteDictionary(dictionary = 'japanese') {
 }
 
 export function setupSettingsMessageListener(callback) {
-    if (typeof window !== 'undefined' && typeof window.addEventListener === 'function') {
-        window.addEventListener('message', (event) => {
-            if (event.source !== window || !event.data || event.data.type !== 'UPDATE_SETTINGS') return;
-            updateSettings(event.data.settings);
-            if (callback) callback(currentSettings);
-        });
-    }
+    if (typeof callback !== 'function') return () => {};
+    settingsListeners.add(callback);
+    return () => settingsListeners.delete(callback);
 }
 
 // Storage change listener to keep settings in sync across all contexts
@@ -432,22 +385,13 @@ if (pBrowser && pBrowser.storage) {
         if (area === 'local') {
             const newSettings = {};
             for (let key in changes) {
-                if (key.startsWith('lyplusAppleLyricsIndex_') || key.startsWith('lyplusApplePlayer') || key.startsWith('lyplusAppleTitleFix:')) continue;
-                newSettings[key] = changes[key].newValue;
+                if (!Object.hasOwn(defaultSettings, key)) continue;
+                newSettings[key] = changes[key].newValue === undefined ? defaultSettings[key] : changes[key].newValue;
+                storageRevisions.set(key, (storageRevisions.get(key) || 0) + 1);
             }
             if (!Object.keys(newSettings).length) return;
-            updateSettings(newSettings);
+            storedSettings = { ...storedSettings, ...newSettings };
+            refreshCurrentSettings();
         }
     });
-}
-
-export function injectCustomCSS(customCSS) {
-    if (typeof document === 'undefined') return;
-    let styleTag = document.getElementById('lyrics-plus-custom-css');
-    if (!styleTag) {
-        styleTag = document.createElement('style');
-        styleTag.id = 'lyrics-plus-custom-css';
-        document.head.appendChild(styleTag);
-    }
-    styleTag.textContent = customCSS || '';
 }

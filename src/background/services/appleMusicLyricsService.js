@@ -1,5 +1,4 @@
 import { parseAMLLLyrics } from '../utils/amllParser.js';
-import { DataParser } from '../utils/dataParser.js';
 import { Utilities } from '../utils/utilities.js';
 
 import { APPLE_LYRICS_ORDER, APPLE_LYRICS_NAMES, normalizeAppleLyricsOrder } from '../../lib/appleLyricsSources.js';
@@ -19,6 +18,15 @@ export class AppleMusicLyricsService {
     this.results = new Map();
     this.pending = new Map();
     this.nativeLyrics = new Map();
+    this.generation = 0;
+  }
+
+  nativeLanguage(song = {}) {
+    return String(song.appleMusicLyricsLanguage || song.language || '').trim().toLowerCase();
+  }
+
+  nativeKey(song = {}) {
+    return `${String(song.appleId || '')}:${this.nativeLanguage(song)}`;
   }
 
   async read(url, { json = false, sha256, limit = 8 * 1024 * 1024 } = {}) {
@@ -57,7 +65,9 @@ export class AppleMusicLyricsService {
     if (this.pendingIndexes.has(provider)) return this.pendingIndexes.get(provider);
     const promise = this.refreshIndex(provider, force);
     this.pendingIndexes.set(provider, promise);
-    try { return await promise; } finally { this.pendingIndexes.delete(provider); }
+    try { return await promise; } finally {
+      if (this.pendingIndexes.get(provider) === promise) this.pendingIndexes.delete(provider);
+    }
   }
 
   async refreshIndex(provider, force) {
@@ -105,7 +115,8 @@ export class AppleMusicLyricsService {
     let url, sha256;
     if (provider === 'amll') url = `${AMLL}am-lyrics/${id}.ttml`;
     else {
-      const index = await this.index(provider, force);
+      // Reloading lyrics does not require rebuilding the independent source index.
+      const index = await this.index(provider, false);
       const entry = provider === 'lunabeat'
         ? index.songs.find(song => ids(song.sourceIds?.appleMusicId).includes(id))
         : index.entries.find(song => song.enabled !== false && [String(song.appleMusicId), ...ids(song.alternateIds)].includes(id));
@@ -117,26 +128,22 @@ export class AppleMusicLyricsService {
     return lyrics;
   }
 
-  async provider(provider, song, force = false) {
+  async provider(provider, song, force = false, { cacheResults = true } = {}) {
     if (provider === 'applemusic') {
-      const ttml = song.appleMusicTTML || this.nativeLyrics.get(String(song.appleId));
+      // Native TTML is language-specific. Never borrow another target language's cached track.
+      const ttml = song.appleMusicTTML || this.nativeLyrics.get(this.nativeKey(song));
       if (ttml) {
         const parsed = this.parse(ttml, provider);
         if (parsed) return parsed;
-      }
-      const lyrics = song.lyricsJSON && DataParser.parseKPoeFormat(song.lyricsJSON);
-      if (lyrics && !Utilities.isEmptyLyrics(lyrics)) {
-        lyrics.provider = provider;
-        lyrics.metadata = { ...lyrics.metadata, source: 'Apple Music', provider };
-        return lyrics;
       }
       return null;
     }
     if (!APPLE_LYRICS_ORDER.includes(provider)) return null;
     const key = `${provider}:${song.appleId}`;
     const cached = this.results.get(key);
-    if (!force && cached?.expires > Date.now()) return cached.lyrics;
+    if (cacheResults && !force && cached?.expires > Date.now()) return cached.lyrics;
     if (this.pending.has(key)) return this.pending.get(key);
+    const generation = this.generation;
     const promise = this.fetchExternal(provider, String(song.appleId), force).catch(error => {
       if (error.status !== 404) console.warn(`YouLy+ ${APPLE_LYRICS_NAMES[provider]}: ${error.message}`);
       return null;
@@ -144,25 +151,45 @@ export class AppleMusicLyricsService {
     this.pending.set(key, promise);
     try {
       const lyrics = await promise;
-      if (this.results.size >= 100) this.results.delete(this.results.keys().next().value);
-      this.results.set(key, { lyrics, expires: Date.now() + (lyrics ? SIX_HOURS : 60000) });
+      if (cacheResults && generation === this.generation) {
+        if (this.results.size >= 100) this.results.delete(this.results.keys().next().value);
+        this.results.set(key, { lyrics, expires: Date.now() + (lyrics ? SIX_HOURS : 60000) });
+      }
       return lyrics;
-    } finally { this.pending.delete(key); }
+    } finally {
+      if (this.pending.get(key) === promise) this.pending.delete(key);
+    }
   }
 
-  async resolve(song, force = false, order) {
+  async resolve(song, force = false, order, options = {}) {
     for (const provider of normalizeAppleLyricsOrder(order)) {
-      const lyrics = await this.provider(provider, song, force);
+      const lyrics = await this.provider(provider, song, force, options);
       if (lyrics) return lyrics;
     }
     throw new Error('No lyrics found from AMLL, LunaBeat, AmLyrics or Apple Music');
   }
 
   rememberNative(song) {
+    if (!song?.appleId) return;
+    // A metadata-only snapshot or a transient empty fetch must not erase a later valid TTML
+    // for the same language. Language-specific keys already prevent cross-language reuse.
     if (!song.appleMusicTTML) return;
+    const key = this.nativeKey(song);
     if (this.nativeLyrics.size >= 30) this.nativeLyrics.delete(this.nativeLyrics.keys().next().value);
-    this.nativeLyrics.set(String(song.appleId), song.appleMusicTTML);
+    this.nativeLyrics.set(key, song.appleMusicTTML);
   }
+
+  clearResultCache() {
+    this.generation++;
+    this.results.clear();
+    this.pending.clear();
+  }
+
+  clearResults() {
+    this.clearResultCache();
+    this.nativeLyrics.clear();
+  }
+
 }
 
 export const appleMusicLyrics = new AppleMusicLyricsService();

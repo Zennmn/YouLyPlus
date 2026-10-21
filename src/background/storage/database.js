@@ -16,122 +16,217 @@ class DatabaseManager {
       request.onupgradeneeded = (event) => {
         const db = event.target.result;
         if (!db.objectStoreNames.contains(this.config.store)) {
-          const keyPath = this.config.store === 'localLyrics' ? 'songId' : 'key';
-          db.createObjectStore(this.config.store, { keyPath });
+          db.createObjectStore(this.config.store, { keyPath: this.config.store === 'localLyrics' ? 'songId' : 'key' });
         }
       };
 
-      request.onsuccess = () => resolve(request.result);
-      request.onerror = () => reject(request.error);
+      request.onsuccess = () => {
+        const db = request.result;
+        db.onversionchange = () => db.close();
+        resolve(db);
+      };
+      request.onerror = () => reject(request.error || new Error(`Failed to open ${this.config.name}`));
+      request.onblocked = () => reject(new Error(`Database upgrade blocked: ${this.config.name}`));
+    });
+  }
+
+  /**
+   * Resolve only after the transaction commits. Request errors are retained until the
+   * transaction aborts so callers never treat a rolled-back write as successful.
+   */
+  async transact(mode, operation) {
+    const db = await this.open();
+    return new Promise((resolve, reject) => {
+      let transaction;
+      let settled = false;
+      let result;
+      let failure = null;
+
+      const finishRejected = (error) => {
+        if (settled) return;
+        settled = true;
+        db.close();
+        reject(error instanceof Error ? error : new Error(String(error || 'IndexedDB transaction failed')));
+      };
+
+      const abortWith = (error) => {
+        if (!failure) failure = error;
+        try {
+          transaction?.abort();
+        } catch (_) {
+          finishRejected(failure);
+        }
+      };
+
+      try {
+        transaction = db.transaction([this.config.store], mode);
+      } catch (error) {
+        db.close();
+        reject(error);
+        return;
+      }
+
+      transaction.oncomplete = () => {
+        if (settled) return;
+        settled = true;
+        db.close();
+        resolve(result);
+      };
+      transaction.onerror = () => {
+        failure ||= transaction.error || new Error(`IndexedDB transaction failed: ${this.config.store}`);
+      };
+      transaction.onabort = () => {
+        finishRejected(failure || transaction.error || new Error(`IndexedDB transaction aborted: ${this.config.store}`));
+      };
+
+      try {
+        operation(
+          transaction.objectStore(this.config.store),
+          value => { result = value; },
+          abortWith
+        );
+      } catch (error) {
+        abortWith(error);
+      }
     });
   }
 
   async get(key) {
-    const db = await this.open();
-    return new Promise((resolve, reject) => {
-      const transaction = db.transaction([this.config.store], "readonly");
-      const store = transaction.objectStore(this.config.store);
+    return this.transact('readonly', (store, setResult, abortWith) => {
       const request = store.get(key);
-
-      request.onsuccess = () => resolve(request.result);
-      request.onerror = () => reject(request.error);
+      request.onsuccess = () => setResult(request.result);
+      request.onerror = () => abortWith(request.error);
     });
   }
 
   async set(data) {
-    const db = await this.open();
-    const transaction = db.transaction([this.config.store], "readwrite");
-    const store = transaction.objectStore(this.config.store);
-    store.put(data);
+    await this.transact('readwrite', (store, _setResult, abortWith) => {
+      const request = store.put(data);
+      request.onerror = () => abortWith(request.error);
+    });
   }
 
   async delete(key) {
-    const db = await this.open();
-    const transaction = db.transaction([this.config.store], "readwrite");
-    const store = transaction.objectStore(this.config.store);
-    store.delete(key);
+    await this.transact('readwrite', (store, _setResult, abortWith) => {
+      const request = store.delete(key);
+      request.onerror = () => abortWith(request.error);
+    });
+  }
+
+  /**
+   * Atomically moves a local record to a new key unless a newer exact record already exists.
+   * Reads and writes share one readwrite transaction, so a concurrent upload cannot be
+   * replaced by a migration that started from older metadata.
+   */
+  async putLocalIfNotOlder(record, previousKey) {
+    return this.transact('readwrite', (store, setResult, abortWith) => {
+      const sourceLookup = store.get(previousKey);
+      sourceLookup.onerror = () => abortWith(sourceLookup.error);
+      sourceLookup.onsuccess = () => {
+        const source = sourceLookup.result;
+        if (!source) {
+          setResult(null);
+          return;
+        }
+
+        const lookup = store.get(record.songId);
+        lookup.onerror = () => abortWith(lookup.error);
+        lookup.onsuccess = () => {
+          const current = lookup.result;
+          const incomingTime = Number(record.timestamp) || 0;
+          const currentTime = Number(current?.timestamp) || 0;
+          if (current && currentTime >= incomingTime) {
+            setResult(current);
+            return;
+          }
+          try {
+            const putRequest = store.put(record);
+            putRequest.onerror = () => abortWith(putRequest.error);
+            if (previousKey !== record.songId) {
+              const deleteRequest = store.delete(previousKey);
+              deleteRequest.onerror = () => abortWith(deleteRequest.error);
+            }
+            setResult(record);
+          } catch (error) {
+            abortWith(error);
+          }
+        };
+      };
+    });
   }
 
   async deleteExpired(expirationTimeMs) {
-    const db = await this.open();
-    return new Promise((resolve, reject) => {
-      const transaction = db.transaction([this.config.store], "readwrite");
-      const store = transaction.objectStore(this.config.store);
+    return this.transact('readwrite', (store, setResult, abortWith) => {
       const request = store.openCursor();
-
       const now = Date.now();
       let deletedCount = 0;
 
-      request.onsuccess = (event) => {
-        const cursor = event.target.result;
-        if (cursor) {
-          const record = cursor.value;
-          if (record.timestamp && (now - record.timestamp > expirationTimeMs)) {
+      request.onsuccess = () => {
+        const cursor = request.result;
+        if (!cursor) {
+          setResult(deletedCount);
+          return;
+        }
+        try {
+          if (cursor.value.timestamp && now - cursor.value.timestamp > expirationTimeMs) {
             cursor.delete();
             deletedCount++;
           }
           cursor.continue();
-        } else {
-          resolve(deletedCount);
+        } catch (error) {
+          abortWith(error);
         }
       };
-
-      request.onerror = () => reject(request.error);
+      request.onerror = () => abortWith(request.error);
     });
   }
 
   async getAll() {
-    const db = await this.open();
-    return new Promise((resolve, reject) => {
-      const transaction = db.transaction([this.config.store], "readonly");
-      const store = transaction.objectStore(this.config.store);
+    return this.transact('readonly', (store, setResult, abortWith) => {
       const request = store.getAll();
-
-      request.onsuccess = () => resolve(request.result);
-      request.onerror = () => reject(request.error);
+      request.onsuccess = () => setResult(request.result);
+      request.onerror = () => abortWith(request.error);
     });
   }
 
   async clear() {
-    const db = await this.open();
-    const transaction = db.transaction([this.config.store], "readwrite");
-    const store = transaction.objectStore(this.config.store);
-    store.clear();
+    await this.transact('readwrite', (store, _setResult, abortWith) => {
+      const request = store.clear();
+      request.onerror = () => abortWith(request.error);
+    });
   }
 
   async deleteWhere(predicate) {
-    const db = await this.open();
-    return new Promise((resolve, reject) => {
-      const transaction = db.transaction([this.config.store], "readwrite");
-      const store = transaction.objectStore(this.config.store);
+    return this.transact('readwrite', (store, setResult, abortWith) => {
       const request = store.openCursor();
       let deletedCount = 0;
 
-      request.onsuccess = (event) => {
-        const cursor = event.target.result;
-        if (cursor) {
+      request.onsuccess = () => {
+        const cursor = request.result;
+        if (!cursor) {
+          setResult(deletedCount);
+          return;
+        }
+        try {
           if (predicate(cursor.value, cursor.key)) {
             cursor.delete();
             deletedCount++;
           }
           cursor.continue();
-        } else {
-          db.close();
-          resolve(deletedCount);
+        } catch (error) {
+          abortWith(error);
         }
       };
-
-      request.onerror = () => {
-        db.close();
-        reject(request.error);
-      };
+      request.onerror = () => abortWith(request.error);
     });
   }
 
   async getBreakdown() {
     const records = await this.getAll();
-    let transBytes = 0, transCount = 0;
-    let romBytes = 0, romCount = 0;
+    let transBytes = 0;
+    let transCount = 0;
+    let romBytes = 0;
+    let romCount = 0;
 
     for (const record of records) {
       const bytes = new TextEncoder().encode(JSON.stringify(record)).length;
@@ -151,46 +246,33 @@ class DatabaseManager {
   }
 
   async estimateSize() {
-    const db = await this.open();
-    return new Promise((resolve, reject) => {
-      if (!db.objectStoreNames.contains(this.config.store)) {
-        resolve({ sizeKB: 0, count: 0 });
-        return;
-      }
-
-      const transaction = db.transaction([this.config.store], "readonly");
-      const store = transaction.objectStore(this.config.store);
-
+    return this.transact('readonly', (store, setResult, abortWith) => {
       const getAllRequest = store.getAll();
       const countRequest = store.count();
-
       let sizeKB = 0;
       let count = 0;
       let completed = 0;
 
-      const checkCompletion = () => {
-        if (++completed === 2) {
-          db.close();
-          resolve({ sizeKB, count });
-        }
+      const finishPart = () => {
+        completed++;
+        if (completed === 2) setResult({ sizeKB, count });
       };
 
       getAllRequest.onsuccess = () => {
-        const totalBytes = getAllRequest.result.reduce((acc, record) => {
-          return acc + new TextEncoder().encode(JSON.stringify(record)).length;
-        }, 0);
+        const totalBytes = getAllRequest.result.reduce(
+          (total, record) => total + new TextEncoder().encode(JSON.stringify(record)).length,
+          0
+        );
         sizeKB = totalBytes / 1024;
-        checkCompletion();
+        finishPart();
       };
-
-      getAllRequest.onerror = () => reject(getAllRequest.error);
+      getAllRequest.onerror = () => abortWith(getAllRequest.error);
 
       countRequest.onsuccess = () => {
         count = countRequest.result;
-        checkCompletion();
+        finishPart();
       };
-
-      countRequest.onerror = () => reject(countRequest.error);
+      countRequest.onerror = () => abortWith(countRequest.error);
     });
   }
 }

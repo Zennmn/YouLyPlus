@@ -1,21 +1,23 @@
 // ==================================================================================================
-// DATA PARSERS
+// LOCAL LYRICS DATA PARSER
 // ==================================================================================================
 
-import { parseSyncedLyrics, parseAppleTTML } from '../../lib/parser.js';
-
 export class DataParser {
+  /**
+   * Accepts both the AMLL-normalized record (data) used by current imports and the
+   * legacy KPoe JSON shape (lyrics) retained in existing local databases.
+   */
   static parseKPoeFormat(data) {
-    if (!data?.lyrics || !Array.isArray(data.lyrics) || data.lyrics.length === 0) {
-      return null;
-    }
+    if (!data || typeof data !== 'object') return null;
+    if (Array.isArray(data.data)) return data;
+    if (!Array.isArray(data.lyrics) || data.lyrics.length === 0) return null;
 
+    const metadata = data.metadata && typeof data.metadata === 'object' ? data.metadata : {};
     return {
       type: data.type,
       data: data.lyrics.map(item => {
         const startTime = Number(item.time || 0) / 1000;
         const duration = Number(item.duration || 0) / 1000;
-
         const syllabus = (item.syllabus || []).map(syl => ({
           text: syl.text || '',
           time: Number(syl.time || 0),
@@ -23,13 +25,12 @@ export class DataParser {
           isBackground: syl.isBackground || false
         }));
 
-        let lineRomanizedText = undefined;
-        let romanizedSyllabus = undefined;
-
+        let lineRomanizedText;
+        let romanizedSyllabus;
         if (item.transliteration) {
-          if (Array.isArray(item.transliteration.syllabus) &&
-            item.transliteration.syllabus.length === syllabus.length &&
-            syllabus.length > 0) {
+          if (Array.isArray(item.transliteration.syllabus)
+            && item.transliteration.syllabus.length === syllabus.length
+            && syllabus.length > 0) {
             romanizedSyllabus = syllabus.map((syl, index) => ({
               ...syl,
               romanizedText: item.transliteration.syllabus[index].text || syl.text
@@ -52,360 +53,9 @@ export class DataParser {
         };
       }),
       metadata: {
-        ...data.metadata,
-        source: `${data.metadata.source}`
-      },
-      ignoreSponsorblock: data.ignoreSponsorblock || data.metadata.ignoreSponsorblock
-    };
-  }
-
-  static parseLRCLibFormat(data) {
-    if (!data.syncedLyrics) return null;
-
-    const timeRegex = /^\[(\d{2}):(\d{2})\.(\d{2,3})\](.*)/;
-    const lines = data.syncedLyrics.split('\n');
-
-    const matches = lines
-      .map(line => timeRegex.exec(line))
-      .filter(Boolean)
-      .map(match => ({
-        startTime: parseInt(match[1], 10) * 60 +
-          parseInt(match[2], 10) +
-          parseInt(match[3], 10) / (match[3].length === 2 ? 100 : 1000),
-        text: match[4].trim()
-      }));
-
-    if (matches.length === 0) return null;
-
-    const parsedLines = matches
-      .map((current, i) => {
-        const endTime = i < matches.length - 1
-          ? matches[i + 1].startTime
-          : current.startTime + 5;
-
-        return {
-          ...current,
-          endTime,
-          duration: endTime - current.startTime
-        };
-      })
-      .filter(line => line.text.trim() !== "♪" && line.text.trim() !== "");
-
-    return {
-      type: 'Line',
-      data: parsedLines,
-      metadata: {
-        title: data.trackName,
-        artist: data.artistName,
-        album: data.albumName,
-        duration: data.duration,
-        source: "LRCLIB"
+        ...metadata,
+        source: String(metadata.source || 'Local')
       }
     };
-  }
-
-  static parseYouTubeSubtitles(data, songInfo) {
-    if (!data?.events?.length) return null;
-
-    const rawEvents = data.events;
-    const parsedLines = [];
-
-    for (let eIdx = 0; eIdx < rawEvents.length; eIdx++) {
-      const event = rawEvents[eIdx];
-      if (!event.segs?.length) continue;
-
-      const fullText = event.segs
-        .map(seg => seg.utf8 || '')
-        .join('')
-        .replace(/\r?\n/g, '')
-        .replace(/\s+/g, ' ');
-
-      if (!fullText.trim() || fullText.trim() === '♪' || fullText.trim() === '♪♪') continue;
-
-      const eventStartMs = typeof event.tStartMs === 'number' ? event.tStartMs : 0;
-      let eventDurationMs = typeof event.dDurationMs === 'number' ? event.dDurationMs : 0;
-
-      if (eventDurationMs <= 0) {
-        const nextEvent = rawEvents.slice(eIdx + 1).find(ev => ev.segs?.length && typeof ev.tStartMs === 'number' && ev.tStartMs > eventStartMs);
-        if (nextEvent && nextEvent.tStartMs > eventStartMs) {
-          eventDurationMs = nextEvent.tStartMs - eventStartMs;
-        } else {
-          eventDurationMs = 3000;
-        }
-      }
-
-      const startTime = eventStartMs / 1000;
-      const duration = eventDurationMs / 1000;
-      const endTime = startTime + duration;
-
-      const validSegs = [];
-      let accumulatedOffset = 0;
-
-      for (let sIdx = 0; sIdx < event.segs.length; sIdx++) {
-        const seg = event.segs[sIdx];
-        if (!seg.utf8 || seg.utf8 === '\n' || seg.utf8 === '\r\n') continue;
-
-        let cleanText = seg.utf8.replace(/\r?\n/g, '');
-        if (!cleanText) continue;
-
-        if (/^\s/.test(cleanText) && validSegs.length > 0) {
-          if (!/\s$/.test(validSegs[validSegs.length - 1].text)) {
-            validSegs[validSegs.length - 1].text += ' ';
-          }
-          cleanText = cleanText.trimStart();
-        }
-
-        const offsetMs = typeof seg.tOffsetMs === 'number' ? seg.tOffsetMs : accumulatedOffset;
-        validSegs.push({
-          text: cleanText,
-          offsetMs
-        });
-
-        accumulatedOffset = offsetMs + 200;
-      }
-
-      const hasDistinctOffsets = validSegs.some(s => s.offsetMs > 0);
-      const syllables = [];
-
-      if (validSegs.length > 1 && hasDistinctOffsets) {
-        for (let i = 0; i < validSegs.length; i++) {
-          const cur = validSegs[i];
-          const sylStartMs = eventStartMs + cur.offsetMs;
-          let sylDurationMs = 0;
-
-          if (i < validSegs.length - 1) {
-            const nextSylStartMs = eventStartMs + validSegs[i + 1].offsetMs;
-            sylDurationMs = nextSylStartMs - sylStartMs;
-          } else {
-            const lineEndMs = eventStartMs + eventDurationMs;
-            sylDurationMs = lineEndMs - sylStartMs;
-          }
-
-          if (sylDurationMs <= 0) sylDurationMs = 200;
-
-          syllables.push({
-            text: cur.text,
-            time: sylStartMs,
-            duration: sylDurationMs,
-            isBackground: false
-          });
-        }
-      }
-
-      parsedLines.push({
-        text: fullText,
-        startTime,
-        endTime,
-        duration,
-        time: eventStartMs,
-        syllabus: syllables.length > 1 ? syllables : [],
-        element: {},
-        romanizedText: undefined,
-        translation: null
-      });
-    }
-
-    if (parsedLines.length === 0) return null;
-
-    return {
-      type: parsedLines.some(l => l.syllabus && l.syllabus.length > 1) ? 'Word' : 'Line',
-      data: parsedLines,
-      metadata: {
-        ...songInfo,
-        source: "YouTube Captions",
-        ignoreSponsorblock: true
-      },
-      ignoreSponsorblock: true
-    };
-  }
-
-  static parseUnisonFormat(data) {
-    if (!data?.lyrics) return null;
-
-    const format = (data.format || '').toLowerCase();
-    const syncType = (data.syncType || 'plain').toLowerCase();
-
-    // Map Unison syncType to internal type
-    const typeMap = { richsync: 'Word', linesync: 'Line', plain: 'None' };
-    const internalType = typeMap[syncType] || 'Line';
-
-    const metadata = {
-      title: data.song || '',
-      artist: data.artist || '',
-      album: data.album || '',
-      language: data.language || '',
-      source: 'Unison'
-    };
-
-    if (format === 'ttml') {
-      const kpoeData = parseAppleTTML(data.lyrics);
-      if (!kpoeData?.lyrics?.length) return null;
-
-      kpoeData.metadata.source = 'Unison';
-      return this.parseKPoeFormat(kpoeData);
-    }
-
-    if (format === 'lrc') {
-      const kpoeData = parseSyncedLyrics(data.lyrics);
-      if (!kpoeData?.lyrics?.length) return null;
-
-      kpoeData.metadata.source = 'Unison';
-      return this.parseKPoeFormat(kpoeData);
-    }
-
-    const lines = data.lyrics.split('\n').filter(l => l.trim());
-    if (lines.length === 0) return null;
-
-    return {
-      type: 'None',
-      data: lines.map(text => ({
-        text: text.trim(),
-        startTime: 0,
-        endTime: 0,
-        duration: 0
-      })),
-      metadata
-    };
-  }
-
-  static parseYTMusicFormat(ytData, songInfo = {}) {
-    if (!ytData) return null;
-
-    const { timed, plain, synced, provider, trackId, videoId, songWriters } = ytData;
-    const title = ytData.title || songInfo.title || '';
-    const artist = ytData.author || songInfo.artist || '';
-    const album = songInfo.album || '';
-    const duration = songInfo.duration || 0;
-    const sourceName = provider || null;
-    const writers = songWriters || songInfo.songWriters || [];
-
-    const metadata = {
-      title,
-      artist,
-      album,
-      duration,
-      source: sourceName,
-      provider: 'ytmusic',
-      songWriters: Array.isArray(writers) ? writers : [],
-      trackId: trackId || null,
-      videoId: videoId || songInfo.videoId || null
-    };
-
-    // If synced lines exist and synced is true, parse timed lines
-    if (synced && Array.isArray(timed) && timed.length > 0) {
-      const parsedLines = [];
-
-      for (let idx = 0; idx < timed.length; idx++) {
-        const line = timed[idx];
-        if (!line || typeof line.text !== 'string') continue;
-
-        const rawText = line.text.trim();
-        const isMusicalSymbol = rawText === '♪' || rawText === '♪♪' || rawText === '♫' || rawText === '♫♫';
-
-        const startTime = (line.start || 0) / 1000;
-        let endTime = (line.end || 0) / 1000;
-
-        if (endTime <= startTime) {
-          const next = timed.slice(idx + 1).find(nl => nl && nl.start > line.start);
-          if (next) {
-            endTime = next.start / 1000;
-          } else {
-            endTime = startTime + 4;
-          }
-        }
-
-        if (rawText.length > 0 && !isMusicalSymbol) {
-          const lineDuration = Math.max(0, endTime - startTime);
-          parsedLines.push({
-            text: rawText,
-            startTime,
-            endTime,
-            duration: lineDuration,
-            syllabus: [],
-            element: {},
-            romanizedText: undefined,
-            translation: null
-          });
-        }
-      }
-
-      if (parsedLines.length > 0) {
-        return {
-          type: 'Line',
-          provider: 'ytmusic',
-          data: parsedLines,
-          metadata
-        };
-      }
-    }
-
-    // For plain text, prefer web remix plain text
-    if (plain && typeof plain === 'string') {
-      const normalized = plain.replace(/\r\n/g, '\n').replace(/\r/g, '\n').trim();
-      const parts = normalized.split(/\n{2,}/);
-      const data = [];
-      let songPartIndex = 0;
-
-      for (const part of parts) {
-        const lines = part
-          .split('\n')
-          .map(l => l.trim())
-          .filter(l => l.length > 0 && l !== '♪' && l !== '♪♪');
-
-        if (lines.length > 0) {
-          for (const text of lines) {
-            data.push({
-              text,
-              startTime: 0,
-              endTime: 0,
-              duration: 0,
-              syllabus: [],
-              element: { songPartIndex },
-              romanizedText: undefined,
-              translation: null
-            });
-          }
-          songPartIndex++;
-        }
-      }
-
-      if (data.length > 0) {
-        return {
-          type: 'None',
-          provider: 'ytmusic',
-          data,
-          metadata
-        };
-      }
-    }
-
-    // Fallback if not synced and timed array was provided without plain text
-    if (Array.isArray(timed) && timed.length > 0) {
-      const filteredTimed = timed.filter(
-        line => line && typeof line.text === 'string' && line.text.trim().length > 0 && line.text.trim() !== '♪' && line.text.trim() !== '♪♪'
-      );
-
-      if (filteredTimed.length > 0) {
-        return {
-          type: 'None',
-          provider: 'ytmusic',
-          data: filteredTimed.map(line => ({
-            text: line.text.trim(),
-            startTime: 0,
-            endTime: 0,
-            duration: 0,
-            syllabus: [],
-            element: { songPartIndex: 0 },
-            romanizedText: undefined,
-            translation: null
-          })),
-          metadata
-        };
-      }
-    }
-
-    return null;
   }
 }
-
-

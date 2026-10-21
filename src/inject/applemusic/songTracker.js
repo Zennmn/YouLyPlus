@@ -15,12 +15,36 @@
   let pendingStorefront;
   let pendingMetadata;
   const subscriptions = [];
-  const lyricsLanguage = document.currentScript?.dataset?.lyricsLanguage;
+  let lyricsLanguage = document.currentScript?.dataset?.lyricsLanguage;
+  let queueRevision = 0;
   const emit = (type, payload) => window.postMessage({ type, ...payload }, window.location.origin);
   const player = () => music?.player || music;
   const read = (key, fallback) => music?.[key] ?? player()?.[key] ?? fallback;
   const method = (name) => typeof music?.[name] === 'function' ? music : typeof player()?.[name] === 'function' ? player() : null;
   const settingTarget = (name) => music && name in music ? music : player() && name in player() ? player() : null;
+  const queueItemId = (item) => {
+    const params = item?.attributes?.playParams || item?.playParams || {};
+    return String(item?.id || params.catalogId || params.id || '');
+  };
+  const playerError = (code, message) => Object.assign(new Error(message), { code });
+
+  function getQueueState() {
+    const queue = read('queue', null);
+    const items = Array.isArray(queue?.items) ? queue.items : [];
+    return {
+      position: Number(queue?.position) || 0,
+      revision: queueRevision,
+      songId: songInfo?.appleId || null,
+      canSelect: !!method('changeToMediaAtIndex') && !!method('play'),
+      items: items.slice(0, 100).map((item, index) => ({
+        index,
+        id: queueItemId(item),
+        title: item?.attributes?.name || item?.title || '',
+        artist: item?.attributes?.artistName || item?.artistName || '',
+        artwork: String(item?.attributes?.artwork?.url || item?.artwork?.url || '').replaceAll('{w}', '96').replaceAll('{h}', '96'),
+      })),
+    };
+  }
 
   function getPreciseTime() {
     try {
@@ -37,7 +61,7 @@
     const shuffleValue = read('shuffleMode', false);
     const shuffleEnums = window.MusicKit?.PlayerShuffleMode || { off: 0, songs: 1 };
     return {
-      songId: songInfo?.appleId || null, currentTime: getPreciseTime(),
+      songId: songInfo?.appleId || null, currentTime: getPreciseTime(), queueRevision,
       duration: Number(read('currentPlaybackDuration', songInfo?.duration || 0)) || songInfo?.duration || 0,
       isPlaying: !!read('isPlaying', false),
       volume: Math.max(0, Math.min(1, Number(read('volume', 1)) || 0)),
@@ -100,8 +124,8 @@
   }
 
   function fetchNativeLyrics(id) {
-    if (nativeLyricsRequest?.id === id && !pendingLyrics?.signal.aborted) return nativeLyricsRequest.promise;
-    const entry = { id };
+    if (nativeLyricsRequest?.id === id && nativeLyricsRequest.language === lyricsLanguage && !pendingLyrics?.signal.aborted) return nativeLyricsRequest.promise;
+    const entry = { id, language: lyricsLanguage };
     entry.promise = requestNativeLyrics(id).finally(() => {
       if (nativeLyricsRequest === entry) nativeLyricsRequest = null;
     });
@@ -278,7 +302,7 @@
       title: attrs.name || '', artist: attrs.artistName || '', album: attrs.albumName || '',
       duration: (Number(attrs.durationInMillis) || 0) / 1000,
       artwork: (attrs.artwork?.url || '').replaceAll('{w}', '800').replaceAll('{h}', '800'),
-      appleId: String(params.catalogId || params.id || item.id), isVideo: params.kind === 'music-videos', lyricsJSON: null,
+      appleId: String(params.catalogId || params.id || item.id), isVideo: params.kind === 'music-videos', appleMusicLyricsLanguage: lyricsLanguage,
     };
     emit('LYPLUS_SONG_CHANGED', { songInfo }); // Do not hold up the cover/UI on a lyrics request.
     publishState(true);
@@ -287,15 +311,30 @@
       const id = songInfo.appleId;
       fetchNativeLyrics(id).then(ttml => {
         if (!ttml || request !== lyricRequest || songInfo?.appleId !== id) return;
-        songInfo = { ...songInfo, appleMusicTTML: ttml };
+        songInfo = { ...songInfo, appleMusicTTML: ttml, appleMusicLyricsLanguage: lyricsLanguage };
         emit('LYPLUS_NATIVE_LYRICS', { songInfo });
       });
     }
   }
 
   async function execute(command, value) {
-    if (!music) throw new Error('Apple Music is not ready yet');
+    if (!music && command !== 'lyricsLanguage') throw new Error('Apple Music is not ready yet');
     if (command === 'snapshot') { syncSong(true); publishState(true); return; }
+    if (command === 'lyricsLanguage') {
+      if (typeof value !== 'string' || value.length > 64) throw new Error('Invalid lyrics language');
+      try { lyricsLanguage = new Intl.Locale(value).toString(); } catch (_) { throw new Error('Invalid lyrics language'); }
+      pendingLyrics?.abort();
+      nativeLyricsRequest = null;
+      const request = ++lyricRequest;
+      const id = songInfo?.appleId;
+      if (songInfo) songInfo = { ...songInfo, appleMusicTTML: undefined, appleMusicLyricsLanguage: lyricsLanguage };
+      if (!id || songInfo.isVideo) return;
+      const ttml = await fetchNativeLyrics(id);
+      if (request !== lyricRequest || songInfo?.appleId !== id) return;
+      songInfo = { ...songInfo, appleMusicTTML: ttml || undefined, appleMusicLyricsLanguage: lyricsLanguage };
+      emit('LYPLUS_NATIVE_LYRICS', { songInfo });
+      return;
+    }
     if (command === 'nativeTTML') {
       syncSong();
       if (!songInfo?.appleId || songInfo.isVideo) throw new Error('nativeTTMLUnavailable');
@@ -305,7 +344,7 @@
       const ttml = current.appleMusicTTML || await fetchNativeLyrics(current.appleId);
       if (request !== lyricRequest || songInfo?.appleId !== current.appleId) throw new Error('nativeTTMLSongChanged');
       if (typeof ttml !== 'string' || !/<(?:\w+:)?tt[\s>]/.test(ttml)) throw new Error('nativeTTMLUnavailable');
-      songInfo = { ...songInfo, appleMusicTTML: ttml };
+      songInfo = { ...songInfo, appleMusicTTML: ttml, appleMusicLyricsLanguage: lyricsLanguage };
       return { ttml, appleId: current.appleId, title: current.title, artist: current.artist };
     }
     if (command === 'catalogMetadata') {
@@ -315,11 +354,43 @@
       return requestCatalogMetadata(id, mode);
     }
     if (command === 'queue') {
+      syncSong();
+      return getQueueState();
+    }
+    if (command === 'queuePlay') {
+      syncSong();
       const queue = read('queue', null);
-      return {
-        position: Number(queue?.position) || 0,
-        items: (Array.isArray(queue?.items) ? queue.items : []).slice(0, 100).map(item => ({ title: item.attributes?.name || item.title || '', artist: item.attributes?.artistName || item.artistName || '' })),
-      };
+      const items = Array.isArray(queue?.items) ? queue.items : [];
+      const index = value?.index;
+      if (!Number.isInteger(index) || index < 0 || index >= items.length) throw playerError('playerQueueChanged', 'The selected queue item is no longer available');
+      if (!Number.isInteger(value?.revision) || value.revision !== queueRevision || value?.songId == null || songInfo?.appleId == null || String(value.songId) !== String(songInfo.appleId)) {
+        throw playerError('playerQueueChanged', 'The playback queue has changed');
+      }
+      const id = queueItemId(items[index]);
+      if (!id || value?.id == null || String(value.id) !== id) throw playerError('playerQueueChanged', 'The selected queue item has changed');
+      const changeToMediaAtIndex = method('changeToMediaAtIndex');
+      if (!changeToMediaAtIndex) throw playerError('playerQueueControlUnavailable', 'Selecting queue items is unavailable');
+      try {
+        if (index === Number(queue.position)) {
+          const playTarget = method('play');
+          if (!playTarget) throw playerError('playerQueuePlayFailed', 'Unable to resume playback');
+          await playTarget.play();
+          syncSong();
+        } else {
+          await changeToMediaAtIndex.changeToMediaAtIndex(index);
+          const playTarget = method('play');
+          if (!playTarget) throw playerError('playerQueuePlayFailed', 'Unable to start playback');
+          await playTarget.play();
+          syncSong(true);
+        }
+        publishState(true);
+        return { ...getQueueState(), selectedIndex: index, selectedId: id };
+      } catch (error) {
+        syncSong();
+        publishState(true);
+        if (error?.code === 'playerQueuePlayFailed') throw error;
+        throw playerError('playerQueuePlayFailed', error?.message || 'Unable to play the selected queue item');
+      }
     }
     if (command === 'airplay') {
       const element = document.querySelector('audio, video');
@@ -366,13 +437,13 @@
     try {
       const result = await execute(message.command, message.value);
       emit('LYPLUS_PLAYER_RESULT', { requestId: message.requestId, ok: true, result });
-    } catch (error) { emit('LYPLUS_PLAYER_RESULT', { requestId: message.requestId, ok: false, error: error?.message || 'Playback failed' }); }
+    } catch (error) { emit('LYPLUS_PLAYER_RESULT', { requestId: message.requestId, ok: false, error: error?.message || 'Playback failed', code: error?.code || null }); }
   });
 
   function attach(instance) {
     music = instance;
     for (const name of ['nowPlayingItemDidChange', 'playbackStateDidChange', 'playbackTimeDidChange', 'playbackDurationDidChange', 'playbackVolumeDidChange', 'volumeDidChange', 'shuffleModeDidChange', 'repeatModeDidChange', 'queueItemsDidChange']) {
-      const listener = () => { syncSong(); publishState(); };
+      const listener = () => { if (name === 'queueItemsDidChange') queueRevision++; syncSong(); publishState(); };
       try { instance.addEventListener(name, listener); subscriptions.push([name, listener]); } catch (_) { }
     }
     syncSong();
