@@ -38,6 +38,11 @@ const TRANSLATION_STATUS = 'translation-save-status';
 const PLAYBACK_STATUS = 'playback-save-status';
 const ADVANCED_STATUS = 'advanced-save-status';
 const FAILURE_MESSAGE = ['msgSettingsSaveFailed', 'Could not save settings. Try again.'];
+const LEGACY_CACHE_STRATEGIES = new Set(['aggressive', 'moderate']);
+
+function normalizeCacheStrategy(value) {
+    return value === 'none' ? 'none' : 'bounded';
+}
 
 const ICONS = {
     drag: 'M11 18c0 1.1-.9 2-2 2s-2-.9-2-2 .9-2 2-2 2 .9 2 2zm-2-8c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0-6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm6 4c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z',
@@ -176,7 +181,11 @@ function setChecked(id, value) {
 }
 
 function updateUI(settings) {
-    currentSettings = { ...defaultSettings, ...pickSettings(settings) };
+    const normalized = { ...defaultSettings, ...pickSettings(settings) };
+    const cacheStrategy = normalizeCacheStrategy(normalized.cacheStrategy);
+    currentSettings = cacheStrategy === normalized.cacheStrategy
+        ? normalized
+        : updateSettings({ cacheStrategy });
     setChecked('enabled', currentSettings.isEnabled);
     setChecked('apple-music-amll', currentSettings.appleMusicAMLL !== false);
     setChecked('apple-music-background', currentSettings.appleMusicAMLLBackground !== false);
@@ -204,7 +213,7 @@ function updateUI(settings) {
     setValue('custom-gemini-prompt', currentSettings.customGeminiPrompt);
     setChecked('override-gemini-romanize-prompt', currentSettings.overrideGeminiRomanizePrompt);
     setValue('custom-gemini-romanize-prompt', currentSettings.customGeminiRomanizePrompt);
-    setValue('cache-strategy', currentSettings.cacheStrategy || 'aggressive');
+    setValue('cache-strategy', cacheStrategy);
 
     for (const id of ['gemini-api-key', 'openrouter-api-key', 'deepl-api-key', 'custom-llm-key']) {
         const input = $(id);
@@ -790,8 +799,7 @@ const ENUM_SETTINGS = {
     largerTextMode: new Set(['lyrics', 'romanization']),
     translationProvider: new Set(['google', 'gemini', 'openrouter', 'customllm', 'deepl', 'deepl-keyless']),
     romanizationProvider: new Set(['offline', 'google', 'gemini', 'openrouter']),
-    transliterationTargetScript: new Set(['latin', 'japanese', 'korean', 'cyrillic', 'devanagari', 'arabic', 'hebrew', 'greek', 'thai']),
-    cacheStrategy: new Set(['aggressive', 'moderate', 'none'])
+    transliterationTargetScript: new Set(['latin', 'japanese', 'korean', 'cyrillic', 'devanagari', 'arabic', 'hebrew', 'greek', 'thai'])
 };
 
 function validFontMetadata(value) {
@@ -807,6 +815,12 @@ function sanitizeImportedSettings(values) {
     const picked = pickSettings(values);
     const result = {};
     for (const [key, value] of Object.entries(picked)) {
+        if (key === 'cacheStrategy') {
+            if (value === 'bounded' || value === 'none' || LEGACY_CACHE_STRATEGIES.has(value)) {
+                result[key] = normalizeCacheStrategy(value);
+            }
+            continue;
+        }
         if (key === 'appleMusicPlayerFontFile') {
             if (validFontMetadata(value)) result[key] = value === null ? null : {
                 id: value.id,

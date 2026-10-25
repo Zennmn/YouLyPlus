@@ -13,7 +13,7 @@ globalThis.LYPLUS_DEFAULT_SETTINGS = Object.freeze({
     lightweight: false,
     largerTextMode: 'lyrics',
     hidePhoneticDup: false,
-    cacheStrategy: 'aggressive',
+    cacheStrategy: 'bounded',
     translationProvider: 'google',
     romanizationProvider: 'offline',
     transliterationTargetScript: 'latin',

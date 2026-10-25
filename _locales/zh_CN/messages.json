@@ -426,15 +426,11 @@
     "description": "Dropdown label"
   },
   "descCacheStrategy": {
-    "message": "决定歌词在本地存储的时间长度，以减少加载时间。",
+    "message": "选择保留最多 100 条最近使用的歌词与派生结果，或关闭缓存。",
     "description": "Description"
   },
-  "optionAggressive": {
-    "message": "激进（24 小时）",
-    "description": "Cache strategy option"
-  },
-  "optionModerate": {
-    "message": "适中（12 小时）",
+  "optionBounded": {
+    "message": "限量（最近使用 100 条）",
     "description": "Cache strategy option"
   },
   "optionNone": {
@@ -1266,7 +1262,7 @@
     "message": "本地 TTML"
   },
   "cacheScopeExplanation": {
-    "message": "激进缓存保留歌词与翻译结果 24 小时，适中缓存保留 12 小时。关闭缓存后不会保存结果，但在线时来源索引仍可能刷新。清除缓存只会删除结果：本地 TTML、歌词偏移、来源偏好与字体都会保留。来源索引不会被清除，也不计入上方大小。"
+    "message": "限量缓存最多保留 100 条最近使用的歌词。翻译与音译共用另一个派生结果库，合计最多保留 100 条最近使用结果；各库按最近使用淘汰。再次使用缓存时会校验来源 SHA-256：来源变化即更新结果，校验失败则使用已有缓存。关闭缓存后不会保存结果，但在线时来源索引仍可能刷新。清除缓存只会删除缓存结果：本地 TTML、歌词偏移、来源偏好与字体都会保留。来源索引独立保存，并会在校验时刷新；上方大小不包含来源索引。"
   },
   "playerExportNativeTTML": {
     "message": "导出原生 TTML"

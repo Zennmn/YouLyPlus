@@ -404,15 +404,11 @@
     "description": "Dropdown label"
   },
   "descCacheStrategy": {
-    "message": "Decide per quanto tempo i testi vengono memorizzati localmente per ridurre i tempi di caricamento.",
+    "message": "Choose whether to keep up to 100 recently used lyrics and derived results, or disable caching.",
     "description": "Description"
   },
-  "optionAggressive": {
-    "message": "Aggressive (24 hours)",
-    "description": "Cache strategy option"
-  },
-  "optionModerate": {
-    "message": "Moderate (12 hours)",
+  "optionBounded": {
+    "message": "Bounded (100 recent entries)",
     "description": "Cache strategy option"
   },
   "optionNone": {
@@ -1268,6 +1264,6 @@
     "message": "Unable to load the font. Please import the file again."
   },
   "cacheScopeExplanation": {
-    "message": "Aggressive keeps lyric and translation results for 24 hours; Moderate keeps them for 12 hours. With caching off, results are not stored, while provider indexes may still refresh when online. Clearing caches removes results only: local TTML, lyric offsets, source preferences and fonts are kept. Provider indexes are not cleared or included in the sizes above."
+    "message": "Bounded keeps up to 100 recently used lyric entries. Translation and transliteration share a separate derived-results library, also capped at 100 recently used entries in total. Each library evicts its least recently used entries. When a cached source is reused, its SHA-256 is checked; a changed source refreshes the result, and a failed check falls back to the existing cached copy. With caching off, results are not stored, while source indexes may still refresh when online. Clearing caches removes cached results only: local TTML, lyric offsets, source preferences and fonts are kept. Source indexes are managed separately and may be refreshed during verification. The sizes above do not include source indexes."
   }
 }

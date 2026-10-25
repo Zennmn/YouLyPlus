@@ -27,14 +27,16 @@ export class SettingsManager {
   }
 
   static async getLyricsSettings() {
-    return this.get({
+    const settings = await this.get({
       'appleMusicLyricsProviderOrder': defaults.appleMusicLyricsProviderOrder,
       'cacheStrategy': defaults.cacheStrategy
     });
+    settings.cacheStrategy = settings.cacheStrategy === 'none' ? 'none' : 'bounded';
+    return settings;
   }
 
   static async getTranslationSettings() {
-    return this.get({
+    const settings = await this.get({
       'cacheStrategy': defaults.cacheStrategy,
       'translationProvider': defaults.translationProvider || PROVIDERS.GOOGLE,
       'romanizationProvider': defaults.romanizationProvider || PROVIDERS.OFFLINE,
@@ -55,5 +57,7 @@ export class SettingsManager {
       'openRouterModel': defaults.openRouterModel,
       'deeplApiKey': defaults.deeplApiKey
     });
+    settings.cacheStrategy = settings.cacheStrategy === 'none' ? 'none' : 'bounded';
+    return settings;
   }
 }

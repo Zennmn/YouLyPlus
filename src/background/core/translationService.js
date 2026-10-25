@@ -118,7 +118,7 @@ export class TranslationService {
     }
 
     if (cacheEnabled && !forceReload) {
-      const cached = await this.getCached(translatedKey, originalVersion, cacheEpoch, settings.cacheStrategy);
+      const cached = await this.getCached(translatedKey, originalVersion, cacheEpoch);
       if (cached) return cached;
     }
 
@@ -139,52 +139,57 @@ export class TranslationService {
         const current = await SettingsManager.getTranslationSettings();
         if (current.cacheStrategy === 'none') return;
         const timestamp = Date.now();
-        state.setCached(translatedKey, {
-          translatedLyrics: finalTranslatedLyrics,
-          originalVersion,
-          timestamp
-        });
-
-        await translationsDB.set({
+        const record = {
           key: translatedKey,
           translatedLyrics: finalTranslatedLyrics,
           originalVersion,
+          lastAccessedAt: timestamp,
           timestamp
-        });
+        };
+
+        const evicted = await translationsDB.setCapped(record, CONFIG.CACHE_MAX_ENTRIES);
+        for (const key of evicted) state.deleteCached(key);
+        if (cacheEpoch === this.cacheEpoch) {
+          state.setCached(translatedKey, {
+            translatedLyrics: finalTranslatedLyrics,
+            originalVersion,
+            lastAccessedAt: timestamp,
+            timestamp
+          });
+        }
       });
     }
 
     return finalTranslatedLyrics;
   }
 
-  static async getCached(key, originalVersion, expectedEpoch = this.cacheEpoch, cacheStrategy = 'aggressive') {
+  static async getCached(key, originalVersion, expectedEpoch = this.cacheEpoch) {
     if (expectedEpoch !== this.cacheEpoch) return null;
-    const expirationTime = CONFIG.CACHE_EXPIRY[cacheStrategy];
-    if (!expirationTime) return null;
-    const isFresh = record => Number.isFinite(Number(record?.timestamp))
-      && Date.now() - Number(record.timestamp) < expirationTime;
 
     // Check memory
-    if (state.hasCached(key)) {
-      const cached = state.getCached(key);
-      if (cached && cached.originalVersion === originalVersion && isFresh(cached)) {
+    const cached = state.getCached(key);
+    if (cached) {
+      if (cached.originalVersion === originalVersion) {
+        await this.queueCacheMutation(async () => {
+          if (expectedEpoch === this.cacheEpoch) await translationsDB.touch(key);
+        });
+        if (expectedEpoch !== this.cacheEpoch) return null;
         return cached.translatedLyrics;
-      } else {
-        state.deleteCached(key);
       }
+      state.deleteCached(key);
     }
 
-    const dbCached = await translationsDB.get(key);
+    const dbCached = await translationsDB.touch(key);
     if (dbCached) {
-      if (dbCached.originalVersion === originalVersion && isFresh(dbCached)) {
-        if (expectedEpoch !== this.cacheEpoch) return null;
-        state.setCached(key, {
-          translatedLyrics: dbCached.translatedLyrics,
-          originalVersion: dbCached.originalVersion,
-          timestamp: dbCached.timestamp
-        });
-        return dbCached.translatedLyrics;
-      }
+      if (expectedEpoch !== this.cacheEpoch) return null;
+      if (dbCached.originalVersion !== originalVersion) return null;
+      state.setCached(key, {
+        translatedLyrics: dbCached.translatedLyrics,
+        originalVersion: dbCached.originalVersion,
+        lastAccessedAt: dbCached.lastAccessedAt,
+        timestamp: dbCached.timestamp
+      });
+      return dbCached.translatedLyrics;
     }
 
     return null;

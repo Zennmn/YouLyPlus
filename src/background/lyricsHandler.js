@@ -14,7 +14,7 @@ const pBrowser = typeof browser !== 'undefined'
 // ==================================================================================================
 
 console.log('Service Worker initialized');
-LyricsService.clearExpiredCache();
+LyricsService.maintainCache();
 
 if (pBrowser?.runtime?.onMessage) {
   pBrowser.runtime.onMessage.addListener((message, sender, sendResponse) => {

@@ -11,10 +11,7 @@ export const CONFIG = {
     DICTIONARY: { name: "DictionaryDB", version: 1, store: "dicts" }
   },
 
-  CACHE_EXPIRY: {
-    aggressive: 24 * 60 * 60 * 1000,
-    moderate: 12 * 60 * 60 * 1000
-  },
+  CACHE_MAX_ENTRIES: 100,
 
   GEMINI: {
     MAX_RETRIES: 5,

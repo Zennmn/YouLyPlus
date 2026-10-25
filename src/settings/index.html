@@ -1102,12 +1102,11 @@
                         <div class="setting-item">
                             <div class="setting-info">
                                 <span class="setting-title" data-i18n="labelCacheStrategy">Cache strategy</span>
-                                <span class="setting-description" data-i18n="descCacheStrategy">Set how long Apple Music lyrics and translations stay cached locally.</span>
+                                <span class="setting-description" data-i18n="descCacheStrategy">Choose whether to keep up to 100 recently used lyrics and derived results, or disable caching.</span>
                             </div>
                             <div class="setting-control">
                                 <select id="cache-strategy" class="native-select">
-                                    <option value="aggressive" data-i18n="optionAggressive">Aggressive (24 hours)</option>
-                                    <option value="moderate" data-i18n="optionModerate">Moderate (12 hours)</option>
+                                    <option value="bounded" data-i18n="optionBounded">Bounded (100 recent entries)</option>
                                     <option value="none" data-i18n="optionNone">None (no caching)</option>
                                 </select>
                             </div>
@@ -1141,7 +1140,7 @@
                             <div class="setting-control"><button id="clear-cache" class="m3-button outlined error" type="button" data-i18n="buttonClearAllCache">Clear All Cache</button></div>
                         </div>
                     </div>
-                    <p class="cache-explanation" data-i18n="cacheScopeExplanation">Aggressive keeps lyric and translation results for 24 hours; Moderate keeps them for 12 hours. With caching off, results are not stored, while provider indexes may still refresh when online. Clearing caches removes results only: local TTML, lyric offsets, source preferences and fonts are kept. The sizes above do not include provider indexes.</p>
+                    <p class="cache-explanation" data-i18n="cacheScopeExplanation">Bounded keeps up to 100 recently used lyric entries. Translation and transliteration share a separate derived-results library, also capped at 100 recently used entries in total. Each library evicts its least recently used entries. When a cached source is reused, its SHA-256 is checked; a changed source refreshes the result, and a failed check falls back to the existing cached copy. With caching off, results are not stored, while source indexes may still refresh when online. Clearing caches removes cached results only: local TTML, lyric offsets, source preferences and fonts are kept. Source indexes are managed separately and may be refreshed during verification. The sizes above do not include source indexes.</p>
                 </div>
 
                 <div class="settings-category">

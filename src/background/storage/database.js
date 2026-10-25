@@ -4,6 +4,22 @@
 
 import { CONFIG } from '../constants.js';
 
+const cacheAccessTime = record => {
+  const lastAccessedAt = Number(record?.lastAccessedAt);
+  if (Number.isFinite(lastAccessedAt)) return lastAccessedAt;
+  const timestamp = Number(record?.timestamp);
+  return Number.isFinite(timestamp) ? timestamp : 0;
+};
+
+const nextCacheAccessTime = records => records.reduce(
+  (time, record) => Math.max(time, cacheAccessTime(record) + 1), Date.now()
+);
+
+const normalizeCacheLimit = limit => {
+  const value = Number(limit);
+  return Number.isFinite(value) ? Math.max(0, Math.floor(value)) : 100;
+};
+
 class DatabaseManager {
   constructor(dbConfig) {
     this.config = dbConfig;
@@ -103,6 +119,96 @@ class DatabaseManager {
     await this.transact('readwrite', (store, _setResult, abortWith) => {
       const request = store.put(data);
       request.onerror = () => abortWith(request.error);
+    });
+  }
+
+  async setCapped(data, limit = 100) {
+    const capacity = normalizeCacheLimit(limit);
+    return this.transact('readwrite', (store, setResult, abortWith) => {
+      const allRequest = store.getAll();
+      allRequest.onerror = () => abortWith(allRequest.error);
+      allRequest.onsuccess = () => {
+        try {
+          const stored = { ...data, lastAccessedAt: nextCacheAccessTime(allRequest.result) };
+          const putRequest = store.put(stored);
+          putRequest.onerror = () => abortWith(putRequest.error);
+          const records = allRequest.result.filter(record => record.key !== stored.key);
+          records.push(stored);
+          const evictedKeys = records
+            .sort((left, right) => cacheAccessTime(left) - cacheAccessTime(right))
+            .slice(0, Math.max(0, records.length - capacity))
+            .map(record => record.key);
+
+          for (const key of evictedKeys) {
+            const deleteRequest = store.delete(key);
+            deleteRequest.onerror = () => abortWith(deleteRequest.error);
+          }
+          setResult(evictedKeys);
+        } catch (error) {
+          abortWith(error);
+        }
+      };
+    });
+  }
+
+  async touch(key) {
+    return this.transact('readwrite', (store, setResult, abortWith) => {
+      const lookupRequest = store.getAll();
+      lookupRequest.onerror = () => abortWith(lookupRequest.error);
+      lookupRequest.onsuccess = () => {
+        const record = lookupRequest.result.find(entry => entry.key === key);
+        if (!record) {
+          setResult(undefined);
+          return;
+        }
+
+        try {
+          const touched = {
+            ...record,
+            lastAccessedAt: nextCacheAccessTime(lookupRequest.result)
+          };
+          const putRequest = store.put(touched);
+          putRequest.onerror = () => abortWith(putRequest.error);
+          setResult(touched);
+        } catch (error) {
+          abortWith(error);
+        }
+      };
+    });
+  }
+
+  async trimToLimit(limit = 100) {
+    const capacity = normalizeCacheLimit(limit);
+    return this.transact('readwrite', (store, setResult, abortWith) => {
+      const allRequest = store.getAll();
+      allRequest.onerror = () => abortWith(allRequest.error);
+      allRequest.onsuccess = () => {
+        try {
+          const records = allRequest.result;
+          const evictCount = Math.max(0, records.length - capacity);
+          if (evictCount === 0) {
+            setResult([]);
+            return;
+          }
+
+          const evictedKeys = records
+            .map((record, index) => ({ record, index }))
+            .sort((left, right) => (
+              cacheAccessTime(left.record) - cacheAccessTime(right.record)
+              || left.index - right.index
+            ))
+            .slice(0, evictCount)
+            .map(({ record }) => record.key);
+
+          for (const key of evictedKeys) {
+            const deleteRequest = store.delete(key);
+            deleteRequest.onerror = () => abortWith(deleteRequest.error);
+          }
+          setResult(evictedKeys);
+        } catch (error) {
+          abortWith(error);
+        }
+      };
     });
   }
 

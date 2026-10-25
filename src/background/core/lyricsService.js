@@ -50,34 +50,33 @@ export class LyricsService {
     const payload = JSON.stringify({
       provider,
       language: this.lyricsLanguage(songInfo),
+      sourceHash: lyrics?.sourceHash,
       data: lyrics?.data || []
     });
     const prefix = localVersion != null ? `local:${localVersion}` : `lyrics:${provider}`;
     return `${prefix}:${this.stableHash(payload)}`;
   }
 
-  static async clearExpiredCache() {
+  static async maintainCache() {
     try {
-      const settings = await SettingsManager.getLyricsSettings();
+      await this.queueCacheMutation(async () => {
+        const settings = await SettingsManager.getLyricsSettings();
+        if (settings.cacheStrategy === 'none') {
+          await Promise.all([lyricsDB.clear(), translationsDB.clear()]);
+          state.clear();
+          appleMusicLyrics.clearResults();
+          return;
+        }
 
-      if (settings.cacheStrategy === 'none') {
-        await Promise.all([lyricsDB.clear(), translationsDB.clear()]);
-        appleMusicLyrics.clearResults();
-        console.log('Cleared the lyrics result cache because the cache strategy is none.');
-        return;
-      }
-
-      const expirationTime = CONFIG.CACHE_EXPIRY[settings.cacheStrategy];
-      if (!expirationTime) return;
-      const [deletedLyrics, deletedTranslations] = await Promise.all([
-        lyricsDB.deleteExpired(expirationTime),
-        translationsDB.deleteExpired(expirationTime)
-      ]);
-      if (deletedLyrics > 0 || deletedTranslations > 0) {
-        console.log(`Cleared ${deletedLyrics} lyrics and ${deletedTranslations} translation records.`);
-      }
+        // Existing records migrate by their last use, with no age-based expiry.
+        const evicted = await Promise.all([
+          lyricsDB.trimToLimit(CONFIG.CACHE_MAX_ENTRIES),
+          translationsDB.trimToLimit(CONFIG.CACHE_MAX_ENTRIES)
+        ]);
+        for (const key of evicted.flat()) state.deleteCached(key);
+      });
     } catch (error) {
-      console.error('Error clearing expired cache:', error);
+      console.error('Error maintaining bounded lyrics cache:', error);
     }
   }
 
@@ -127,10 +126,7 @@ export class LyricsService {
       let cached = null;
       if (!manualProvider && !forceReload && cacheEnabled) {
         const memoryCached = state.getCached(cacheKey);
-        const expirationTime = CONFIG.CACHE_EXPIRY[settings.cacheStrategy];
         if (memoryCached?.lyrics
-          && Number.isFinite(expirationTime)
-          && Date.now() - (Number(memoryCached.timestamp) || 0) < expirationTime
           && memoryCached.sourceOrder === expected.sourceOrder
           && memoryCached.sourcePreference === expected.sourcePreference
           && memoryCached.lyricsLanguage === language) {
@@ -141,22 +137,39 @@ export class LyricsService {
         cached ||= await this.getFromDB(cacheKey, expected);
       }
 
+      let local = null;
+      let lyrics = null;
       if (cached?.lyrics) {
+        const cachedProvider = cached.lyrics.provider || cached.lyrics.metadata?.provider;
+        if (cachedProvider === PROVIDERS.LOCAL) {
+          local = await this.checkLocalLyrics(songInfo);
+          lyrics = local?.lyrics || null;
+          if (!local) cached = null;
+        } else {
+          // Without expiry, a fallback must still yield when a preferred source gains lyrics.
+          const preferred = selected
+            ? (selected !== cachedProvider && selected !== PROVIDERS.LOCAL ? [selected] : [])
+            : order.slice(0, Math.max(0, order.indexOf(cachedProvider)));
+          for (const candidate of preferred) {
+            lyrics = await appleMusicLyrics.provider(candidate, songInfo, true, { cacheResults: cacheEnabled });
+            if (changed()) return this.getAppleMusicLyrics(songInfo, forceReload, provider);
+            if (lyrics) break;
+          }
+          // A failed validation returns the usable cached lyrics; it never expires by age.
+          lyrics ||= await appleMusicLyrics.revalidate(songInfo, cached.lyrics);
+        }
         if (changed()) return this.getAppleMusicLyrics(songInfo, forceReload, provider);
-        this.cacheProviderOnLyrics(
-          cached.lyrics,
-          cached.lyrics.provider || cached.lyrics.metadata?.provider || 'unknown'
-        );
-        state.setCached(cacheKey, cached);
-        return cached;
       }
 
       // Local imports always win in automatic mode; selecting an online source explicitly bypasses it.
-      const local = (selected === PROVIDERS.LOCAL || (!manualProvider && !selected))
-        ? await this.checkLocalLyrics(songInfo)
-        : null;
-      let lyrics = local?.lyrics || null;
-      const sourceForceReload = forceReload || !cacheEnabled;
+      if (!lyrics) {
+        local = (selected === PROVIDERS.LOCAL || (!manualProvider && !selected))
+          ? await this.checkLocalLyrics(songInfo)
+          : null;
+        lyrics = local?.lyrics || null;
+      }
+      // A cache miss must not borrow an unvalidated provider result or an old index.
+      const sourceForceReload = true;
       const sourceOptions = { cacheResults: cacheEnabled };
 
       if (!lyrics && selected !== PROVIDERS.LOCAL) {
@@ -190,13 +203,16 @@ export class LyricsService {
         lyrics.provider || lyrics.metadata?.provider || 'unknown'
       );
 
+      const version = this.resultVersion(lyrics, songInfo, local?.version);
+      const unchanged = cached?.version === version
+        && cached.lyrics?.sourceHash === lyrics.sourceHash;
       const result = {
         lyrics,
-        version: this.resultVersion(lyrics, songInfo, local?.version),
+        version,
         sourceOrder: orderKey,
         sourcePreference: selected || 'auto',
         lyricsLanguage: language,
-        timestamp: Date.now()
+        timestamp: unchanged ? cached.timestamp : Date.now()
       };
       if (cacheEnabled) {
         await this.queueCacheMutation(async () => {
@@ -204,19 +220,27 @@ export class LyricsService {
             || (this.localLyricsRevisions.get(cacheKey) || 0) !== revision) return;
           const current = await SettingsManager.getLyricsSettings();
           if (current.cacheStrategy === 'none') return;
-          state.setCached(cacheKey, result);
-          await lyricsDB.set({
-            key: cacheKey,
-            lyrics: result.lyrics,
-            version: result.version,
-            sourceOrder: result.sourceOrder,
-            sourcePreference: result.sourcePreference,
-            lyricsLanguage: result.lyricsLanguage,
-            duration: songInfo.duration,
-            timestamp: result.timestamp
-          });
+          const touched = unchanged ? await lyricsDB.touch(cacheKey) : null;
+          if (!touched) {
+            const evicted = await lyricsDB.setCapped({
+              key: cacheKey,
+              lyrics: result.lyrics,
+              version: result.version,
+              sourceOrder: result.sourceOrder,
+              sourcePreference: result.sourcePreference,
+              lyricsLanguage: result.lyricsLanguage,
+              duration: songInfo.duration,
+              timestamp: result.timestamp
+            }, CONFIG.CACHE_MAX_ENTRIES);
+            for (const key of evicted) state.deleteCached(key);
+          }
+          if (epoch === this.cacheEpoch
+            && (this.localLyricsRevisions.get(cacheKey) || 0) === revision) {
+            state.setCached(cacheKey, result);
+          }
         });
       }
+      if (changed()) return this.getAppleMusicLyrics(songInfo, forceReload, provider);
       return result;
     } catch (error) {
       // A request started before a local edit must not hide the newly imported file.
@@ -236,19 +260,16 @@ export class LyricsService {
     const settings = await SettingsManager.getLyricsSettings();
     if (settings.cacheStrategy === 'none') return null;
 
-    const result = await lyricsDB.get(key);
+    const result = await lyricsDB.touch(key);
     if (!result) return null;
 
-    const expirationTime = CONFIG.CACHE_EXPIRY[settings.cacheStrategy];
-    const expired = !Number.isFinite(expirationTime)
-      || Date.now() - (Number(result.timestamp) || 0) >= expirationTime;
     const mismatched = expected && (
       result.sourceOrder !== expected.sourceOrder
       || result.sourcePreference !== expected.sourcePreference
       || result.lyricsLanguage !== expected.lyricsLanguage
     );
 
-    if (expired || mismatched) return null;
+    if (mismatched) return null;
 
     return {
       lyrics: result.lyrics,

@@ -426,15 +426,11 @@
     "description": "Dropdown label"
   },
   "descCacheStrategy": {
-    "message": "決定歌詞在本地儲存的時間長短，以減少載入時間。",
+    "message": "選擇保留最多 100 筆最近使用的歌詞與衍生結果，或關閉快取。",
     "description": "Description"
   },
-  "optionAggressive": {
-    "message": "積極（24 小時）",
-    "description": "Cache strategy option"
-  },
-  "optionModerate": {
-    "message": "適中（12 小時）",
+  "optionBounded": {
+    "message": "限量（最近使用 100 筆）",
     "description": "Cache strategy option"
   },
   "optionNone": {
@@ -1266,7 +1262,7 @@
     "message": "本機 TTML"
   },
   "cacheScopeExplanation": {
-    "message": "積極快取保留歌詞與翻譯結果 24 小時，適中快取保留 12 小時。關閉快取後不會儲存結果，但線上時來源索引仍可能重新整理。清除快取只會刪除結果：本機 TTML、歌詞偏移、來源偏好與字型都會保留。來源索引不會被清除，也不計入上方大小。"
+    "message": "限量快取最多保留 100 筆最近使用的歌詞。翻譯與音譯共用另一個衍生結果庫，合計最多保留 100 筆最近使用結果；各庫依最近使用淘汰。再次使用快取時會驗證來源 SHA-256：來源變更即更新結果，驗證失敗則使用現有快取。關閉快取後不會儲存結果，但線上時來源索引仍可能重新整理。清除快取只會刪除快取結果：本機 TTML、歌詞偏移、來源偏好與字型都會保留。來源索引獨立保存，並會在驗證時重新整理；上方大小不包含來源索引。"
   },
   "playerExportNativeTTML": {
     "message": "匯出原生 TTML"
