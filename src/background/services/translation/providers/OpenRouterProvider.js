@@ -2,6 +2,7 @@
 import { TranslationProvider } from '../TranslationProvider.js';
 import { createTranslationPrompt, createRomanizationPrompt } from '../prompts.js';
 import { Utilities } from '../../../utils/utilities.js';
+import { buildLLMThinkingParameters } from './CustomLLMProvider.js';
 
 export class OpenRouterProvider extends TranslationProvider {
     constructor(settings) {
@@ -50,7 +51,8 @@ Do not wrap in Markdown code blocks. Just the raw JSON string.`;
                         "content": prompt
                     }
                 ],
-                "response_format": { "type": "json_object" }
+                "response_format": { "type": "json_object" },
+                ...buildLLMThinkingParameters(this.settings, 'openrouter')
             })
         });
 

@@ -207,6 +207,45 @@
     "message": "Pilih layanan untuk menerjemahkan lirik.",
     "description": "Description for translation provider"
   },
+  "labelLLMThinkingFormat": {
+    "message": "Thinking parameter format"
+  },
+  "descLLMThinkingFormat": {
+    "message": "Use a fixed format for proxy endpoints or model aliases. None leaves thinking behavior to the server."
+  },
+  "optionLLMThinkingFormatAuto": {
+    "message": "Auto"
+  },
+  "optionLLMThinkingFormatDeepSeek": {
+    "message": "DeepSeek"
+  },
+  "optionLLMThinkingFormatOpenRouter": {
+    "message": "OpenRouter"
+  },
+  "optionLLMThinkingFormatNone": {
+    "message": "None (server default)"
+  },
+  "labelLLMThinkingMode": {
+    "message": "Thinking mode"
+  },
+  "descLLMThinkingMode": {
+    "message": "Only applies to DeepSeek-compatible endpoints and OpenRouter models that support thinking. Enabling it may increase translation time."
+  },
+  "labelLLMThinkingEffort": {
+    "message": "Thinking effort"
+  },
+  "descLLMThinkingEffort": {
+    "message": "Only applies when thinking is enabled. Higher effort may take longer."
+  },
+  "optionLLMThinkingLow": {
+    "message": "Low"
+  },
+  "optionLLMThinkingHigh": {
+    "message": "High"
+  },
+  "optionLLMThinkingMax": {
+    "message": "Maximum"
+  },
   "labelGeminiApiKey": {
     "message": "API Key Gemini AI",
     "description": "Input label"
@@ -1265,5 +1304,38 @@
   },
   "cacheScopeExplanation": {
     "message": "Bounded keeps up to 100 recently used lyric entries. Translation and transliteration share a separate derived-results library, also capped at 100 recently used entries in total. Each library evicts its least recently used entries. When a cached source is reused, its SHA-256 is checked; a changed source refreshes the result, and a failed check falls back to the existing cached copy. With caching off, results are not stored, while source indexes may still refresh when online. Clearing caches removes cached results only: local TTML, lyric offsets, source preferences and fonts are kept. Source indexes are managed separately and may be refreshed during verification. The sizes above do not include source indexes."
+  },
+  "playerFavorite": {
+    "message": "Favorite"
+  },
+  "playerUnfavorite": {
+    "message": "Remove from favorites"
+  },
+  "playerFavoriteUpdating": {
+    "message": "Updating favorite…"
+  },
+  "playerFavoriteUnavailable": {
+    "message": "Apple Music favorite status is unavailable"
+  },
+  "playerFavoriteAdded": {
+    "message": "Added to Favorite Songs in Apple Music"
+  },
+  "playerFavoriteRemoved": {
+    "message": "Removed from Favorite Songs in Apple Music"
+  },
+  "playerFavoriteSongChanged": {
+    "message": "The song changed. Try again for the current song."
+  },
+  "playerFavoriteFailed": {
+    "message": "Unable to update your Apple Music favorite. Try again."
+  },
+  "playerFavoriteReading": {
+    "message": "Reading favorite status…"
+  },
+  "playerFavoriteSignIn": {
+    "message": "Sign in to Apple Music, then try again."
+  },
+  "playerFavoriteLoadFailed": {
+    "message": "Unable to read favorite status. Click the star to retry."
   }
 }

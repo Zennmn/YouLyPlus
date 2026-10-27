@@ -20,6 +20,9 @@
         'playerDiagnosticNeedsPlayback', 'playerDiagnosticRate', 'playerDiagnosticSlow', 'playerExportDiagnostics',
         'playerQueue', 'playerQueueLoading', 'playerQueueEmpty', 'playerQueueLoadFailed', 'playerQueueRetry',
         'playerExportNativeTTML', 'playerQueueCurrent', 'playerQueuePlaying', 'playerQueueChanged', 'playerQueuePlayFailed', 'playerQueueControlUnavailable',
+        'playerFavorite', 'playerUnfavorite', 'playerFavoriteUpdating', 'playerFavoriteUnavailable',
+        'playerFavoriteAdded', 'playerFavoriteRemoved', 'playerFavoriteSongChanged', 'playerFavoriteFailed',
+        'playerFavoriteReading', 'playerFavoriteSignIn', 'playerFavoriteLoadFailed',
     ];
 
     function createPlayer(frame, options = {}) {

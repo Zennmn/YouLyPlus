@@ -12,6 +12,7 @@ export const MusicInfo: React.FC<
 		onArtistClicked?: (artist: string, index: number) => void;
 		onAlbumClicked?: () => void;
 		onMenuButtonClicked?: () => void;
+		favoriteButtonSlot?: React.ReactNode;
 	} & HTMLProps<HTMLDivElement>
 > = memo(
 	({
@@ -21,6 +22,7 @@ export const MusicInfo: React.FC<
 		onArtistClicked,
 		onAlbumClicked,
 		onMenuButtonClicked,
+		favoriteButtonSlot,
 		className,
 		...rest
 	}) => {
@@ -41,7 +43,17 @@ export const MusicInfo: React.FC<
 						<TextMarquee className={styles.album}>{album}</TextMarquee>
 					)}
 				</div>
-				<MenuButton onClick={onMenuButtonClicked} />
+				<div className={styles.actions}>
+					{favoriteButtonSlot && (
+						<div className={styles.favoriteButton}>
+							{favoriteButtonSlot}
+						</div>
+					)}
+					<MenuButton
+						className={styles.menuButton}
+						onClick={onMenuButtonClicked}
+					/>
+				</div>
 			</div>
 		);
 	},

@@ -16,7 +16,7 @@ import { OpenRouterProvider } from '../services/translation/providers/OpenRouter
 import { DeepLProvider } from '../services/translation/providers/DeepLProvider.js';
 import { DeepLKeylessProvider } from '../services/translation/providers/DeepLKeylessProvider.js';
 import { OfflineRomanizationProvider } from '../services/translation/providers/OfflineRomanizationProvider.js';
-import { CustomLLMProvider } from '../services/translation/providers/CustomLLMProvider.js';
+import { CustomLLMProvider, buildLLMThinkingParameters } from '../services/translation/providers/CustomLLMProvider.js';
 
 export class TranslationService {
   static cacheSchemaVersion = 4;
@@ -51,6 +51,13 @@ export class TranslationService {
       openRouterModel: settings.openRouterModel,
       customLLMBaseUrl: translation ? settings.customLLMBaseUrl : '',
       customLLMModel: translation ? settings.customLLMModel : '',
+      ...(translation && ['customllm', 'openrouter'].includes(settings.translationProvider)
+        ? {
+          llmThinkingParameters: buildLLMThinkingParameters(
+            settings, settings.translationProvider === 'openrouter' ? 'openrouter' : undefined
+          )
+        }
+        : {}),
       translatePrompt: translation && settings.overrideGeminiPrompt ? settings.customGeminiPrompt || '' : '',
       romanizePrompt: !translation && settings.overrideGeminiRomanizePrompt
         ? settings.customGeminiRomanizePrompt || ''

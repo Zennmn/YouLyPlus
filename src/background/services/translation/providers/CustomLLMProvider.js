@@ -11,6 +11,37 @@ export function customLLMEndpoint(value) {
     return url;
 }
 
+export function resolveLLMThinkingFormat(settings = {}) {
+    if (['deepseek', 'openrouter', 'none'].includes(settings.llmThinkingFormat)) {
+        return settings.llmThinkingFormat;
+    }
+    let hostname = '';
+    try { hostname = new URL(String(settings.customLLMBaseUrl || '').trim()).hostname; } catch (_) {}
+    if (hostname === 'openrouter.ai' || hostname.endsWith('.openrouter.ai')) return 'openrouter';
+    if (hostname === 'deepseek.com' || hostname.endsWith('.deepseek.com')
+        || /deepseek/i.test(String(settings.customLLMModel || '')) || settings.llmThinkingEnabled === true) {
+        return 'deepseek';
+    }
+    return 'none';
+}
+
+export function buildLLMThinkingParameters(settings = {}, format = resolveLLMThinkingFormat(settings)) {
+    if (format === 'none') return {};
+    const enabled = settings.llmThinkingEnabled === true;
+    const effort = ['low', 'high', 'max'].includes(settings.llmThinkingEffort)
+        ? settings.llmThinkingEffort : 'high';
+    if (format === 'openrouter') {
+        return { reasoning: { enabled, exclude: true, ...(enabled ? { effort } : {}) } };
+    }
+    if (format === 'deepseek') {
+        return {
+            thinking: { type: enabled ? 'enabled' : 'disabled' },
+            ...(enabled ? { reasoning_effort: effort } : {})
+        };
+    }
+    return {};
+}
+
 export class CustomLLMProvider extends TranslationProvider {
     async translate(texts, targetLang, songInfo = {}) {
         if (!texts.length) return [];
@@ -22,18 +53,20 @@ export class CustomLLMProvider extends TranslationProvider {
             throw new Error('Authorize the API address using the connection test in Settings.');
         }
         const controller = new AbortController();
-        const timer = setTimeout(() => controller.abort(), 60000);
+        const thinkingEnabled = this.settings.llmThinkingEnabled === true;
+        const timer = setTimeout(() => controller.abort(), thinkingEnabled ? 180000 : 60000);
         try {
             const headers = { 'Content-Type': 'application/json' };
             if (this.settings.customLLMApiKey?.trim()) headers.Authorization = `Bearer ${this.settings.customLLMApiKey.trim()}`;
             const prompt = createTranslationPrompt(this.settings, texts, targetLang, songInfo)
                 + `\n\nINPUT LINES:\n${JSON.stringify(texts)}\nReturn only JSON: {"translated_lyrics": [one translated string for each input line]}. Keep exactly ${texts.length} lines in order.`;
+            const requestBody = { model, stream: false, messages: [
+                { role: 'system', content: 'Translate song lyrics. Return only the requested JSON, with one string per input line.' },
+                { role: 'user', content: prompt },
+            ], ...buildLLMThinkingParameters(this.settings) };
             const response = await fetch(endpoint.href, {
                 method: 'POST', headers, credentials: 'omit', redirect: 'error', signal: controller.signal,
-                body: JSON.stringify({ model, stream: false, messages: [
-                    { role: 'system', content: 'Translate song lyrics. Return only the requested JSON, with one string per input line.' },
-                    { role: 'user', content: prompt },
-                ] }),
+                body: JSON.stringify(requestBody),
             });
             if (!response.ok) throw new Error(`Third-party LLM HTTP ${response.status}`);
             const data = await response.json();

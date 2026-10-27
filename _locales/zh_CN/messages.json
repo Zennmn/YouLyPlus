@@ -229,6 +229,45 @@
     "message": "选择用于翻译歌词的服务。",
     "description": "Description for translation provider"
   },
+  "labelLLMThinkingFormat": {
+    "message": "思考参数格式"
+  },
+  "descLLMThinkingFormat": {
+    "message": "中转接口或模型别名可手动指定格式。选择不发送时，思考行为由服务端默认设置决定。"
+  },
+  "optionLLMThinkingFormatAuto": {
+    "message": "自动识别"
+  },
+  "optionLLMThinkingFormatDeepSeek": {
+    "message": "DeepSeek"
+  },
+  "optionLLMThinkingFormatOpenRouter": {
+    "message": "OpenRouter"
+  },
+  "optionLLMThinkingFormatNone": {
+    "message": "不发送（服务端默认）"
+  },
+  "labelLLMThinkingMode": {
+    "message": "思考模式"
+  },
+  "descLLMThinkingMode": {
+    "message": "仅适用于 DeepSeek 兼容接口和支持思考开关的 OpenRouter 模型，开启后可能增加翻译耗时。"
+  },
+  "labelLLMThinkingEffort": {
+    "message": "思考强度"
+  },
+  "descLLMThinkingEffort": {
+    "message": "仅在开启思考时生效。强度越高，翻译可能越慢。"
+  },
+  "optionLLMThinkingLow": {
+    "message": "低"
+  },
+  "optionLLMThinkingHigh": {
+    "message": "高"
+  },
+  "optionLLMThinkingMax": {
+    "message": "最高"
+  },
   "labelGeminiApiKey": {
     "message": "Gemini AI API 密钥",
     "description": "Input label"
@@ -1281,5 +1320,38 @@
   },
   "playerQueueControlUnavailable": {
     "message": "Apple Music 当前暂不支持切换队列项目。"
+  },
+  "playerFavorite": {
+    "message": "收藏"
+  },
+  "playerUnfavorite": {
+    "message": "取消收藏"
+  },
+  "playerFavoriteUpdating": {
+    "message": "正在更新收藏状态…"
+  },
+  "playerFavoriteUnavailable": {
+    "message": "暂时无法读取 Apple Music 的收藏状态"
+  },
+  "playerFavoriteAdded": {
+    "message": "已加入 Apple Music「喜爱的歌曲」"
+  },
+  "playerFavoriteRemoved": {
+    "message": "已从 Apple Music「喜爱的歌曲」移除"
+  },
+  "playerFavoriteSongChanged": {
+    "message": "歌曲已切换，请对当前歌曲重试。"
+  },
+  "playerFavoriteFailed": {
+    "message": "无法更新 Apple Music 收藏状态，请重试。"
+  },
+  "playerFavoriteReading": {
+    "message": "正在读取收藏状态…"
+  },
+  "playerFavoriteSignIn": {
+    "message": "请先登录 Apple Music，然后重试。"
+  },
+  "playerFavoriteLoadFailed": {
+    "message": "无法读取收藏状态，请点击星标重试。"
   }
 }

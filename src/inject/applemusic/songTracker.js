@@ -17,6 +17,12 @@
   const subscriptions = [];
   let lyricsLanguage = document.currentScript?.dataset?.lyricsLanguage;
   let queueRevision = 0;
+  let favoriteState = null;
+  let favoriteStateSongId = null;
+  let favoriteRead;
+  let favoriteWrite;
+  let favoriteGeneration = 0;
+  let favoriteReadError = null;
   const emit = (type, payload) => window.postMessage({ type, ...payload }, window.location.origin);
   const player = () => music?.player || music;
   const read = (key, fallback) => music?.[key] ?? player()?.[key] ?? fallback;
@@ -27,6 +33,121 @@
     return String(item?.id || params.catalogId || params.id || '');
   };
   const playerError = (code, message) => Object.assign(new Error(message), { code });
+
+  function musicApiHeaders() {
+    const developerToken = music?.developerToken || music?.configuration?.developerToken || music?.configuration?.app?.developerToken;
+    const userToken = music?.musicUserToken;
+    if (!developerToken || !userToken) return null;
+    return { Authorization: `Bearer ${developerToken}`, 'Music-User-Token': userToken, Accept: 'application/json' };
+  }
+
+  function favoriteSnapshot() {
+    const id = songInfo?.appleId || null;
+    const known = typeof id === 'string' && /^\d+$/.test(id) && favoriteStateSongId === id && typeof favoriteState === 'boolean';
+    return {
+      favoriteSongId: id,
+      isFavorited: known ? favoriteState : null,
+      canFavorite: !!(known && !songInfo.isVideo && !favoriteWrite && !favoriteReadError && favoriteRead?.id !== id && musicApiHeaders()),
+    };
+  }
+
+  function resetFavoriteState() {
+    favoriteGeneration++;
+    favoriteReadError = null;
+    favoriteRead?.controller?.abort();
+    favoriteRead = null;
+    favoriteState = null;
+    favoriteStateSongId = null;
+  }
+
+  async function readFavoriteState(songId = songInfo?.appleId) {
+    if (typeof songId !== 'string' || !/^\d+$/.test(songId) || songInfo?.appleId !== songId || songInfo.isVideo || favoriteWrite) return null;
+    if (favoriteRead?.id === songId) return favoriteRead.promise;
+    favoriteRead?.controller?.abort();
+    favoriteRead = null;
+    const generation = favoriteGeneration;
+    const headers = musicApiHeaders();
+    if (!headers) {
+      if (generation === favoriteGeneration && songInfo?.appleId === songId) {
+        favoriteStateSongId = songId;
+        favoriteState = null;
+        favoriteReadError = 'playerFavoriteSignIn';
+        publishState(true);
+      }
+      return null;
+    }
+
+    const controller = new AbortController();
+    const entry = { id: songId, generation, controller, promise: null };
+    favoriteRead = entry;
+    favoriteReadError = null;
+    const timeout = setTimeout(() => controller.abort(), 8000);
+    entry.promise = (async () => {
+      let value = null;
+      let errorCode = 'playerFavoriteLoadFailed';
+      try {
+        const storefront = await getAccountStorefront(headers) || validStorefront(music?.storefrontId) || 'us';
+        // Match Apple Music Web's personalized library-relationship request.
+        // Its Favorites UI maps the explicitly requested personalRating to a star.
+        const query = new URLSearchParams({
+          'ids[songs]': songId, 'fields[songs]': 'inLibrary,personalRating',
+          relate: 'library', 'omit[resource]': 'autos', platform: 'web', 'format[resources]': 'map',
+        });
+        const response = await fetch(`https://amp-api.music.apple.com/v1/catalog/${storefront}?${query}`, {
+          headers, credentials: 'include', cache: 'no-store', signal: controller.signal,
+        });
+        if (response.status === 401 || response.status === 403) errorCode = 'playerFavoriteSignIn';
+        if (response.ok) {
+          const body = await response.json();
+          const song = body?.resources?.songs?.[songId] || (Array.isArray(body?.data)
+            ? body.data.find(item => item?.type === 'songs' && String(item.id) === songId) : null);
+          if (song?.attributes && typeof song.attributes === 'object') {
+            value = typeof song.attributes.inFavorites === 'boolean'
+              ? song.attributes.inFavorites : song.attributes.personalRating === 1;
+          }
+        }
+      } catch (_) { /* Keep the state unknown when the account request fails. */ }
+      finally {
+        clearTimeout(timeout);
+        if (favoriteRead === entry) favoriteRead = null;
+      }
+      if (generation === favoriteGeneration && songInfo?.appleId === songId && !favoriteWrite) {
+        syncSong();
+        if (generation !== favoriteGeneration || songInfo?.appleId !== songId || favoriteWrite) return value;
+        favoriteStateSongId = songId;
+        favoriteReadError = value === null ? errorCode : null;
+        // Keep the last confirmed state through a transient refresh failure.
+        if (value !== null) favoriteState = value;
+        else if (errorCode === 'playerFavoriteSignIn') favoriteState = null;
+        publishState(true);
+      }
+      return value;
+    })();
+    return entry.promise;
+  }
+
+  async function writeFavoriteState(songId, favorited) {
+    const headers = musicApiHeaders();
+    if (!headers) throw playerError('playerFavoriteSignIn', 'Apple Music account authorization is unavailable');
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 8000);
+    try {
+      const query = new URLSearchParams({ 'ids[songs]': songId });
+      const response = await fetch(`https://amp-api.music.apple.com/v1/me/favorites?${query}`, {
+        method: favorited ? 'POST' : 'DELETE',
+        headers,
+        credentials: 'include',
+        signal: controller.signal,
+      });
+      if (response.status === 401 || response.status === 403) {
+        throw playerError('playerFavoriteSignIn', 'Apple Music account authorization was rejected');
+      }
+      if (!response.ok) throw playerError('playerFavoriteFailed', `Apple Music rejected the favorites update (${response.status})`);
+    } catch (error) {
+      if (error?.code) throw error;
+      throw playerError('playerFavoriteFailed', controller.signal.aborted ? 'Apple Music favorites update timed out' : 'Unable to update Apple Music favorites');
+    } finally { clearTimeout(timeout); }
+  }
 
   function getQueueState() {
     const queue = read('queue', null);
@@ -68,6 +189,7 @@
       shuffle: shuffleValue === true || shuffleValue === 'songs' || shuffleValue === shuffleEnums.songs,
       repeat: repeatValue === 'one' || repeatValue === repeatEnums.one ? 'one' : repeatValue === 'all' || repeatValue === repeatEnums.all ? 'all' : 'off',
       capabilities: { shuffle: !!settingTarget('shuffleMode'), repeat: !!settingTarget('repeatMode') },
+      ...favoriteSnapshot(),
     };
   }
 
@@ -293,10 +415,11 @@
     const changed = key !== songKey;
     songKey = key;
     if (!changed && songInfo) { emit('LYPLUS_SONG_SNAPSHOT', { songInfo }); return; }
+    if (changed) resetFavoriteState();
     const request = ++lyricRequest;
     pendingLyrics?.abort();
     const attrs = item?.attributes;
-    if (!attrs) { songInfo = null; emit('LYPLUS_SONG_CHANGED', { songInfo: null }); return; }
+    if (!attrs) { songInfo = null; emit('LYPLUS_SONG_CHANGED', { songInfo: null }); publishState(true); return; }
     const params = attrs.playParams || {};
     songInfo = {
       title: attrs.name || '', artist: attrs.artistName || '', album: attrs.albumName || '',
@@ -309,6 +432,7 @@
     // hasLyrics describes the browsing storefront, not necessarily the account's.
     if (!songInfo.isVideo) {
       const id = songInfo.appleId;
+      readFavoriteState(id);
       fetchNativeLyrics(id).then(ttml => {
         if (!ttml || request !== lyricRequest || songInfo?.appleId !== id) return;
         songInfo = { ...songInfo, appleMusicTTML: ttml, appleMusicLyricsLanguage: lyricsLanguage };
@@ -319,7 +443,12 @@
 
   async function execute(command, value) {
     if (!music && command !== 'lyricsLanguage') throw new Error('Apple Music is not ready yet');
-    if (command === 'snapshot') { syncSong(true); publishState(true); return; }
+    if (command === 'snapshot') {
+      syncSong(true);
+      readFavoriteState();
+      publishState(true);
+      return;
+    }
     if (command === 'lyricsLanguage') {
       if (typeof value !== 'string' || value.length > 64) throw new Error('Invalid lyrics language');
       try { lyricsLanguage = new Intl.Locale(value).toString(); } catch (_) { throw new Error('Invalid lyrics language'); }
@@ -398,6 +527,68 @@
       element.webkitShowPlaybackTargetPicker();
       return;
     }
+    if (command === 'favoriteState') {
+      syncSong();
+      const id = songInfo?.appleId;
+      if (!id || songInfo.isVideo || !/^\d+$/.test(id)) throw playerError('playerFavoriteUnavailable', 'Favorites are unavailable for this song');
+      if (value?.songId !== id) throw playerError('playerFavoriteSongChanged', 'The current song changed');
+      if (!musicApiHeaders()) throw playerError('playerFavoriteSignIn', 'Apple Music account authorization is unavailable');
+      const cached = favoriteSnapshot();
+      if (cached.canFavorite) return cached;
+      const generation = favoriteGeneration;
+      const result = await readFavoriteState(id);
+      syncSong();
+      if (generation !== favoriteGeneration || songInfo?.appleId !== id) throw playerError('playerFavoriteSongChanged', 'The current song changed');
+      if (typeof result !== 'boolean') throw playerError(favoriteReadError || 'playerFavoriteLoadFailed', 'Unable to read Apple Music favorite status');
+      return favoriteSnapshot();
+    }
+    if (command === 'favorite') {
+      syncSong();
+      const id = songInfo?.appleId || null;
+      const requestedId = typeof value?.songId === 'string' ? value.songId : '';
+      if (requestedId && id && requestedId !== id) throw playerError('playerFavoriteSongChanged', 'The current song changed before the favorites update');
+      if (!id || songInfo.isVideo || !/^\d+$/.test(id)) {
+        throw playerError('playerFavoriteUnavailable', 'Apple Music favorites are unavailable for this song');
+      }
+      if (!musicApiHeaders()) throw playerError('playerFavoriteSignIn', 'Apple Music account authorization is unavailable');
+      if (requestedId !== id) throw playerError('playerFavoriteSongChanged', 'The favorite request does not match the current song');
+      if (typeof value?.favorited !== 'boolean') throw playerError('playerFavoriteUnavailable', 'Invalid favorite state');
+      if (favoriteWrite) throw playerError('playerFavoriteFailed', 'An Apple Music favorites update is already in progress');
+      if (favoriteRead?.id === id || favoriteStateSongId !== id || typeof favoriteState !== 'boolean') {
+        throw playerError('playerFavoriteUnavailable', 'The Apple Music favorite state is not available yet');
+      }
+      if (favoriteState === value.favorited) return favoriteSnapshot();
+
+      const generation = ++favoriteGeneration;
+      favoriteRead?.controller?.abort();
+      favoriteRead = null;
+      favoriteWrite = { id, generation };
+      publishState(true);
+      try { await writeFavoriteState(id, value.favorited); }
+      catch (error) {
+        favoriteWrite = null;
+        syncSong();
+        if (generation !== favoriteGeneration || songInfo?.appleId !== id) {
+          readFavoriteState();
+          throw playerError('playerFavoriteSongChanged', 'The current song changed during the favorites update');
+        }
+        if (error?.code === 'playerFavoriteSignIn') { favoriteState = null; favoriteReadError = error.code; }
+        publishState(true);
+        if (error?.code) throw error;
+        throw playerError('playerFavoriteFailed', error?.message || 'Unable to update the Apple Music favorite');
+      }
+      syncSong();
+      favoriteWrite = null;
+      if (generation !== favoriteGeneration || songInfo?.appleId !== id) {
+        readFavoriteState();
+        throw playerError('playerFavoriteSongChanged', 'The current song changed during the favorites update');
+      }
+      favoriteStateSongId = id;
+      favoriteState = value.favorited;
+      favoriteReadError = null;
+      publishState(true);
+      return favoriteSnapshot();
+    }
     const calls = { playPause: read('isPlaying', false) ? 'pause' : 'play', previous: 'skipToPreviousItem', next: 'skipToNextItem', seek: 'seekToTime' };
     if (Object.hasOwn(calls, command)) {
       const name = calls[command];
@@ -455,13 +646,20 @@
     try { const instance = window.MusicKit?.getInstance(); if (instance) { attach(instance); return; } } catch (_) { }
     setTimeout(waitForMusicKit, 500);
   }
-  document.addEventListener('visibilitychange', () => publishState(true));
+  document.addEventListener('visibilitychange', () => {
+    publishState(true);
+    if (!document.hidden) readFavoriteState();
+  });
+  window.addEventListener('focus', () => {
+    if (!document.hidden) readFavoriteState();
+  });
   window.addEventListener('pagehide', () => {
     clearInterval(poll);
     if (frame) cancelAnimationFrame(frame);
     pendingLyrics?.abort();
     pendingStorefront?.abort();
     pendingMetadata?.abort();
+    favoriteRead?.controller?.abort();
     for (const [name, listener] of subscriptions) music?.removeEventListener?.(name, listener);
   }, { once: true });
   waitForMusicKit();

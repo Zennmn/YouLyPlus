@@ -101,6 +101,9 @@ const controlBindings = [
     { id: 'custom-llm-url', key: 'customLLMBaseUrl', type: 'value', statusId: TRANSLATION_STATUS, delay: 500 },
     { id: 'custom-llm-key', key: 'customLLMApiKey', type: 'value', statusId: TRANSLATION_STATUS, delay: 500 },
     { id: 'custom-llm-model', key: 'customLLMModel', type: 'value', statusId: TRANSLATION_STATUS, delay: 500 },
+    { id: 'llm-thinking-format', key: 'llmThinkingFormat', type: 'value', statusId: TRANSLATION_STATUS },
+    { id: 'llm-thinking-enabled', key: 'llmThinkingEnabled', type: 'checkbox', statusId: TRANSLATION_STATUS },
+    { id: 'llm-thinking-effort', key: 'llmThinkingEffort', type: 'value', statusId: TRANSLATION_STATUS },
     { id: 'deepl-api-key', key: 'deeplApiKey', type: 'value', statusId: TRANSLATION_STATUS, delay: 500 },
     { id: 'romanization-provider', key: 'romanizationProvider', type: 'value', statusId: TRANSLATION_STATUS },
     { id: 'transliteration-target', key: 'transliterationTargetScript', type: 'value', statusId: TRANSLATION_STATUS },
@@ -114,7 +117,7 @@ const controlBindings = [
 
 function failureStatusFor(key) {
     if (['cacheStrategy'].includes(key)) return ADVANCED_STATUS;
-    if (/^(translationProvider|romanizationProvider|transliterationTargetScript|gemini|openRouter|customLLM|deepl|overrideGemini|customGemini|customTranslateTarget)/.test(key)) return TRANSLATION_STATUS;
+    if (/^(translationProvider|romanizationProvider|transliterationTargetScript|gemini|openRouter|customLLM|llmThinkingEnabled|llmThinkingFormat|llmThinkingEffort|deepl|overrideGemini|customGemini|customTranslateTarget)/.test(key)) return TRANSLATION_STATUS;
     return PLAYBACK_STATUS;
 }
 
@@ -205,6 +208,9 @@ function updateUI(settings) {
     setValue('custom-llm-url', currentSettings.customLLMBaseUrl);
     setValue('custom-llm-key', currentSettings.customLLMApiKey);
     setValue('custom-llm-model', currentSettings.customLLMModel);
+    setValue('llm-thinking-format', ['auto', 'deepseek', 'openrouter', 'none'].includes(currentSettings.llmThinkingFormat) ? currentSettings.llmThinkingFormat : 'auto');
+    setChecked('llm-thinking-enabled', currentSettings.llmThinkingEnabled === true);
+    setValue('llm-thinking-effort', ['low', 'high', 'max'].includes(currentSettings.llmThinkingEffort) ? currentSettings.llmThinkingEffort : 'high');
     setValue('deepl-api-key', currentSettings.deeplApiKey);
     setValue('romanization-provider', currentSettings.romanizationProvider || 'offline');
     setValue('transliteration-target', currentSettings.transliterationTargetScript || 'latin');
@@ -264,8 +270,11 @@ function updateTargetLanguageOptionsForProvider() {
 function applyConditionalVisibility(refreshDictionaries = false) {
     const translation = $('translation-provider')?.value || currentSettings.translationProvider;
     const romanization = $('romanization-provider')?.value || currentSettings.romanizationProvider;
+    const thinkingFormat = $('llm-thinking-format')?.value || currentSettings.llmThinkingFormat;
     const translationGemini = translation === 'gemini';
     const translationOpenRouter = translation === 'openrouter';
+    const translationCustomLLM = translation === 'customllm';
+    const translationLLM = translationOpenRouter || translation === 'customllm';
     const romanizationGemini = romanization === 'gemini';
     const romanizationOpenRouter = romanization === 'openrouter';
     const translationAI = translationGemini || translationOpenRouter;
@@ -275,6 +284,8 @@ function applyConditionalVisibility(refreshDictionaries = false) {
     setHidden('gemini-translation-model-group', !translationGemini);
     setHidden('openrouter-settings-category', !(translationOpenRouter || romanizationOpenRouter));
     setHidden('custom-llm-settings-category', translation !== 'customllm');
+    setHidden('llm-thinking-mode-group', !translationLLM);
+    setHidden('llm-thinking-format-group', !translationCustomLLM);
     setHidden('deepl-settings-category', translation !== 'deepl');
     setHidden('override-gemini-prompt-group', !translationAI);
     setHidden('custom-gemini-prompt-group', !(translationAI && $('override-gemini-prompt')?.checked));
@@ -283,6 +294,12 @@ function applyConditionalVisibility(refreshDictionaries = false) {
     setHidden('gemini-romanization-model-group', !romanizationGemini);
     setHidden('offline-japanese-dict-group', romanization !== 'offline');
     setHidden('offline-arabic-dict-group', romanization !== 'offline');
+
+    const thinkingEnabled = $('llm-thinking-enabled');
+    const thinkingEffort = $('llm-thinking-effort');
+    const thinkingDisabled = translationCustomLLM && thinkingFormat === 'none';
+    if (thinkingEnabled) thinkingEnabled.disabled = thinkingDisabled;
+    if (thinkingEffort) thinkingEffort.disabled = thinkingDisabled || thinkingEnabled?.checked !== true;
 
     const target = $('transliteration-target');
     if (target) target.disabled = !romanizationAI;
@@ -660,7 +677,10 @@ async function testCustomLLM() {
     const values = {
         customLLMBaseUrl: $('custom-llm-url')?.value.trim() || '',
         customLLMApiKey: $('custom-llm-key')?.value.trim() || '',
-        customLLMModel: $('custom-llm-model')?.value.trim() || ''
+        customLLMModel: $('custom-llm-model')?.value.trim() || '',
+        llmThinkingFormat: $('llm-thinking-format')?.value || currentSettings.llmThinkingFormat || 'auto',
+        llmThinkingEnabled: $('llm-thinking-enabled')?.checked === true,
+        llmThinkingEffort: $('llm-thinking-effort')?.value || 'high'
     };
     try {
         const endpoint = customLLMEndpoint(values.customLLMBaseUrl);
@@ -798,6 +818,8 @@ const ENUM_SETTINGS = {
     appleMusicTitleCorrection: new Set(['off', 'original', 'cn', 'jp']),
     largerTextMode: new Set(['lyrics', 'romanization']),
     translationProvider: new Set(['google', 'gemini', 'openrouter', 'customllm', 'deepl', 'deepl-keyless']),
+    llmThinkingFormat: new Set(['auto', 'deepseek', 'openrouter', 'none']),
+    llmThinkingEffort: new Set(['low', 'high', 'max']),
     romanizationProvider: new Set(['offline', 'google', 'gemini', 'openrouter']),
     transliterationTargetScript: new Set(['latin', 'japanese', 'korean', 'cyrillic', 'devanagari', 'arabic', 'hebrew', 'greek', 'thai'])
 };
@@ -819,6 +841,10 @@ function sanitizeImportedSettings(values) {
             if (value === 'bounded' || value === 'none' || LEGACY_CACHE_STRATEGIES.has(value)) {
                 result[key] = normalizeCacheStrategy(value);
             }
+            continue;
+        }
+        if (key === 'llmThinkingEnabled') {
+            if (typeof value === 'boolean') result[key] = value;
             continue;
         }
         if (key === 'appleMusicPlayerFontFile') {

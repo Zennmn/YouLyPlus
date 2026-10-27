@@ -54,6 +54,9 @@ export class SettingsManager {
       'customLLMBaseUrl': defaults.customLLMBaseUrl,
       'customLLMApiKey': defaults.customLLMApiKey,
       'customLLMModel': defaults.customLLMModel,
+      'llmThinkingEnabled': defaults.llmThinkingEnabled,
+      'llmThinkingEffort': defaults.llmThinkingEffort,
+      'llmThinkingFormat': defaults.llmThinkingFormat,
       'openRouterModel': defaults.openRouterModel,
       'deeplApiKey': defaults.deeplApiKey
     });

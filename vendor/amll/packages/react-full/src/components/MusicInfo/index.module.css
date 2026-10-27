@@ -1,8 +1,69 @@
 .musicInfo {
 	display: flex;
+	align-items: center;
 	color: white;
 	font-size: max(2vh, 1em);
 	min-width: 0;
+}
+
+.actions {
+	display: flex;
+	align-items: center;
+	flex: 0 0 auto;
+	gap: 12px;
+	margin-left: 16px;
+}
+
+.favoriteButton {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex: 0 0 auto;
+	width: 3.5vh;
+	height: 3.5vh;
+
+	@media screen and (max-width: 1000px) {
+		width: max(2em, min(5vw, 4vh));
+		height: max(2em, min(5vw, 4vh));
+	}
+
+	& > button {
+		width: 100%;
+		height: 100%;
+		padding: 0;
+		border-radius: 50%;
+		background: #ffffff15;
+		color: white;
+		opacity: 1;
+
+		& > svg {
+			width: 72%;
+			height: auto;
+		}
+
+		&[aria-pressed="true"] {
+			background: white;
+			color: #202124;
+		}
+
+		&:hover:not([aria-disabled="true"]) {
+			background: #ffffff2a;
+		}
+
+		&[aria-pressed="true"]:hover:not([aria-disabled="true"]) {
+			background: #f2f2f2;
+		}
+
+		&[aria-disabled="true"] {
+			background: #ffffff0d;
+			color: #fff;
+			opacity: 0.45;
+		}
+	}
+}
+
+.actions .menuButton {
+	margin-left: 0;
 }
 
 .info {

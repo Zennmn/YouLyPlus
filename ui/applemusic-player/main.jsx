@@ -4,6 +4,8 @@ import { atom, createStore, Provider, useAtomValue } from 'jotai';
 import { PrebuiltLyricPlayer } from '../../vendor/amll/packages/react-full/src/components/PrebuiltLyricPlayer';
 import { ToggleIconButton } from '../../vendor/amll/packages/react-full/src/components/ToggleIconButton';
 import PlayIcon from '../../vendor/amll/packages/react-full/src/components/PrebuiltLyricPlayer/icon_play.svg?react';
+import StarIcon from '../../vendor/amll/packages/react-full/src/components/ToggleIconButton/star.svg?react';
+import StarFilledIcon from '../../vendor/amll/packages/react-full/src/components/ToggleIconButton/star_filled.svg?react';
 import * as data from '../../vendor/amll/packages/react-full/src/states/dataAtoms';
 import * as callbacks from '../../vendor/amll/packages/react-full/src/states/callbacks';
 import * as config from '../../vendor/amll/packages/react-full/src/states/configAtoms';
@@ -121,6 +123,7 @@ export function createPlayer(host, options = {}) {
     status: 'loading', menu: false, toast: '', displayMode: 'none', providers: [], offset: 0,
     translating: false, connected: false, queueOpen: false, queueLoading: false, queueError: false,
     queue: { position: 0, items: [], canSelect: false }, queuePlayingIndex: null, displayFeedback: {},
+    isFavorited: null, canFavorite: false, favoriteBusy: false,
   });
   let root = null;
   let destroyed = false;
@@ -140,6 +143,7 @@ export function createPlayer(host, options = {}) {
   let queueSelecting = false;
   let lastQueueRevision;
   let panelTrigger = null;
+  let favoriteRequest = 0;
   const patchView = (patch) => {
     const previous = store.get(viewAtom);
     if (Object.keys(patch).some(key => !Object.is(previous[key], patch[key]))) store.set(viewAtom, { ...previous, ...patch });
@@ -226,6 +230,39 @@ export function createPlayer(host, options = {}) {
     try { return await options.sendCommand?.(name, value); }
     catch (error) { toast(error?.message || label('playerPlaybackCommandFailed', 'Playback command failed')); }
   };
+  async function toggleFavorite() {
+    const current = String(song.appleId || '');
+    const view = store.get(viewAtom);
+    if (view.favoriteBusy) return;
+    if (!current || !options.sendCommand) { toast(label('playerFavoriteUnavailable', 'Favorites are unavailable for this song')); return; }
+    const request = ++favoriteRequest;
+    patchView({ favoriteBusy: true });
+    try {
+      let isFavorited = view.isFavorited;
+      if (!view.canFavorite || typeof isFavorited !== 'boolean') {
+        toast(label('playerFavoriteReading', 'Reading favorite status…'));
+        const state = await options.sendCommand('favoriteState', { songId: current });
+        if (destroyed || request !== favoriteRequest || String(song.appleId) !== current) return;
+        if (state?.favoriteSongId !== current || typeof state.isFavorited !== 'boolean' || !state.canFavorite) {
+          throw Object.assign(new Error('Favorite status is unavailable'), { code: 'playerFavoriteLoadFailed' });
+        }
+        isFavorited = state.isFavorited;
+        patchView({ isFavorited, canFavorite: true });
+      }
+      const favorited = !isFavorited;
+      const result = await options.sendCommand('favorite', { songId: current, favorited });
+      if (destroyed || request !== favoriteRequest || String(song.appleId) !== current) return;
+      if (result?.favoriteSongId !== current || result.isFavorited !== favorited) throw new Error('Invalid Apple Music favorite response');
+      patchView({ isFavorited: result.isFavorited, canFavorite: !!result.canFavorite });
+      toast(label(favorited ? 'playerFavoriteAdded' : 'playerFavoriteRemoved', favorited ? 'Added to Favorite Songs' : 'Removed from Favorite Songs'));
+    } catch (error) {
+      if (destroyed || request !== favoriteRequest || String(song.appleId) !== current) return;
+      const key = ['playerFavoriteUnavailable', 'playerFavoriteSongChanged', 'playerFavoriteFailed', 'playerFavoriteSignIn', 'playerFavoriteLoadFailed'].includes(error?.code) ? error.code : 'playerFavoriteFailed';
+      toast(label(key, 'Unable to update your Apple Music favorite. Try again.'));
+    } finally {
+      if (!destroyed && request === favoriteRequest) patchView({ favoriteBusy: false });
+    }
+  }
   const diagnostics = createPerformanceDiagnostics({ onComplete(report) {
     diagnosticReport = report;
     if (!destroyed) { queueRequest++; patchView({ diagnosing: false, diagnosticSummary: report, menu: true, queueOpen: false, queueLoading: false, queueError: false }); }
@@ -377,11 +414,12 @@ export function createPlayer(host, options = {}) {
     const oldKey = song.appleId || `${song.title}-${song.artist}-${song.album}`;
     const songChanged = key !== oldKey;
     if (songChanged) {
+      favoriteRequest++;
       diagnostics.finish('song-changed');
       lastArgs = undefined;
       offset = 0;
       store.set(data.musicLyricLinesAtom, []);
-      patchView({ status: 'loading', providers: [], providerPreference: 'auto', offset: 0, translating: false, plain: null, source: '', displayFeedback: {} });
+      patchView({ status: 'loading', providers: [], providerPreference: 'auto', offset: 0, translating: false, plain: null, source: '', displayFeedback: {}, isFavorited: null, canFavorite: false, favoriteBusy: false });
       updateTick(0);
     }
     song = info;
@@ -461,6 +499,20 @@ export function createPlayer(host, options = {}) {
       return () => clearTimeout(timer);
     }, [panelType, retainedPanel]);
     useLayoutEffect(() => { options.onReady?.(); return () => {}; }, []);
+    useEffect(() => {
+      const handlePlaybackKey = event => {
+        if ((event.code !== 'Space' && event.key !== ' ') || event.defaultPrevented || event.isComposing || event.keyCode === 229 || event.ctrlKey || event.metaKey || event.altKey || event.shiftKey) return;
+        const view = store.get(viewAtom);
+        if (document.hidden || !store.get(config.isLyricPageOpenedAtom) || !view.connected || view.menu || view.queueOpen) return;
+        const target = event.target;
+        if (target?.isContentEditable || target?.closest?.('input, textarea, select, button, a[href], summary, [contenteditable]:not([contenteditable="false"]), [role="button"], [role="textbox"], [role="combobox"], [role="listbox"], [role="slider"]')) return;
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        if (!event.repeat) command('playPause');
+      };
+      document.addEventListener('keydown', handlePlaybackKey, true);
+      return () => document.removeEventListener('keydown', handlePlaybackKey, true);
+    }, []);
     useLayoutEffect(() => {
       if (!options.browserFullscreen) return;
       let active = true, timer, revision = 0;
@@ -512,6 +564,10 @@ export function createPlayer(host, options = {}) {
     const fullscreenLabel = view.fullscreen
       ? label('playerExitFullscreen', 'Exit fullscreen')
       : label('playerFullscreen', 'Fullscreen');
+    const favoriteAvailable = view.canFavorite && typeof view.isFavorited === 'boolean';
+    const favoriteLabel = view.favoriteBusy ? label('playerFavoriteUpdating', 'Updating favorite…')
+      : !favoriteAvailable ? `${label('playerFavorite', 'Favorite')} · ${label('playerQueueRetry', 'Retry')}`
+      : view.isFavorited ? label('playerUnfavorite', 'Remove from favorites') : label('playerFavorite', 'Favorite');
     const fullscreenIcon = exit => <svg viewBox="0 0 64 64" fill="none" aria-hidden="true">
       <path d={exit ? 'M24 13v11H13m27-11v11h11M13 40h11v11m16 0V40h11' : 'M24 13H13v11m27-11h11v11M13 40v11h11m16 0h11V40'} stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" />
     </svg>;
@@ -547,6 +603,13 @@ export function createPlayer(host, options = {}) {
         lyricTimeOffsetMs={latency * 1000 + view.offset}
         onPlaylistClick={toggleQueue}
         onAirPlayClick={() => command('airplay')}
+        favoriteButtonSlot={<ToggleIconButton
+          className="lyplus-amll-favorite" checked={view.isFavorited === true}
+          uncheckedIcon={<StarIcon />} checkedIcon={<StarFilledIcon />}
+          title={favoriteLabel} aria-label={favoriteLabel} aria-pressed={view.isFavorited === true}
+          aria-busy={view.favoriteBusy || undefined} aria-disabled={view.favoriteBusy}
+          onClick={toggleFavorite}
+        />}
         fullscreenButtonSlot={options.browserFullscreen && <ToggleIconButton
           className="lyplus-amll-fullscreen" checked={view.fullscreen}
           uncheckedIcon={fullscreenIcon(false)} checkedIcon={fullscreenIcon(true)}
@@ -650,6 +713,11 @@ export function createPlayer(host, options = {}) {
     updatePlayback(state) {
       if (destroyed) return;
       playback = state;
+      const sameFavoriteSong = !!song.appleId && state.favoriteSongId === String(song.appleId);
+      patchView({
+        isFavorited: sameFavoriteSong && typeof state.isFavorited === 'boolean' ? state.isFavorited : null,
+        canFavorite: sameFavoriteSong && typeof state.isFavorited === 'boolean' && state.canFavorite === true,
+      });
       if (state.queueRevision !== undefined && state.queueRevision !== null && state.queueRevision !== lastQueueRevision) {
         lastQueueRevision = state.queueRevision;
         if (store.get(viewAtom).queueOpen) refreshQueue();

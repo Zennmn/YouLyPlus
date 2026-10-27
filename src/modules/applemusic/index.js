@@ -167,7 +167,7 @@ function injectPlatformCSS() {
 function sendPlayerCommand(command, value) {
     return new Promise((resolve, reject) => {
         const requestId = `lyplus-${Date.now()}-${++commandSequence}`;
-        const timer = setTimeout(() => { pendingCommands.delete(requestId); reject(new Error('Apple Music did not respond. Try the native player.')); }, ['nativeTTML', 'lyricsLanguage'].includes(command) ? 16000 : command === 'queuePlay' ? 12000 : command === 'catalogMetadata' ? 10000 : 6000);
+        const timer = setTimeout(() => { pendingCommands.delete(requestId); reject(new Error('Apple Music did not respond. Try the native player.')); }, ['nativeTTML', 'lyricsLanguage'].includes(command) ? 16000 : ['queuePlay', 'favorite', 'favoriteState'].includes(command) ? 12000 : command === 'catalogMetadata' ? 10000 : 6000);
         pendingCommands.set(requestId, { resolve, reject, timer });
         window.postMessage({ type: 'LYPLUS_PLAYER_COMMAND', command, value, requestId }, window.location.origin);
     });
@@ -252,7 +252,10 @@ function mountAMLL() {
             importTTML: (id, lyrics) => updateLocalTTML(id, lyrics),
             removeLocalTTML: (id) => updateLocalTTML(id, null, true),
             onReady: () => stylesReady.then(() => {
-                if (amllHost === host && host.isConnected && !nativeMode) { modal.setAttribute('data-lyplus-amll-active', 'true'); }
+                if (amllHost === host && host.isConnected && !nativeMode) {
+                    modal.setAttribute('data-lyplus-amll-active', 'true');
+                    host.focus({ preventScroll: true });
+                }
             }).catch(() => { if (amllHost === host) showNativePlayer(); }),
         });
         amllPlayer.updateSettings(currentSettings);

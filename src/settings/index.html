@@ -888,6 +888,50 @@
                     </div>
                 </div>
 
+                <div class="settings-category" id="llm-thinking-mode-group" hidden>
+                    <div class="settings-group">
+                        <div class="setting-item" id="llm-thinking-format-group" hidden>
+                            <div class="setting-info">
+                                <span class="setting-title" id="llm-thinking-format-label" data-i18n="labelLLMThinkingFormat">Thinking parameter format</span>
+                                <span class="setting-description" id="llm-thinking-format-description" data-i18n="descLLMThinkingFormat">Use a fixed format for proxy endpoints or model aliases. None leaves thinking behavior to the server.</span>
+                            </div>
+                            <div class="setting-control">
+                                <select id="llm-thinking-format" class="native-select" aria-labelledby="llm-thinking-format-label" aria-describedby="llm-thinking-format-description">
+                                    <option value="auto" data-i18n="optionLLMThinkingFormatAuto">Auto</option>
+                                    <option value="deepseek" data-i18n="optionLLMThinkingFormatDeepSeek">DeepSeek</option>
+                                    <option value="openrouter" data-i18n="optionLLMThinkingFormatOpenRouter">OpenRouter</option>
+                                    <option value="none" data-i18n="optionLLMThinkingFormatNone">None (server default)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="setting-item">
+                            <div class="setting-info">
+                                <span class="setting-title" id="llm-thinking-mode-label" data-i18n="labelLLMThinkingMode">Thinking mode</span>
+                                <span class="setting-description" id="llm-thinking-mode-description" data-i18n="descLLMThinkingMode">Only applies to DeepSeek-compatible endpoints and OpenRouter models that support thinking. Enabling it may increase translation time.</span>
+                            </div>
+                            <div class="setting-control">
+                                <label class="m3-switch">
+                                    <input type="checkbox" id="llm-thinking-enabled" aria-labelledby="llm-thinking-mode-label" aria-describedby="llm-thinking-mode-description">
+                                    <div class="track"><div class="handle"></div></div>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="setting-item">
+                            <div class="setting-info">
+                                <span class="setting-title" id="llm-thinking-effort-label" data-i18n="labelLLMThinkingEffort">Thinking effort</span>
+                                <span class="setting-description" id="llm-thinking-effort-description" data-i18n="descLLMThinkingEffort">Only applies when thinking is enabled. Higher effort may take longer.</span>
+                            </div>
+                            <div class="setting-control">
+                                <select id="llm-thinking-effort" class="native-select" aria-labelledby="llm-thinking-effort-label" aria-describedby="llm-thinking-effort-description" disabled>
+                                    <option value="low" data-i18n="optionLLMThinkingLow">Low</option>
+                                    <option value="high" data-i18n="optionLLMThinkingHigh">High</option>
+                                    <option value="max" data-i18n="optionLLMThinkingMax">Maximum</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="settings-category" id="openrouter-settings-category" hidden>
                     <h3 class="category-title" data-i18n="categoryOpenRouterSettings">OpenRouter settings</h3>
                     <div class="settings-group">

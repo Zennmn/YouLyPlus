@@ -40,6 +40,9 @@ function resetLyricsSession() {
 // Settings keys that affect which cached responses to invalidate
 const TRANSLATION_SETTING_KEYS = [
   'customLLMBaseUrl', 'customLLMApiKey', 'customLLMModel',
+  'llmThinkingEnabled',
+  'llmThinkingEffort',
+  'llmThinkingFormat',
   'translationProvider',
   'geminiApiKey',
   'geminiModel',

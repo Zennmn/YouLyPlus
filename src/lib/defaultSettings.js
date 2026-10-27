@@ -31,5 +31,8 @@ globalThis.LYPLUS_DEFAULT_SETTINGS = Object.freeze({
     customLLMBaseUrl: '',
     customLLMApiKey: '',
     customLLMModel: '',
+    llmThinkingEnabled: false,
+    llmThinkingFormat: 'auto',
+    llmThinkingEffort: 'high',
     deeplApiKey: '',
 });

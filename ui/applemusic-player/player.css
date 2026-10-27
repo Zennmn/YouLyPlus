@@ -7,6 +7,10 @@
 .lyplus-amll-fullscreen:hover { opacity: 0.8; }
 .lyplus-amll-fullscreen:focus-visible { outline: 2px solid currentColor; outline-offset: 3px; border-radius: 8px; }
 .lyplus-amll-fullscreen:disabled { cursor: wait; }
+.lyplus-amll-favorite { flex-shrink: 0; cursor: pointer; }
+.lyplus-amll-favorite:focus-visible { outline: 2px solid currentColor; outline-offset: 3px; border-radius: 8px; }
+.lyplus-amll-favorite[aria-disabled="true"] { cursor: default; }
+.lyplus-amll-favorite[aria-busy="true"] { cursor: wait; }
 
 /* Extra lyrics actions are accessible only through AMLL's existing menu button. */
 .lyplus-amll-panel-layer {

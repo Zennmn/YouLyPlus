@@ -130,7 +130,8 @@ import styles from "./index.module.css";
 const PrebuiltMusicInfo: FC<{
 	className?: string;
 	style?: React.CSSProperties;
-}> = ({ className, style }) => {
+	favoriteButtonSlot?: React.ReactNode;
+}> = ({ className, style, favoriteButtonSlot }) => {
 	const musicName = useAtomValue(musicNameAtom);
 	const musicArtists = useAtomValue(musicArtistsAtom);
 	const musicAlbum = useAtomValue(musicAlbumNameAtom);
@@ -159,6 +160,7 @@ const PrebuiltMusicInfo: FC<{
 			artists={showMusicArtists ? musicArtists.map((v) => v.name) : undefined}
 			album={showMusicAlbum ? musicAlbum : undefined}
 			onMenuButtonClicked={onMenuClicked}
+			favoriteButtonSlot={favoriteButtonSlot}
 		/>
 	);
 };
@@ -535,6 +537,7 @@ export interface PrebuiltLyricPlayerProps extends HTMLProps<HTMLDivElement> {
 	onPlaylistClick?: () => void;
 	onAirPlayClick?: () => void;
 	fullscreenButtonSlot?: React.ReactNode;
+	favoriteButtonSlot?: React.ReactNode;
 	/** Lyrics-only timing correction; progress controls keep the actual media time. */
 	lyricTimeOffsetMs?: number;
 }
@@ -550,6 +553,7 @@ export const PrebuiltLyricPlayer: FC<PrebuiltLyricPlayerProps> = ({
 	onPlaylistClick,
 	onAirPlayClick,
 	fullscreenButtonSlot,
+	favoriteButtonSlot,
 	...rest
 }) => {
 	const [hideLyricView, setHideLyricView] = useAtom(hideLyricViewAtom);
@@ -633,6 +637,7 @@ export const PrebuiltLyricPlayer: FC<PrebuiltLyricPlayerProps> = ({
 				styles.smallMusicInfo,
 				hideLyricView && styles.hideLyric,
 			)}
+			favoriteButtonSlot={favoriteButtonSlot}
 		/>
 	);
 	const showSmallFullscreen =
@@ -704,6 +709,7 @@ export const PrebuiltLyricPlayer: FC<PrebuiltLyricPlayerProps> = ({
 								styles.bigMusicInfo,
 								hideLyricView && styles.hideLyric,
 							)}
+							favoriteButtonSlot={favoriteButtonSlot}
 						/>
 						<PrebuiltProgressBar />
 						<PrebuiltMusicControls className={styles.bigControls} />
@@ -735,7 +741,10 @@ export const PrebuiltLyricPlayer: FC<PrebuiltLyricPlayerProps> = ({
 				}
 				controlsSlot={
 					<>
-						<PrebuiltMusicInfo className={styles.horizontalControls} />
+						<PrebuiltMusicInfo
+							className={styles.horizontalControls}
+							favoriteButtonSlot={favoriteButtonSlot}
+						/>
 						<PrebuiltProgressBar />
 						<PrebuiltMusicControls
 							className={classNames(styles.controls, styles.horizontalMediaControls)}
